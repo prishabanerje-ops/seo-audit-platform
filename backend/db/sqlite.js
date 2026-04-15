@@ -11,6 +11,7 @@ import { up as migration006 } from './migrations/006_multi_tenancy.js';
 import { up as migration007 } from './migrations/007_audit_results_company_id.js';
 import { up as migration008 } from './migrations/008_force_password_reset.js';
 import { up as migration009 } from './migrations/009_ads_integration.js';
+import { up as migration010 } from './migrations/010_audit_checks_v2.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DB_PATH = join(__dirname, '..', 'seo-automation.db');
@@ -37,6 +38,7 @@ const MIGRATIONS = [
   { id: 7, fn: migration007, name: '007_audit_results_company_id' },
   { id: 8, fn: migration008, name: '008_force_password_reset' },
   { id: 9, fn: migration009, name: '009_ads_integration' },
+  { id: 10, fn: migration010, name: '010_audit_checks_v2' },
 ];
 
 /**
