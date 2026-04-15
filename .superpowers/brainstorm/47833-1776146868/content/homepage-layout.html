@@ -1,0 +1,97 @@
+<h2>Homepage Layout — Which approach?</h2>
+<p class="subtitle">These are structural layouts, not final designs. Pick the direction that feels right for this tool.</p>
+
+<div class="cards">
+
+  <!-- Option A: Marketing Landing Page -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#f8f9fc;padding:16px;font-family:system-ui;">
+      <div style="background:#6366f1;color:white;padding:6px 12px;border-radius:4px;font-size:11px;display:inline-block;margin-bottom:8px;">SEO Audit Platform</div>
+      <div style="text-align:center;padding:20px 8px;">
+        <div style="font-size:18px;font-weight:700;color:#0f1117;margin-bottom:4px;">Powerful Technical SEO,<br>Self-Hosted</div>
+        <div style="font-size:10px;color:#94a3b8;margin-bottom:10px;">477+ checks · AI fixes · GSC + GA4 integration</div>
+        <div style="background:#6366f1;color:white;padding:5px 14px;border-radius:4px;font-size:10px;display:inline-block;">→ Sign In to Your Platform</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:8px;">
+        <div style="background:white;border:1px solid #e2e6f0;border-radius:4px;padding:8px;text-align:center;">
+          <div style="font-size:14px;font-weight:700;color:#6366f1;">477+</div>
+          <div style="font-size:9px;color:#94a3b8;">SEO Checks</div>
+        </div>
+        <div style="background:white;border:1px solid #e2e6f0;border-radius:4px;padding:8px;text-align:center;">
+          <div style="font-size:14px;font-weight:700;color:#6366f1;">AI</div>
+          <div style="font-size:9px;color:#94a3b8;">Fix Recommendations</div>
+        </div>
+        <div style="background:white;border:1px solid #e2e6f0;border-radius:4px;padding:8px;text-align:center;">
+          <div style="font-size:14px;font-weight:700;color:#6366f1;">GSC</div>
+          <div style="font-size:9px;color:#94a3b8;">+ GA4 Integration</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Marketing Landing Page</h3>
+      <p>Full hero section, feature highlights, stat cards. Login CTA is prominent but not the only focus. Feels like a product website.</p>
+    </div>
+  </div>
+
+  <!-- Option B: Login-First with soft branding -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#f8f9fc;padding:16px;font-family:system-ui;display:flex;align-items:center;justify-content:center;">
+      <div style="background:white;border:1px solid #e2e6f0;border-radius:8px;padding:20px 16px;width:100%;max-width:200px;">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:14px;">
+          <div style="width:20px;height:20px;background:#6366f1;border-radius:4px;"></div>
+          <div style="font-size:11px;font-weight:700;color:#0f1117;">SEO Audit Platform</div>
+        </div>
+        <div style="font-size:13px;font-weight:600;color:#0f1117;margin-bottom:2px;">Sign In</div>
+        <div style="font-size:9px;color:#94a3b8;margin-bottom:10px;">Self-hosted · Private · Secure</div>
+        <div style="background:#f1f3f9;height:22px;border-radius:3px;margin-bottom:6px;"></div>
+        <div style="background:#f1f3f9;height:22px;border-radius:3px;margin-bottom:10px;"></div>
+        <div style="background:#6366f1;height:22px;border-radius:3px;"></div>
+        <div style="display:flex;justify-content:center;gap:8px;margin-top:10px;">
+          <div style="font-size:8px;color:#94a3b8;">477+ checks</div>
+          <div style="font-size:8px;color:#94a3b8;">·</div>
+          <div style="font-size:8px;color:#94a3b8;">AI powered</div>
+          <div style="font-size:8px;color:#94a3b8;">·</div>
+          <div style="font-size:8px;color:#94a3b8;">Private</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Login-First (Minimal)</h3>
+      <p>Centered login card with subtle tagline. No hero, no feature grid. Fast to load, no distraction. Ideal for internal tools where users know what it is.</p>
+    </div>
+  </div>
+
+  <!-- Option C: Split-Screen -->
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#f8f9fc;padding:0;font-family:system-ui;display:flex;border-radius:4px;overflow:hidden;height:160px;">
+      <!-- Left branding side -->
+      <div style="flex:1;background:linear-gradient(135deg,#0f1117,#1a1d27);padding:16px;display:flex;flex-direction:column;justify-content:center;position:relative;overflow:hidden;">
+        <div style="position:absolute;top:-20px;left:-20px;width:100px;height:100px;background:rgba(99,102,241,0.15);border-radius:50%;"></div>
+        <div style="position:relative;z-index:1;">
+          <div style="width:16px;height:16px;background:#6366f1;border-radius:3px;margin-bottom:8px;"></div>
+          <div style="font-size:12px;font-weight:700;color:white;margin-bottom:3px;">SEO Audit Platform</div>
+          <div style="font-size:8px;color:#64748b;margin-bottom:8px;">Self-hosted technical SEO tool</div>
+          <div style="display:flex;flex-direction:column;gap:4px;">
+            <div style="display:flex;align-items:center;gap:4px;"><div style="width:8px;height:8px;background:rgba(99,102,241,0.3);border-radius:2px;"></div><div style="font-size:7px;color:#94a3b8;">477+ checks</div></div>
+            <div style="display:flex;align-items:center;gap:4px;"><div style="width:8px;height:8px;background:rgba(99,102,241,0.3);border-radius:2px;"></div><div style="font-size:7px;color:#94a3b8;">AI recommendations</div></div>
+            <div style="display:flex;align-items:center;gap:4px;"><div style="width:8px;height:8px;background:rgba(99,102,241,0.3);border-radius:2px;"></div><div style="font-size:7px;color:#94a3b8;">GSC + GA4 + Screaming Frog</div></div>
+          </div>
+        </div>
+      </div>
+      <!-- Right login side -->
+      <div style="flex:1;background:white;padding:16px;display:flex;flex-direction:column;justify-content:center;">
+        <div style="font-size:11px;font-weight:600;color:#0f1117;margin-bottom:6px;">Sign In</div>
+        <div style="background:#f1f3f9;height:18px;border-radius:3px;margin-bottom:4px;"></div>
+        <div style="background:#f1f3f9;height:18px;border-radius:3px;margin-bottom:8px;"></div>
+        <div style="background:#6366f1;height:18px;border-radius:3px;"></div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Split-Screen (Branding + Login)</h3>
+      <p>Left half: dark branded panel with feature list. Right half: login form. Similar to the existing Login page style but <em>this becomes the homepage</em> at <code>/</code>. Consistent with existing design language.</p>
+    </div>
+  </div>
+
+</div>
+
+<p class="subtitle" style="margin-top:16px;">Click a card to select, or just tell me in the terminal what you prefer.</p>

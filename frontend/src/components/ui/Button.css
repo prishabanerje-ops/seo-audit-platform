@@ -1,0 +1,17 @@
+/* Hover states for Button variants — CSS var driven, no JS handlers needed */
+
+[data-btn-variant="primary"]:hover:not([data-btn-disabled="true"]) {
+  background-color: var(--brand-hover) !important;
+}
+[data-btn-variant="secondary"]:hover:not([data-btn-disabled="true"]) {
+  background-color: var(--border-default) !important;
+}
+[data-btn-variant="destructive"]:hover:not([data-btn-disabled="true"]) {
+  background-color: #dc2626 !important;
+}
+[data-btn-variant="ghost"]:hover:not([data-btn-disabled="true"]) {
+  background-color: var(--bg-raised) !important;
+}
+[data-btn-variant="outline"]:hover:not([data-btn-disabled="true"]) {
+  background-color: var(--bg-raised) !important;
+}

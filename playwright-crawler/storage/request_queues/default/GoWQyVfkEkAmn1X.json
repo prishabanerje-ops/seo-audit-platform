@@ -1,0 +1,9 @@
+{
+	"id": "GoWQyVfkEkAmn1X",
+	"json": "{\"id\":\"GoWQyVfkEkAmn1X\",\"url\":\"https://www.cars24.com/buy-used-hyundai-i10-cars-gurgaon/\",\"loadedUrl\":\"https://www.cars24.com/buy-used-hyundai-i10-cars-gurgaon/\",\"uniqueKey\":\"https://www.cars24.com/buy-used-hyundai-i10-cars-gurgaon\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"depth\":1,\"redirectChain\":[],\"responseTime\":0,\"__crawlee\":{\"crawlDepth\":1,\"state\":4}},\"handledAt\":\"2026-04-13T09:22:43.091Z\"}",
+	"method": "GET",
+	"orderNo": null,
+	"retryCount": 0,
+	"uniqueKey": "https://www.cars24.com/buy-used-hyundai-i10-cars-gurgaon",
+	"url": "https://www.cars24.com/buy-used-hyundai-i10-cars-gurgaon/"
+}

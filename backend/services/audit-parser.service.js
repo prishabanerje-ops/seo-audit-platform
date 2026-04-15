@@ -1,0 +1,516 @@
+/**
+ * Audit Parser Service
+ *
+ * Accepts in-memory SF-format datasets (output of toSfFormat()) and runs
+ * all audit check logic, inserting findings into `audit_results`.
+ *
+ * In-memory processing — no CSV file I/O.
+ *
+ * Usage:
+ *   import { parseAndStoreFromDatasets } from './audit-parser.service.js';
+ *   const count = await parseAndStoreFromDatasets(datasets, jobId, siteId, companyId);
+ */
+
+import db from '../db/sqlite.js';
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+/** True if the row's Indexability column is exactly "Indexable" */
+const isIndexable = (row) => (row['Indexability'] || '').trim() === 'Indexable';
+
+/** Safe integer parse — returns NaN if blank or non-numeric */
+const toInt = (v) => parseInt(String(v ?? '').trim(), 10);
+
+/** Normalise a string field — trim + collapse inner whitespace */
+const str = (v) => String(v ?? '').trim();
+
+// ─── Bulk insert helper ───────────────────────────────────────────────────────
+
+function bulkInsert(findings) {
+  if (!findings.length) return;
+
+  const stmt = db.prepare(`
+    INSERT INTO audit_results (crawl_job_id, site_id, section, url, data, severity, issue_type, company_id)
+    VALUES (@crawlJobId, @siteId, @section, @url, @data, @severity, @issueType, @companyId)
+  `);
+
+  const insertMany = db.transaction((rows) => {
+    for (const row of rows) stmt.run(row);
+  });
+
+  insertMany(findings);
+  console.log(`[audit-parser] Inserted ${findings.length} finding(s).`);
+}
+
+// ─── Check implementations ────────────────────────────────────────────────────
+
+function checkResponseCodes(rows, jobId, siteId) {
+  const findings = [];
+
+  for (const row of rows) {
+    const url = str(row['Address']);
+    if (!url) continue;
+
+    const statusCode   = str(row['Status Code']);
+    const status       = str(row['Status']);
+    const redirectType = str(row['Redirect Type']);
+    const redirectUrl  = str(row['Redirect URL']);
+
+    if (statusCode.startsWith('3')) {
+      findings.push({
+        crawlJobId: jobId, siteId,
+        section: 'Response Codes', url, severity: 'warning',
+        issueType: '3xx Redirects',
+        data: JSON.stringify({ statusCode, redirectUrl, redirectType }),
+      });
+    }
+
+    if (statusCode.startsWith('4')) {
+      findings.push({
+        crawlJobId: jobId, siteId,
+        section: 'Response Codes', url, severity: 'critical',
+        issueType: '4xx Client Errors',
+        data: JSON.stringify({ statusCode, status }),
+      });
+    }
+
+    if (statusCode.startsWith('5')) {
+      findings.push({
+        crawlJobId: jobId, siteId,
+        section: 'Response Codes', url, severity: 'critical',
+        issueType: '5xx Server Errors',
+        data: JSON.stringify({ statusCode, status }),
+      });
+    }
+
+    if (redirectType && redirectType.toLowerCase().includes('chain')) {
+      findings.push({
+        crawlJobId: jobId, siteId,
+        section: 'Response Codes', url, severity: 'warning',
+        issueType: 'Redirect Chains',
+        data: JSON.stringify({ redirectType, redirectUrl }),
+      });
+    }
+
+    if (status === 'Redirect Loop') {
+      findings.push({
+        crawlJobId: jobId, siteId,
+        section: 'Response Codes', url, severity: 'critical',
+        issueType: 'Redirect Loops',
+        data: JSON.stringify({ status, redirectUrl }),
+      });
+    }
+  }
+
+  return findings;
+}
+
+function checkPageTitles(rows, jobId, siteId) {
+  const findings    = [];
+  const titleCounts = new Map();
+
+  for (const row of rows) {
+    if (!isIndexable(row)) continue;
+    const url   = str(row['Address']); if (!url) continue;
+    const title = str(row['Title 1']); if (!title) continue;
+    if (!titleCounts.has(title)) titleCounts.set(title, []);
+    titleCounts.get(title).push(url);
+  }
+
+  for (const row of rows) {
+    if (!isIndexable(row)) continue;
+    const url    = str(row['Address']); if (!url) continue;
+    const title  = str(row['Title 1']);
+    const length = toInt(row['Title 1 Length']);
+
+    if (!title) {
+      findings.push({
+        crawlJobId: jobId, siteId, section: 'Title Tags', url,
+        severity: 'critical', issueType: 'Missing Title Tag', data: JSON.stringify({}),
+      });
+      continue;
+    }
+
+    const dupeList = titleCounts.get(title);
+    if (dupeList && dupeList.length > 1) {
+      findings.push({
+        crawlJobId: jobId, siteId, section: 'Title Tags', url,
+        severity: 'warning', issueType: 'Duplicate Title Tag',
+        data: JSON.stringify({ title, duplicateCount: dupeList.length }),
+      });
+    }
+
+    if (!isNaN(length) && length < 30) {
+      findings.push({
+        crawlJobId: jobId, siteId, section: 'Title Tags', url,
+        severity: 'warning', issueType: 'Title Too Short (under 30 chars)',
+        data: JSON.stringify({ title, length }),
+      });
+    }
+
+    if (!isNaN(length) && length > 60) {
+      findings.push({
+        crawlJobId: jobId, siteId, section: 'Title Tags', url,
+        severity: 'warning', issueType: 'Title Too Long (over 60 chars)',
+        data: JSON.stringify({ title, length }),
+      });
+    }
+
+    if (title.includes('?') || title.includes('=')) {
+      findings.push({
+        crawlJobId: jobId, siteId, section: 'Title Tags', url,
+        severity: 'warning', issueType: 'Dynamic Parameters in Titles',
+        data: JSON.stringify({ title }),
+      });
+    }
+  }
+
+  return findings;
+}
+
+function checkMetaDescriptions(rows, jobId, siteId) {
+  const findings   = [];
+  const descCounts = new Map();
+
+  for (const row of rows) {
+    if (!isIndexable(row)) continue;
+    const url  = str(row['Address']); if (!url) continue;
+    const desc = str(row['Meta Description 1']); if (!desc) continue;
+    if (!descCounts.has(desc)) descCounts.set(desc, []);
+    descCounts.get(desc).push(url);
+  }
+
+  for (const row of rows) {
+    if (!isIndexable(row)) continue;
+    const url    = str(row['Address']); if (!url) continue;
+    const desc   = str(row['Meta Description 1']);
+    const length = toInt(row['Meta Description 1 Length']);
+
+    if (!desc) {
+      findings.push({
+        crawlJobId: jobId, siteId, section: 'Meta Description', url,
+        severity: 'warning', issueType: 'Missing Meta Description', data: JSON.stringify({}),
+      });
+      continue;
+    }
+
+    const dupeList = descCounts.get(desc);
+    if (dupeList && dupeList.length > 1) {
+      findings.push({
+        crawlJobId: jobId, siteId, section: 'Meta Description', url,
+        severity: 'warning', issueType: 'Duplicate Meta Description',
+        data: JSON.stringify({ description: desc, duplicateCount: dupeList.length }),
+      });
+    }
+
+    if (!isNaN(length) && length < 70) {
+      findings.push({
+        crawlJobId: jobId, siteId, section: 'Meta Description', url,
+        severity: 'info', issueType: 'Meta Description Too Short (<70)',
+        data: JSON.stringify({ description: desc, length }),
+      });
+    }
+
+    if (!isNaN(length) && length > 160) {
+      findings.push({
+        crawlJobId: jobId, siteId, section: 'Meta Description', url,
+        severity: 'warning', issueType: 'Meta Description Too Long (>160)',
+        data: JSON.stringify({ description: desc, length }),
+      });
+    }
+  }
+
+  return findings;
+}
+
+function checkH1s(rows, jobId, siteId) {
+  const findings   = [];
+  const h1Counts   = new Map();
+  const urlsWithH1 = new Set();
+
+  for (const row of rows) {
+    if (!isIndexable(row)) continue;
+    const url = str(row['Address']); if (!url) continue;
+    const h1  = str(row['H1-1']);    if (!h1) continue;
+    urlsWithH1.add(url);
+    if (!h1Counts.has(h1)) h1Counts.set(h1, []);
+    h1Counts.get(h1).push(url);
+  }
+
+  for (const row of rows) {
+    if (!isIndexable(row)) continue;
+    const url         = str(row['Address']); if (!url) continue;
+    const h1          = str(row['H1-1']);
+    const occurrences = toInt(row['Occurrences']);
+
+    if (!h1) {
+      findings.push({
+        crawlJobId: jobId, siteId, section: 'Headings', url,
+        severity: 'critical', issueType: 'H1 Missing', data: JSON.stringify({}),
+      });
+      continue;
+    }
+
+    const dupeList = h1Counts.get(h1);
+    if (dupeList && dupeList.length > 1) {
+      findings.push({
+        crawlJobId: jobId, siteId, section: 'Headings', url,
+        severity: 'warning', issueType: 'H1 Duplicate',
+        data: JSON.stringify({ h1, duplicateCount: dupeList.length }),
+      });
+    }
+
+    if (!isNaN(occurrences) && occurrences > 1) {
+      findings.push({
+        crawlJobId: jobId, siteId, section: 'Headings', url,
+        severity: 'warning', issueType: 'Multiple H1s',
+        data: JSON.stringify({ h1, occurrences }),
+      });
+    }
+  }
+
+  return { findings, urlsWithH1 };
+}
+
+function checkH2s(rows, jobId, siteId, urlsWithH1) {
+  const findings   = [];
+  const urlsWithH2 = new Set();
+
+  for (const row of rows) {
+    if (!isIndexable(row)) continue;
+    const url = str(row['Address']); if (!url) continue;
+    const h2  = str(row['H2-1']);
+    if (h2) urlsWithH2.add(url);
+  }
+
+  for (const url of urlsWithH1) {
+    if (!urlsWithH2.has(url)) {
+      findings.push({
+        crawlJobId: jobId, siteId, section: 'Headings', url,
+        severity: 'info', issueType: 'Missing H2/H3', data: JSON.stringify({}),
+      });
+    }
+  }
+
+  return findings;
+}
+
+function checkCanonicals(rows, jobId, siteId) {
+  const findings = [];
+
+  for (const row of rows) {
+    if (!isIndexable(row)) continue;
+    const url       = str(row['Address']); if (!url) continue;
+    const canonical = str(row['Canonical Link Element 1']);
+
+    if (!canonical) {
+      findings.push({
+        crawlJobId: jobId, siteId, section: 'Canonical', url,
+        severity: 'warning', issueType: 'Missing Canonical', data: JSON.stringify({}),
+      });
+      continue;
+    }
+
+    if (canonical.startsWith('/')) {
+      findings.push({
+        crawlJobId: jobId, siteId, section: 'Canonical', url,
+        severity: 'warning', issueType: 'Canonical is Relative',
+        data: JSON.stringify({ canonical }),
+      });
+    }
+
+    if (canonical.includes('#')) {
+      findings.push({
+        crawlJobId: jobId, siteId, section: 'Canonical', url,
+        severity: 'warning', issueType: 'Canonical Contains Fragment (#)',
+        data: JSON.stringify({ canonical }),
+      });
+    }
+  }
+
+  return findings;
+}
+
+function checkUrlStructure(rows, jobId, siteId) {
+  const findings = [];
+
+  for (const row of rows) {
+    const address     = str(row['Address']); if (!address) continue;
+    const statusCode  = str(row['Status Code']);
+    const contentType = str(row['Content Type']).toLowerCase();
+    const indexable   = str(row['Indexability']);
+
+    if (statusCode !== '200') continue;
+    if (!contentType.includes('text/html')) continue;
+
+    let parsedPath = '';
+    try {
+      const parsed = new URL(address);
+      parsedPath   = parsed.pathname + parsed.search;
+    } catch {
+      parsedPath = address;
+    }
+
+    if (parsedPath.includes('_')) {
+      findings.push({
+        crawlJobId: jobId, siteId, section: 'URL Structure', url: address,
+        severity: 'warning', issueType: 'Underscores in URLs',
+        data: JSON.stringify({ url: address }),
+      });
+    }
+
+    if (address.includes('%20') || address.includes('+')) {
+      findings.push({
+        crawlJobId: jobId, siteId, section: 'URL Structure', url: address,
+        severity: 'warning', issueType: 'Spaces in URLs',
+        data: JSON.stringify({ url: address }),
+      });
+    }
+
+    try {
+      const parsed   = new URL(address);
+      const pathOnly = parsed.pathname;
+      if (pathOnly !== pathOnly.toLowerCase()) {
+        findings.push({
+          crawlJobId: jobId, siteId, section: 'URL Structure', url: address,
+          severity: 'warning', issueType: 'Mixed Case URLs',
+          data: JSON.stringify({ url: address }),
+        });
+      }
+    } catch { /* malformed — skip */ }
+
+    if (address.length > 115) {
+      findings.push({
+        crawlJobId: jobId, siteId, section: 'URL Structure', url: address,
+        severity: 'warning', issueType: 'URLs Over 115 Characters',
+        data: JSON.stringify({ url: address, length: address.length }),
+      });
+    }
+
+    if (address.includes('utm_') && indexable === 'Indexable') {
+      findings.push({
+        crawlJobId: jobId, siteId, section: 'URL Structure', url: address,
+        severity: 'critical', issueType: 'Untracked UTMs Indexed',
+        data: JSON.stringify({ url: address }),
+      });
+    }
+  }
+
+  return findings;
+}
+
+function checkStructuredData(rows, jobId, siteId) {
+  const findings = [];
+
+  for (const row of rows) {
+    const url      = str(row['Address']); if (!url) continue;
+    const errors   = toInt(row['Errors']);
+    const warnings = toInt(row['Warnings']);
+
+    if (!isNaN(errors) && errors > 0) {
+      findings.push({
+        crawlJobId: jobId, siteId, section: 'Structured Data', url,
+        severity: 'critical', issueType: 'Structured Data Errors',
+        data: JSON.stringify({ errors }),
+      });
+    }
+
+    if (!isNaN(warnings) && warnings > 0) {
+      findings.push({
+        crawlJobId: jobId, siteId, section: 'Structured Data', url,
+        severity: 'warning', issueType: 'Structured Data Warnings',
+        data: JSON.stringify({ warnings }),
+      });
+    }
+  }
+
+  return findings;
+}
+
+function checkStructuredDataValidation(errorRows, warningRows, jobId, siteId) {
+  const findings = [];
+
+  if (errorRows) {
+    for (const row of errorRows) {
+      const url        = str(row['Address']); if (!url) continue;
+      const richErrors = toInt(row['Rich Result Errors']);
+      if (isNaN(richErrors) || richErrors === 0) continue;
+      findings.push({
+        crawlJobId: jobId, siteId, section: 'Structured Data', url,
+        severity: 'critical', issueType: 'Structured Data Validation Errors',
+        data: JSON.stringify({ richErrors, feature: str(row['Feature-1']) || null, type: str(row['Type-1']) || null }),
+      });
+    }
+  }
+
+  if (warningRows) {
+    for (const row of warningRows) {
+      const url          = str(row['Address']); if (!url) continue;
+      const richWarnings = toInt(row['Rich Result Warnings']);
+      if (isNaN(richWarnings) || richWarnings === 0) continue;
+      findings.push({
+        crawlJobId: jobId, siteId, section: 'Structured Data', url,
+        severity: 'warning', issueType: 'Structured Data Validation Warnings',
+        data: JSON.stringify({ richWarnings, feature: str(row['Feature-1']) || null, type: str(row['Type-1']) || null }),
+      });
+    }
+  }
+
+  return findings;
+}
+
+// ─── Public API ───────────────────────────────────────────────────────────────
+
+/**
+ * Run all audit checks against in-memory SF-format datasets and bulk-insert
+ * findings into `audit_results`.
+ *
+ * @param {object} datasets   — output of toSfFormat() from playwright-crawler
+ * @param {string} jobId      — crawl_jobs.id
+ * @param {string} siteId     — sites.id
+ * @param {string|null} companyId
+ * @returns {number}          — total findings inserted
+ */
+export function parseAndStoreFromDatasets(datasets, jobId, siteId, companyId = null) {
+  console.log(`[audit-parser] Starting parse for job ${jobId} (site ${siteId})`);
+
+  const allFindings = [];
+
+  const run = (label, fn) => {
+    const f = fn();
+    console.log(`[audit-parser] ${label}: ${f.length} finding(s)`);
+    allFindings.push(...f);
+  };
+
+  run('Response Codes',  () => checkResponseCodes(datasets.response_codes_all || [], jobId, siteId));
+  run('Page Titles',     () => checkPageTitles(datasets.page_titles_all || [], jobId, siteId));
+  run('Meta Desc',       () => checkMetaDescriptions(datasets.meta_description_all || [], jobId, siteId));
+
+  let urlsWithH1 = new Set();
+  {
+    const { findings, urlsWithH1: h1Set } = checkH1s(datasets.h1_all || [], jobId, siteId);
+    console.log(`[audit-parser] H1: ${findings.length} finding(s)`);
+    urlsWithH1 = h1Set;
+    allFindings.push(...findings);
+  }
+
+  run('H2/H3 (missing)', () => checkH2s(datasets.h2_all || [], jobId, siteId, urlsWithH1));
+  run('Canonicals',      () => checkCanonicals(datasets.canonicals_all || [], jobId, siteId));
+  run('URL Structure',   () => checkUrlStructure(datasets.internal_all || [], jobId, siteId));
+  run('Structured Data', () => checkStructuredData(datasets.structured_data_all || [], jobId, siteId));
+  run('SD Validation',   () => checkStructuredDataValidation(
+    datasets.structured_data_validation_errors,
+    datasets.structured_data_validation_warnings,
+    jobId, siteId,
+  ));
+
+  if (companyId) {
+    for (const f of allFindings) f.companyId = companyId;
+  }
+
+  console.log(`[audit-parser] Total findings: ${allFindings.length}. Inserting…`);
+  bulkInsert(allFindings);
+  console.log(`[audit-parser] Done for job ${jobId}.`);
+
+  return allFindings.length;
+}

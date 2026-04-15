@@ -1,0 +1,9 @@
+{
+	"id": "sadqP04w49BqSdY",
+	"json": "{\"id\":\"sadqP04w49BqSdY\",\"url\":\"https://www.cars24.com/new-cars/toyota/\",\"uniqueKey\":\"https://www.cars24.com/new-cars/toyota\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"depth\":1,\"redirectChain\":[],\"__crawlee\":{\"crawlDepth\":1}}}",
+	"method": "GET",
+	"orderNo": 1776072160799,
+	"retryCount": 0,
+	"uniqueKey": "https://www.cars24.com/new-cars/toyota",
+	"url": "https://www.cars24.com/new-cars/toyota/"
+}

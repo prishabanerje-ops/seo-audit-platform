@@ -1,0 +1,9 @@
+{
+	"id": "6gKyQ09kU5CWysr",
+	"json": "{\"id\":\"6gKyQ09kU5CWysr\",\"url\":\"https://www.cars24.com/new-cars/search-by/cars-under-5-lakhs/\",\"uniqueKey\":\"https://www.cars24.com/new-cars/search-by/cars-under-5-lakhs\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"depth\":1,\"redirectChain\":[],\"__crawlee\":{\"crawlDepth\":1}}}",
+	"method": "GET",
+	"orderNo": 1776072160799,
+	"retryCount": 0,
+	"uniqueKey": "https://www.cars24.com/new-cars/search-by/cars-under-5-lakhs",
+	"url": "https://www.cars24.com/new-cars/search-by/cars-under-5-lakhs/"
+}

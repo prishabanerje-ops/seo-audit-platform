@@ -1,0 +1,9 @@
+{
+	"id": "iWgU0YWKNBd54ak",
+	"json": "{\"id\":\"iWgU0YWKNBd54ak\",\"url\":\"https://www.cars24.com/new-cars/mg/\",\"uniqueKey\":\"https://www.cars24.com/new-cars/mg\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"depth\":1,\"redirectChain\":[],\"__crawlee\":{\"crawlDepth\":1}}}",
+	"method": "GET",
+	"orderNo": 1776072160799,
+	"retryCount": 0,
+	"uniqueKey": "https://www.cars24.com/new-cars/mg",
+	"url": "https://www.cars24.com/new-cars/mg/"
+}

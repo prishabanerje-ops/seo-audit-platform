@@ -1,0 +1,95 @@
+<h2>Homepage Visual Tone — Dark or Light?</h2>
+<p class="subtitle">The app already supports both. Which feel should the homepage hero lead with?</p>
+
+<div class="cards">
+
+  <!-- Option A: Dark Hero -->
+  <div class="card" data-choice="dark" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:0;overflow:hidden;border-radius:4px;">
+      <div style="background:linear-gradient(135deg,#0f1117 0%,#1a1d27 100%);padding:20px 16px;font-family:system-ui;position:relative;overflow:hidden;">
+        <div style="position:absolute;top:-30px;right:-30px;width:120px;height:120px;background:rgba(99,102,241,0.12);border-radius:50%;"></div>
+        <div style="position:absolute;bottom:-20px;left:20px;width:80px;height:80px;background:rgba(99,102,241,0.08);border-radius:50%;"></div>
+        <!-- Nav -->
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;position:relative;z-index:1;">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <div style="width:18px;height:18px;background:#6366f1;border-radius:4px;"></div>
+            <span style="font-size:11px;font-weight:700;color:#e2e8f0;">SEO Audit Platform</span>
+          </div>
+          <div style="background:#6366f1;color:white;padding:3px 10px;border-radius:4px;font-size:9px;font-weight:600;">Sign In →</div>
+        </div>
+        <!-- Hero -->
+        <div style="position:relative;z-index:1;">
+          <div style="background:rgba(99,102,241,0.15);color:#a5b4fc;padding:3px 8px;border-radius:20px;font-size:8px;display:inline-block;margin-bottom:8px;border:1px solid rgba(99,102,241,0.2);">v2.0 · Self-Hosted</div>
+          <div style="font-size:20px;font-weight:800;color:#e2e8f0;line-height:1.2;margin-bottom:6px;">Technical SEO<br><span style="color:#6366f1;">Audit Platform</span></div>
+          <div style="font-size:9px;color:#64748b;margin-bottom:14px;">477+ checks · AI-powered fixes · GSC & GA4 integration</div>
+          <div style="display:inline-block;background:#6366f1;color:white;padding:6px 14px;border-radius:5px;font-size:9px;font-weight:600;">Get Started →</div>
+        </div>
+      </div>
+      <!-- Feature row -->
+      <div style="background:#1a1d27;border-top:1px solid #2d3148;display:flex;gap:0;">
+        <div style="flex:1;padding:8px 10px;border-right:1px solid #2d3148;">
+          <div style="font-size:11px;font-weight:700;color:#6366f1;margin-bottom:1px;">477+</div>
+          <div style="font-size:8px;color:#64748b;">SEO Checks</div>
+        </div>
+        <div style="flex:1;padding:8px 10px;border-right:1px solid #2d3148;">
+          <div style="font-size:11px;font-weight:700;color:#6366f1;margin-bottom:1px;">AI</div>
+          <div style="font-size:8px;color:#64748b;">Fix Recommendations</div>
+        </div>
+        <div style="flex:1;padding:8px 10px;">
+          <div style="font-size:11px;font-weight:700;color:#6366f1;margin-bottom:1px;">100%</div>
+          <div style="font-size:8px;color:#64748b;">Self-Hosted</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>Dark Hero</h3>
+      <p>Deep navy/near-black background with indigo accents. Feels premium, modern, dev-tool aesthetic. Matches the dark theme already in the app.</p>
+    </div>
+  </div>
+
+  <!-- Option B: Light Hero -->
+  <div class="card" data-choice="light" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:0;overflow:hidden;border-radius:4px;">
+      <div style="background:#f8f9fc;padding:20px 16px;font-family:system-ui;position:relative;overflow:hidden;">
+        <div style="position:absolute;top:-30px;right:-30px;width:120px;height:120px;background:rgba(99,102,241,0.06);border-radius:50%;"></div>
+        <!-- Nav -->
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;position:relative;z-index:1;">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <div style="width:18px;height:18px;background:#6366f1;border-radius:4px;"></div>
+            <span style="font-size:11px;font-weight:700;color:#0f1117;">SEO Audit Platform</span>
+          </div>
+          <div style="background:#6366f1;color:white;padding:3px 10px;border-radius:4px;font-size:9px;font-weight:600;">Sign In →</div>
+        </div>
+        <!-- Hero -->
+        <div style="position:relative;z-index:1;">
+          <div style="background:rgba(99,102,241,0.08);color:#4338ca;padding:3px 8px;border-radius:20px;font-size:8px;display:inline-block;margin-bottom:8px;border:1px solid rgba(99,102,241,0.15);">v2.0 · Self-Hosted</div>
+          <div style="font-size:20px;font-weight:800;color:#0f1117;line-height:1.2;margin-bottom:6px;">Technical SEO<br><span style="color:#6366f1;">Audit Platform</span></div>
+          <div style="font-size:9px;color:#94a3b8;margin-bottom:14px;">477+ checks · AI-powered fixes · GSC & GA4 integration</div>
+          <div style="display:inline-block;background:#6366f1;color:white;padding:6px 14px;border-radius:5px;font-size:9px;font-weight:600;">Get Started →</div>
+        </div>
+      </div>
+      <!-- Feature row -->
+      <div style="background:white;border-top:1px solid #e2e6f0;display:flex;gap:0;">
+        <div style="flex:1;padding:8px 10px;border-right:1px solid #e2e6f0;">
+          <div style="font-size:11px;font-weight:700;color:#6366f1;margin-bottom:1px;">477+</div>
+          <div style="font-size:8px;color:#94a3b8;">SEO Checks</div>
+        </div>
+        <div style="flex:1;padding:8px 10px;border-right:1px solid #e2e6f0;">
+          <div style="font-size:11px;font-weight:700;color:#6366f1;margin-bottom:1px;">AI</div>
+          <div style="font-size:8px;color:#94a3b8;">Fix Recommendations</div>
+        </div>
+        <div style="flex:1;padding:8px 10px;">
+          <div style="font-size:11px;font-weight:700;color:#6366f1;margin-bottom:1px;">100%</div>
+          <div style="font-size:8px;color:#94a3b8;">Self-Hosted</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>Light Hero</h3>
+      <p>Clean white/light-grey background. Classic SaaS landing page feel. Easier to read at a glance, feels approachable and professional.</p>
+    </div>
+  </div>
+
+</div>
+
+<p class="subtitle" style="margin-top:16px;">Click to select, or just tell me here.</p>

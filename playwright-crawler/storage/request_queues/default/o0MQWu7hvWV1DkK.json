@@ -1,0 +1,9 @@
+{
+	"id": "o0MQWu7hvWV1DkK",
+	"json": "{\"id\":\"o0MQWu7hvWV1DkK\",\"url\":\"https://www.cars24.com/about-us/\",\"uniqueKey\":\"https://www.cars24.com/about-us\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"depth\":1,\"redirectChain\":[],\"__crawlee\":{\"crawlDepth\":1}}}",
+	"method": "GET",
+	"orderNo": 1776072160799,
+	"retryCount": 0,
+	"uniqueKey": "https://www.cars24.com/about-us",
+	"url": "https://www.cars24.com/about-us/"
+}

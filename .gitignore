@@ -1,0 +1,11 @@
+node_modules/
+.env
+*.db
+*.db-shm
+*.db-wal
+backend/exports/
+backend/crawl-configs/
+frontend/dist/
+google-service-account.json
+coverage/
+.DS_Store
