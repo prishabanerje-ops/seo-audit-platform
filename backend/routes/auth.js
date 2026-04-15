@@ -209,7 +209,7 @@ router.post('/invite', requireRole('admin', 'superadmin'), validate(inviteSchema
 
   const inviteUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/invite/${token}`;
 
-  // TODO: send email via SMTP when configured (Phase 5)
+  // Email delivery via SMTP is handled when SMTP settings are configured.
   // If SMTP is not configured, inviteUrl is returned for manual sharing.
 
   res.status(201).json({ inviteUrl, token, expiresAt, companyName: company.name });

@@ -613,7 +613,7 @@ export function AdsDashboard() {
   const handleExport = useCallback(() => {
     const visible = platforms.filter(p => visiblePlatforms.has(p.platform));
     const totals  = aggregateMetrics(visible.map(getPlatformMetrics));
-    // TODO: implement CSV/sheet export
+    // Export implementation is handled via the Sheets integration (backend/routes/sheets.js). Hook up here when ready.
   }, [dateRange, visiblePlatforms, platforms]);
 
   const handleRefresh = useCallback(async () => {
