@@ -335,6 +335,8 @@ const patchUserSchema = z.object({
   name:   z.string().min(1).max(100).optional(),
 }).refine(d => Object.keys(d).length > 0, { message: 'At least one field required' });
 
+const ALLOWED_USER_PATCH_FIELDS = ['role', 'status', 'name'];
+
 router.patch('/users/:id', requireRole('admin', 'superadmin'), validate(patchUserSchema), (req, res) => {
   const { id } = req.params;
   const { role: actorRole, company_id: actorCompanyId } = req.user;
@@ -352,15 +354,15 @@ router.patch('/users/:id', requireRole('admin', 'superadmin'), validate(patchUse
     return res.status(403).json({ error: 'You do not have permission to modify this user' });
   }
 
-  const fields = [];
-  const vals = [];
-  for (const [k, v] of Object.entries(req.body)) {
-    fields.push(`${k} = ?`);
-    vals.push(v);
-  }
-  vals.push(id);
+  // Use an explicit whitelist (matches pattern in sites.js) to prevent
+  // column injection if patchUserSchema is ever extended carelessly.
+  const fields = Object.entries(req.body)
+    .filter(([k]) => ALLOWED_USER_PATCH_FIELDS.includes(k));
+  if (!fields.length) return res.status(400).json({ error: 'No valid fields to update' });
 
-  db.prepare(`UPDATE users SET ${fields.join(', ')} WHERE id = ?`).run(...vals);
+  const setClause = fields.map(([k]) => `${k} = ?`).join(', ');
+  const vals = [...fields.map(([, v]) => v), id];
+  db.prepare(`UPDATE users SET ${setClause} WHERE id = ?`).run(...vals);
 
   const updated = db.prepare(
     'SELECT id, email, name, role, company_id, status, last_active_at FROM users WHERE id = ?'
