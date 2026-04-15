@@ -5,6 +5,7 @@ node_modules/
 *.db-wal
 backend/exports/
 backend/crawl-configs/
+backend/crawl-data/
 frontend/dist/
 google-service-account.json
 coverage/
