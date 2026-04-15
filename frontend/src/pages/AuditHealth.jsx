@@ -26,33 +26,32 @@ import { Button }          from '../components/ui/Button.jsx';
 
 // ── Category → audit route map ────────────────────────────────────────────────
 const CATEGORY_ROUTES = {
-  'Response Codes':              '/audit/response-codes',
-  'Redirects':                   '/audit/redirects',
-  '404 Errors':                  '/audit/response-codes',
-  'Title Tags':                  '/audit/title-tags',
-  'Meta Description':            '/audit/meta-desc',
-  'Headings':                    '/audit/headings',
-  'Canonical':                   '/audit/canonicals',
-  'Hreflang':                    '/audit/hreflang',
-  'Images':                      '/audit/images',
-  'Image Optimisation':          '/audit/images',
-  'Internal Linking':            '/audit/links',
-  'Schema / Structured Data':    '/audit/structured-data',
-  'Core Web Vitals':             '/audit/page-speed',
-  'Indexation & Directives':     '/audit/indexability',
-  'robots.txt':                  '/audit/robots',
-  'Sitemap':                     '/audit/sitemap',
-  'URL Structure':               '/audit/crawl-depth',
-  'HTML Structure':              '/audit/content',
-  'Content Quality':             '/audit/content',
-  'JavaScript':                  '/audit/custom',
-  'Page Experience':             '/audit/mobile',
-  'M-Site vs Desktop':           '/audit/mobile',
-  'Backlink & Authority':        '/audit/content',
-  'Local SEO':                   '/audit/content',
-  'Meta Robots':                 '/audit/indexability',
-  'Site Architecture':           '/audit/crawl-depth',
-  'Log File / Crawl Intelligence': '/audit/log-file',
+  // Core technical
+  'Response Codes':           '/audit/response-codes',
+  'Canonical':                '/audit/canonicals',
+  'Robots / Indexability':    '/audit/robots',
+  'Sitemap':                  '/audit/sitemap',
+  'URL Structure':            '/audit/crawl-depth',
+
+  // On-page
+  'Title Tags':               '/audit/title-tags',
+  'Meta Description':         '/audit/meta-desc',
+  'Headings':                 '/audit/headings',
+  'Internal Linking':         '/audit/links',
+  'Images':                   '/audit/images',
+  'Schema / Structured Data': '/audit/structured-data',
+  'Content':                  '/audit/content',
+
+  // Performance & rendering
+  'Speed & Performance':      '/audit/page-speed',
+  'Mobile SEO':               '/audit/mobile',
+  'JavaScript Rendering':     '/audit/custom',
+
+  // Advanced (no dedicated detail page yet)
+  'International SEO':        '/audit/custom',
+  'Rankings & Traffic Drops': '/audit/custom',
+  'Monitoring & Operations':  '/audit/custom',
+  'LLM / AI Crawlers':        '/audit/custom',
 };
 
 // ── Helper components ─────────────────────────────────────────────────────────
