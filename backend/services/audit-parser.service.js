@@ -409,7 +409,7 @@ function checkStructuredData(rows, jobId, siteId) {
 
     if (!isNaN(errors) && errors > 0) {
       findings.push({
-        crawlJobId: jobId, siteId, section: 'Structured Data', url,
+        crawlJobId: jobId, siteId, section: 'Schema / Structured Data', url,
         severity: 'critical', issueType: 'Structured Data Errors',
         data: JSON.stringify({ errors }),
       });
@@ -417,7 +417,7 @@ function checkStructuredData(rows, jobId, siteId) {
 
     if (!isNaN(warnings) && warnings > 0) {
       findings.push({
-        crawlJobId: jobId, siteId, section: 'Structured Data', url,
+        crawlJobId: jobId, siteId, section: 'Schema / Structured Data', url,
         severity: 'warning', issueType: 'Structured Data Warnings',
         data: JSON.stringify({ warnings }),
       });
@@ -436,7 +436,7 @@ function checkStructuredDataValidation(errorRows, warningRows, jobId, siteId) {
       const richErrors = toInt(row['Rich Result Errors']);
       if (isNaN(richErrors) || richErrors === 0) continue;
       findings.push({
-        crawlJobId: jobId, siteId, section: 'Structured Data', url,
+        crawlJobId: jobId, siteId, section: 'Schema / Structured Data', url,
         severity: 'critical', issueType: 'Structured Data Validation Errors',
         data: JSON.stringify({ richErrors, feature: str(row['Feature-1']) || null, type: str(row['Type-1']) || null }),
       });
@@ -449,7 +449,7 @@ function checkStructuredDataValidation(errorRows, warningRows, jobId, siteId) {
       const richWarnings = toInt(row['Rich Result Warnings']);
       if (isNaN(richWarnings) || richWarnings === 0) continue;
       findings.push({
-        crawlJobId: jobId, siteId, section: 'Structured Data', url,
+        crawlJobId: jobId, siteId, section: 'Schema / Structured Data', url,
         severity: 'warning', issueType: 'Structured Data Validation Warnings',
         data: JSON.stringify({ richWarnings, feature: str(row['Feature-1']) || null, type: str(row['Type-1']) || null }),
       });
