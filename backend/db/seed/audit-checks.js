@@ -3514,7 +3514,7 @@ export function seedAuditChecks(db) {
   if (cnt === AUDIT_CHECKS.length) return 0;
 
   const stmt = db.prepare(`
-    INSERT OR REPLACE INTO audit_checks
+    INSERT INTO audit_checks
       (check_number, name, category, subsection, description, implementation_rule,
        severity_default, is_automated, automation_type, logic_summary, seo_impact)
     VALUES
