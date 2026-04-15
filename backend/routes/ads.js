@@ -26,7 +26,7 @@ router.get('/connections', (req, res) => {
   res.json({ connections });
 });
 
-router.post('/connect/:platform', requireRole('admin'), validatePlatform, (req, res) => {
+router.post('/connect/:platform', requireRole('admin', 'superadmin'), validatePlatform, (req, res) => {
   const { platform } = req.params;
   const state = createOAuthState(req.user.sub, platform);
   let authUrl;
@@ -50,7 +50,7 @@ router.get('/callback/:platform', validatePlatform, async (req, res) => {
   }
 });
 
-router.delete('/connections/:platform', requireRole('admin'), validatePlatform, (req, res) => {
+router.delete('/connections/:platform', requireRole('admin', 'superadmin'), validatePlatform, (req, res) => {
   deleteConnection(req.user.company_id, req.params.platform);
   res.json({ ok: true });
 });
@@ -65,7 +65,7 @@ router.get('/accounts/:platform', validatePlatform, (req, res) => {
   res.json({ accounts: rows });
 });
 
-router.post('/accounts/:platform/select', requireRole('admin'), validatePlatform, (req, res) => {
+router.post('/accounts/:platform/select', requireRole('admin', 'superadmin'), validatePlatform, (req, res) => {
   const { accountId } = req.body;
   if (!accountId) return res.status(400).json({ error: 'accountId required' });
   const conn = getConnection(req.user.company_id, req.params.platform);
