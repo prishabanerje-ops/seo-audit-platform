@@ -29,7 +29,7 @@
 
 ## 1. Product Overview
 
-A self-hosted, web-based technical SEO audit platform running at a single URL. It crawls websites via a built-in Playwright/Crawlee crawler, runs 204 custom SEO checks against crawl output, surfaces AI-powered fix recommendations via Anthropic Claude, and integrates with Google Search Console, Google Analytics 4, Linear, Slack, SMTP, and Google Sheets.
+A self-hosted, web-based technical SEO audit platform running at a single URL. It crawls websites via a built-in Playwright/Crawlee crawler, runs 291 custom SEO checks across 19 categories against crawl output, surfaces AI-powered fix recommendations via Anthropic Claude, and integrates with Google Search Console, Google Analytics 4, Linear, Slack, SMTP, and Google Sheets.
 
 **Intended users:** A small internal team (2–5 people). Not a SaaS product. Runs on one machine, serves a private team.
 
@@ -347,18 +347,24 @@ Visible only to superadmin. Accessible via Phase 2 Audit Log page under the Admi
 #### `audit_checks`
 | Column | Type | Notes |
 |---|---|---|
-| `id` | INTEGER PK AUTOINCREMENT | |
-| `check_number` | INTEGER UNIQUE | 1–204 |
-| `name` | TEXT | Human-readable name |
-| `category` | TEXT | Category slug |
-| `description` | TEXT | What it checks |
-| `detection_method` | TEXT | How it detects the issue |
-| `logic_summary` | TEXT | Decision logic |
-| `seo_impact` | TEXT | Why it matters |
-| `tool_source` | TEXT | Default `screaming-frog` |
-| `severity_default` | TEXT | Default severity |
-| `is_automated` | INTEGER | 1 = auto, 0 = manual |
-| `created_at` | TIMESTAMP | |
+| `id` | INTEGER PK | Auto-increment |
+| `check_number` | INTEGER UNIQUE | 1–291 |
+| `name` | TEXT | Unique check name (from CSV Issue column) |
+| `category` | TEXT | Top-level section, Title Case (19 categories) |
+| `subsection` | TEXT | Second-level grouping (e.g. "HTTP Status Codes") |
+| `description` | TEXT | Human-readable explanation |
+| `implementation_rule` | TEXT | Pseudocode detection logic from CSV |
+| `automation_type` | TEXT | `'automated'` \| `'manual'` \| `'hybrid'` |
+| `is_automated` | INTEGER | `1` = automated, `0` = manual or hybrid (legacy compat) |
+| `severity_default` | TEXT | `'critical'` \| `'warning'` \| `'info'` |
+| `created_at` | TIMESTAMP | Auto |
+
+**19 categories (291 checks total):**
+Response Codes · Canonical · Robots / Indexability · Sitemap · URL Structure ·
+Title Tags · Meta Description · Headings · Internal Linking · Images ·
+Schema / Structured Data · Content · Speed & Performance · Mobile SEO ·
+JavaScript Rendering · International SEO · Rankings & Traffic Drops ·
+Monitoring & Operations · LLM / AI Crawlers
 
 Seeded by: `scripts/seed-checks.js` (run via `npm run seed`).
 
@@ -955,7 +961,7 @@ Sidebar (220px expanded / 56px collapsed) + Header (56px) + scrollable main cont
 
 #### `/login` — Login
 - Split layout: 55% brand panel (hidden on mobile), 45% form
-- Brand panel: logo mark, tagline, 3 feature bullets (204 checks, AI-powered fixes, self-hosted)
+- Brand panel: logo mark, tagline, 3 feature bullets (291 checks, AI-powered fixes, self-hosted)
 - Form: email, password (with show/hide toggle), error display, submit with loading state
 - On submit: `POST /api/auth/login` → sets user → navigates to `location.state.from || '/admin'`
 
@@ -1074,7 +1080,7 @@ Auto-generated on first run via `setup.sh`: `JWT_SECRET` (64 hex chars), `ENCRYP
 |---|---|---|
 | **Phase 1** | Foundation: CSS system, P0 components, app shell, auth pages (Login, Setup, InviteAccept), backend auth + DB migrations | ✅ Complete |
 | **Phase 2** | Sites + Crawl Management: live crawl via Socket.io, import CSV, crawl status page. Built-in Playwright/Crawlee crawler (`playwright-crawler/`) replaces external crawler dependency — dual-mode (Cheerio fast pass + Playwright fallback), 9 extractors, 12 SF-compatible datasets, parity-tested. Wired into `crawl-runner.js` behind `USE_PLAYWRIGHT_CRAWLER` feature flag. | ✅ Complete |
-| **Phase 3** | Audit Engine: parse CSV output → `audit_results`, run 204 checks, calculate health score, category pages, issue detail page | 🔄 Partial — CSV parser built (9 CSV files → audit_results), health score calculation live, AuditHealth page built with per-check accordion. Category detail pages and issue detail page still pending. |
+| **Phase 3** | Audit Engine: parse CSV output → `audit_results`, run 291 checks across 19 categories, calculate health score, category pages, issue detail page | 🔄 Partial — CSV parser built (9 CSV files → audit_results), health score calculation live, AuditHealth page built with per-check accordion. Category detail pages and issue detail page still pending. |
 | **Phase 4** | Dashboards: Admin View, SEO Dashboard, Developer View with real data | Pending |
 | **Phase 5** | Integrations: GSC overlay, GA4 overlay, PageSpeed Insights, AI recommendations via Claude | Pending |
 | **Phase 6** | Tasks board, Linear sync, scheduled crawls (cron), notifications feed, Slack webhook | Pending |
@@ -1112,7 +1118,7 @@ Auto-generated on first run via `setup.sh`: `JWT_SECRET` (64 hex chars), `ENCRYP
 ├── README.md                             # Operational how-to guide
 │
 ├── scripts/
-│   └── seed-checks.js                    # Seeds 204 audit checks into DB
+│   └── seed-checks.js                    # Seeds 291 audit checks into DB
 │
 ├── backend/
 │   ├── package.json                      # type:module, dependencies

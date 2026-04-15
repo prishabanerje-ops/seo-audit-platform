@@ -1,6 +1,6 @@
 # SEO Audit Platform v2.0
 
-A self-hosted technical SEO audit platform. Crawls websites via a built-in Playwright/Crawlee crawler, runs 204 SEO checks, surfaces AI-powered fix recommendations via Claude, and integrates with GSC, GA4, Linear, Slack, and Google Sheets.
+A self-hosted technical SEO audit platform. Crawls websites via a built-in Playwright/Crawlee crawler, runs 291 SEO checks across 19 categories, surfaces AI-powered fix recommendations via Claude, and integrates with GSC, GA4, Linear, Slack, and Google Sheets.
 
 ---
 
@@ -47,7 +47,7 @@ The script will:
 - Install Playwright browser binaries
 - Download JetBrains Mono fonts
 - Run all database migrations
-- Seed the 204 audit checks
+- Seed the 291 audit checks
 
 ### 2. Fill in optional env vars
 
@@ -370,7 +370,7 @@ SQLite uses WAL mode — it's safe to copy the `.db` file while the server is ru
 | `npm start` | Start backend in production mode |
 | `npm run setup` | Run the full first-time setup script |
 | `npm run migrate` | Run pending database migrations |
-| `npm run seed` | Re-seed the 204 audit checks |
+| `npm run seed` | Re-seed the 291 audit checks |
 | `npm test` | Run backend tests |
 
 ---
@@ -413,7 +413,7 @@ Aakash/
 │       ├── main.jsx
 │       └── router.jsx
 ├── scripts/
-│   └── seed-checks.js           # Seeds 204 audit checks
+│   └── seed-checks.js           # Seeds 291 audit checks
 ├── .env                         # Local env (gitignored)
 ├── .env.example                 # Template
 ├── package.json                 # Root scripts
