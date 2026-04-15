@@ -150,7 +150,7 @@ While a crawl is running, go to **Crawls → Live Run** (or click the running jo
 Once complete, go to **Audit Health** to see:
 - Overall health score (0–100)
 - Issue breakdown by severity (critical / warning / info / pass)
-- Category breakdown (20 categories)
+- Category breakdown (19 categories)
 
 Click any category or issue to drill into affected URLs.
 
