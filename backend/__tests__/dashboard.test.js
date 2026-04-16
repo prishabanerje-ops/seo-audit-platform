@@ -30,5 +30,7 @@ describe('GET /api/dashboard/admin', () => {
     expect(Array.isArray(res.body.sites)).toBe(true);
     expect(res.body.task_summary).toHaveProperty('backlog');
     expect(res.body.task_summary).toHaveProperty('in_progress');
+    expect(res.body.task_summary).toHaveProperty('review');
+    expect(res.body.task_summary).toHaveProperty('done');
   });
 });
