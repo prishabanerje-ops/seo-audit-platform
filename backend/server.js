@@ -35,6 +35,7 @@ import gscRoutes       from './routes/gsc.js';
 import ga4Routes       from './routes/ga4.js';
 import aiRoutes        from './routes/ai.js';
 import dashboardRoutes from './routes/dashboard.js';
+import tasksRoutes     from './routes/tasks.js';
 import { resetStuckJobs, getJobUrlBuffer } from './services/crawl-runner.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -136,6 +137,7 @@ app.use('/api/gsc',       gscRoutes);
 app.use('/api/ga4',       ga4Routes);
 app.use('/api/ai',        aiRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/tasks',    tasksRoutes);
 
 // Placeholder 501 for routes not yet implemented (Phase 3+)
 app.use('/api', (req, res) => {
