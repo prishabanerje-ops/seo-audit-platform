@@ -460,4 +460,111 @@ router.post('/change-password', authLimiter, validate(changePasswordSchema), asy
   res.json({ ok: true });
 });
 
+// ─── POST /api/auth/impersonate ──────────────────────────────────────────────
+/**
+ * @route POST /api/auth/impersonate
+ * @desc  Superadmin impersonates a target user — issues a JWT with impersonated_by claim.
+ * @access superadmin
+ */
+const impersonateSchema = z.object({
+  user_id: z.string().uuid(),
+});
+
+router.post('/impersonate', requireSuperAdmin, validate(impersonateSchema), (req, res) => {
+  const { user_id } = req.body;
+
+  // Guard: cannot impersonate yourself
+  if (user_id === req.user.sub) {
+    return res.status(400).json({ error: 'Cannot impersonate yourself.' });
+  }
+
+  const target = db.prepare('SELECT id, email, name, role, company_id, status FROM users WHERE id = ?').get(user_id);
+
+  if (!target) {
+    return res.status(404).json({ error: 'User not found.' });
+  }
+
+  if (target.status === 'inactive') {
+    return res.status(400).json({ error: 'Cannot impersonate an inactive user.' });
+  }
+
+  if (target.role === 'superadmin') {
+    return res.status(400).json({ error: 'Cannot impersonate another superadmin.' });
+  }
+
+  const payload = {
+    sub:            target.id,
+    email:          target.email,
+    name:           target.name,
+    role:           target.role,
+    company_id:     target.company_id ?? null,
+    impersonated_by: req.user.sub,
+  };
+
+  const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '4h', algorithm: 'HS256' });
+  res.cookie('auth_token', token, getCookieOptions(req));
+
+  logAction(req.user, {
+    action:     'user.impersonate',
+    targetType: 'user',
+    targetId:   target.id,
+    companyId:  target.company_id,
+    metadata:   { target_email: target.email, target_role: target.role },
+  });
+
+  res.json({
+    user: {
+      sub:            target.id,
+      email:          target.email,
+      name:           target.name,
+      role:           target.role,
+      company_id:     target.company_id ?? null,
+      impersonated_by: req.user.sub,
+    },
+  });
+});
+
+// ─── POST /api/auth/impersonate/end ──────────────────────────────────────────
+/**
+ * @route POST /api/auth/impersonate/end
+ * @desc  Ends an active impersonation session and restores the original superadmin JWT.
+ * @access any authenticated user (must have impersonated_by claim)
+ */
+router.post('/impersonate/end', (req, res) => {
+  if (!req.user?.impersonated_by) {
+    return res.status(400).json({ error: 'Not currently impersonating anyone.' });
+  }
+
+  const superadmin = db.prepare('SELECT id, email, name, role, company_id, status FROM users WHERE id = ?').get(req.user.impersonated_by);
+
+  if (!superadmin || superadmin.role !== 'superadmin') {
+    res.clearCookie('auth_token');
+    return res.status(401).json({ error: 'Original superadmin session not found. Please log in again.' });
+  }
+
+  const token = signToken(superadmin);
+  res.cookie('auth_token', token, getCookieOptions(req));
+
+  logAction(
+    { sub: superadmin.id, email: superadmin.email, role: superadmin.role, company_id: null },
+    {
+      action:     'user.impersonate_end',
+      targetType: 'user',
+      targetId:   req.user.sub,
+      companyId:  req.user.company_id,
+      metadata:   { was_impersonating: req.user.email },
+    }
+  );
+
+  res.json({
+    user: {
+      sub:        superadmin.id,
+      email:      superadmin.email,
+      name:       superadmin.name,
+      role:       superadmin.role,
+      company_id: null,
+    },
+  });
+});
+
 export default router;
