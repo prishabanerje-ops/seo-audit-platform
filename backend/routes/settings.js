@@ -8,6 +8,7 @@ import { z }        from 'zod';
 import db           from '../db/sqlite.js';
 import { validate } from '../middleware/validate.js';
 import { requireRole } from '../middleware/auth.js';
+import { logAction } from '../services/audit-log.service.js';
 
 const router = Router();
 
@@ -25,6 +26,11 @@ router.get('/', requireRole('admin', 'superadmin'), (req, res) => {
   const targetCompanyId = role === 'superadmin'
     ? (req.query.company_id || company_id)
     : company_id;
+
+  if (req.user.role === 'superadmin' && req.query.company_id) {
+    const co = db.prepare('SELECT id FROM companies WHERE id = ?').get(req.query.company_id);
+    if (!co) return res.status(404).json({ error: 'Company not found.' });
+  }
 
   let companySettings = {};
   if (targetCompanyId) {
@@ -58,9 +64,14 @@ router.put('/', requireRole('admin', 'superadmin'), validate(settingsSchema), (r
     ? (req.query.company_id || company_id)
     : company_id;
 
+  if (req.user.role === 'superadmin' && req.query.company_id) {
+    const co = db.prepare('SELECT id FROM companies WHERE id = ?').get(req.query.company_id);
+    if (!co) return res.status(404).json({ error: 'Company not found.' });
+  }
+
   const now = new Date().toISOString();
 
-  if (targetCompanyId) {
+  if (targetCompanyId && Object.keys(settings).length > 0) {
     const upsert = db.prepare(`
       INSERT INTO company_settings (company_id, key, value, created_at, updated_at)
       VALUES (?, ?, ?, ?, ?)
@@ -69,7 +80,7 @@ router.put('/', requireRole('admin', 'superadmin'), validate(settingsSchema), (r
     const saveMany = db.transaction((entries) => {
       for (const [key, value] of entries) {
         if (ALLOWED_COMPANY_KEYS.includes(key)) {
-          upsert.run(targetCompanyId, key, value || null, now, now);
+          upsert.run(targetCompanyId, key, value === '' ? null : value, now, now);
         }
       }
     });
@@ -82,11 +93,18 @@ router.put('/', requireRole('admin', 'superadmin'), validate(settingsSchema), (r
     );
     const saveGlobal = db.transaction((entries) => {
       for (const [key, value] of entries) {
-        if (ALLOWED_GLOBAL_KEYS.includes(key)) upsertGlobal.run(key, value || null);
+        if (ALLOWED_GLOBAL_KEYS.includes(key)) upsertGlobal.run(key, value === '' ? null : value);
       }
     });
     saveGlobal(Object.entries(global));
   }
+
+  logAction(req.user, {
+    action:     'settings.update',
+    targetType: 'company',
+    targetId:   targetCompanyId || null,
+    companyId:  targetCompanyId || null,
+  });
 
   res.json({ ok: true });
 });
