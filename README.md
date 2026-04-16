@@ -156,9 +156,17 @@ Once complete, go to **Audit Health** to see:
 
 Click any category or issue to drill into affected URLs.
 
-### Step 5 — AI Recommendations (Coming Soon)
+### Step 5 — AI Recommendations
 
-AI-powered fix recommendations via Claude are planned for a future phase. Set `ANTHROPIC_API_KEY` in `.env` now if you have one — the platform will use it once the feature ships.
+AI-powered fix recommendations via Claude are now live.
+
+1. Complete a crawl and open any issue in the **Issue Detail** page (`/audit/issue/:id`).
+2. Click **Get AI Recommendation** — the platform calls `claude-sonnet-4-6` and streams the response token-by-token.
+3. Use the thumbs up / thumbs down buttons after generation to submit feedback.
+
+**Setup:** Set `ANTHROPIC_API_KEY` in `.env`, or go to **Settings → AI** and paste the key there (stored encrypted in the database).
+
+**Caching:** Recommendations are cached per URL. Clicking the button on the same issue a second time returns the cached result instantly — no API call is made.
 
 ---
 
@@ -390,13 +398,26 @@ Aakash/
 ├── backend/
 │   ├── db/
 │   │   ├── sqlite.js            # DB singleton + migration runner
-│   │   └── migrations/          # 001–006 SQL migrations (006 = multi-tenancy)
+│   │   └── migrations/          # 001–015 SQL migrations (006 = multi-tenancy, 015 = ai_suggestions per-URL)
 │   ├── middleware/
 │   │   ├── auth.js              # JWT + requireRole
 │   │   ├── rateLimiter.js       # express-rate-limit config
 │   │   └── validate.js          # Zod request validation helper
 │   ├── routes/
-│   │   └── auth.js              # All /api/auth/* endpoints
+│   │   ├── auth.js              # /api/auth/*
+│   │   ├── sites.js             # /api/sites/*
+│   │   ├── crawls.js            # /api/crawls/*
+│   │   ├── reports.js           # /api/reports/* (summary, category, issues, result detail, developer-summary)
+│   │   ├── errors.js            # /api/errors
+│   │   ├── gsc.js               # /api/gsc/* (OAuth + data endpoints)
+│   │   ├── ga4.js               # /api/ga4/* (OAuth + data endpoints)
+│   │   ├── ai.js                # /api/ai/suggest (SSE streaming + cache + feedback)
+│   │   ├── dashboard.js         # /api/dashboard/admin
+│   │   └── tasks.js             # /api/tasks/* (CRUD + comments)
+│   ├── __tests__/
+│   │   ├── gsc-data.test.js     # GSC data endpoint tests
+│   │   ├── ga4-data.test.js     # GA4 data endpoint tests
+│   │   └── tasks.test.js        # Tasks CRUD tests
 │   ├── uploads/
 │   │   └── logos/               # Company logo uploads (PNG/JPG/SVG/WebP, max 50KB)
 │   ├── server.js                # Express app entry
@@ -409,7 +430,7 @@ Aakash/
 │       ├── api/index.js         # Axios instance
 │       ├── components/          # Shared UI components
 │       ├── context/             # Auth, Sites, Toast contexts
-│       ├── pages/               # Page components
+│       ├── pages/               # Page components (Login, Sites, Crawl, AuditHealth, AuditCategory, IssueDetail, AdminView, SeoView, DeveloperView, Tasks, TaskDetail, …)
 │       ├── styles/              # theme.css + fonts.css
 │       ├── App.jsx
 │       ├── main.jsx

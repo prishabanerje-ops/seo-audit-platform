@@ -4,7 +4,7 @@
 >
 > **Do not guess. Do not infer missing product behavior unless explicitly confirmed.**
 >
-> **Last updated:** April 2026 — multi-tenancy Phase 2 (impersonation) and Phase 3 (per-company settings, GSC/GA4 OAuth, real Settings/Users pages) complete. Migration 012 adds `company_settings` and `company_oauth_tokens` tables.
+> **Last updated:** April 2026 — Phase 3 (audit category + issue detail pages, AI recommendations) and Phase 4a (Admin/SEO/Developer dashboards, Task board) complete. Migration 015 adds `result_id` and `feedback` columns to `ai_suggestions`. GSC/GA4 data-read endpoints added. Dashboard and Tasks routes registered.
 
 ---
 
@@ -232,6 +232,7 @@ Migration runner: `backend/db/sqlite.js`. Tracks applied migrations in `_migrati
 | `006_multi_tenancy.js` | Adds `companies` table, `audit_log` table, `company_id` column to all data tables, partial unique index enforcing single superadmin, seeds Cars24 company, promotes `aakash.srivastava@cars24.com` to superadmin, creates `admin@c24.com` as Cars24 admin |
 | `012_company_settings.js` | Adds `company_settings` (key-value settings per company) and `company_oauth_tokens` (GSC/GA4 OAuth tokens per company) tables |
 | `013_site_crawl_config.js` | Adds `crawl_config TEXT` column to `sites` table — stores per-site default crawl configuration as a JSON string |
+| `015_ai_suggestions_per_url.js` | Adds `result_id INTEGER` (FK → `audit_results.id`, UNIQUE INDEX where NOT NULL) and `feedback INTEGER` (thumbs up +1 / thumbs down -1 / null) columns to `ai_suggestions` |
 
 ### Tables
 
@@ -451,6 +452,9 @@ Seeded by: `scripts/seed-checks.js` (run via `npm run seed`).
 | `site_id` | TEXT | |
 | `section` | TEXT | |
 | `response_text` | TEXT | Full Claude response |
+| `result_id` | INTEGER | FK → `audit_results.id`. Added migration 015. UNIQUE INDEX where NOT NULL. Enables per-URL caching. |
+| `feedback` | INTEGER | Thumbs up (+1) / thumbs down (-1) / null. Added migration 015. |
+| `company_id` | TEXT | FK → companies. Added migration 006. |
 | `created_at` | TIMESTAMP | |
 
 #### `ai_suggestion_feedback`
@@ -469,16 +473,17 @@ Seeded by: `scripts/seed-checks.js` (run via `npm run seed`).
 | `id` | TEXT PK | |
 | `audit_result_id` | TEXT | nullable |
 | `site_id` | TEXT FK → sites | CASCADE DELETE |
+| `company_id` | TEXT | FK → companies. Added migration 006. |
 | `title` | TEXT | |
 | `description` | TEXT | |
-| `status` | TEXT | `backlog` / `in-progress` / `done` |
+| `status` | TEXT | `backlog` / `in_progress` / `review` / `done` (underscore, 4 values) |
 | `assignee_id` | TEXT | user.id |
 | `linear_ticket_id` | TEXT | |
 | `linear_url` | TEXT | |
 | `created_by` | TEXT | user.id |
 | `created_at` | TEXT | |
 | `updated_at` | TEXT | |
-| `priority` | TEXT | `low` / `medium` / `high` / `urgent`. Default `medium`. |
+| `priority` | TEXT | `low` / `medium` / `high` / `critical`. Default `medium`. |
 | `due_date` | TEXT | |
 | `issue_type` | TEXT | |
 | `issue_section` | TEXT | |
@@ -547,7 +552,7 @@ Entry point. Startup order:
 6. Socket.io (same CORS origin)
 7. `authMiddleware` — global, applied before all routes
 8. `apiLimiter` — 300 req/min on `/api/*`
-9. Routes registered: `/api/auth`, `/api/sites`, `/api/crawls`, `/api/errors`
+9. Routes registered: `/api/auth`, `/api/sites`, `/api/crawls`, `/api/errors`, `/api/reports`, `/api/gsc`, `/api/ga4`, `/api/ai`, `/api/dashboard`, `/api/tasks`
 10. `resetStuckJobs()` — resets queued/running jobs to failed
 11. Static file serving in production from `backend/public/`
 12. Global error handler
@@ -878,6 +883,74 @@ All routes require authentication.
 
 `healthScore` is computed as `max(0, round(100 - (critical*3 + warning*2 + info*1) / totalUrls * 10))` and persisted back to `crawl_jobs.health_score` if not already set.
 
+### Reports (continued — Phase 3 + Phase 4a additions)
+
+| Method | Path | Auth | Request | Response |
+|---|---|---|---|---|
+| GET | `/api/reports/:siteId/category` | Any authed | `?section=<name>&job_id=<optional>` | `{ jobId, section, groups: [{ issue_type, severity, count }] }`. Groups ordered by severity rank then count DESC. `{ jobId: null, section, groups: [] }` if no completed job. |
+| GET | `/api/reports/:siteId/issues` | Any authed | `?section=<name>&issue_type=<name>&job_id=<optional>&limit=50&offset=0` | `{ results: [{ id, url, severity, data }], total, limit, offset }`. Max limit 200. |
+| GET | `/api/reports/results/:resultId` | Any authed | — | `{ result: { id, url, issue_type, section, severity, data }, check: { id, name, description, seo_impact, implementation_rule, subsection } \| null }`. 404 if not found. 403 if wrong company. `check` is null if no matching `audit_checks` row. |
+| GET | `/api/reports/:siteId/developer-summary` | Any authed | — | `{ job: { id, total_urls, health_score, started_at, completed_at, duration_seconds } \| null, response_codes: { 2xx, 3xx, 4xx, 5xx }, top_issues: [{ issue_type, section, severity, count }], custom_extraction: [{ id, url, issue_type, data }] }`. Top 10 issues by severity then count. Up to 50 custom extraction rows. |
+
+### GSC Data
+
+| Method | Path | Auth | Request | Response |
+|---|---|---|---|---|
+| GET | `/api/gsc/:siteId/summary` | Any authed | — | `{ clicks, impressions, ctr, position, clicks_delta, impressions_delta }`. Aggregates `gsc_cache` WHERE `period='current'`. Deltas = current minus previous period totals. Returns all zeros if no data. 404 if site not found, 403 if wrong company. |
+| GET | `/api/gsc/:siteId/queries` | Any authed | — | `{ queries: [{ query, clicks, impressions, ctr, position }] }`. Top 25 queries by clicks, grouped by `top_query` WHERE `period='current'`. |
+| GET | `/api/gsc/:siteId/pages` | Any authed | — | `{ pages: [{ url, clicks, impressions, ctr, position }] }`. Top 50 pages by clicks, WHERE `period='current'`. |
+
+### GA4 Data
+
+| Method | Path | Auth | Request | Response |
+|---|---|---|---|---|
+| GET | `/api/ga4/:siteId/summary` | Any authed | — | `{ sessions, bounce_rate, avg_duration }`. Aggregates `ga4_cache` for the site. Returns zeros if no data. 404/403 same access control as GSC. |
+| GET | `/api/ga4/:siteId/pages` | Any authed | `?limit=50&offset=0` | `{ pages: [{ url, sessions, bounce_rate, avg_duration }], total, limit, offset }`. Max limit 200. Ordered by sessions DESC. |
+
+### Dashboard
+
+| Method | Path | Auth | Request | Response |
+|---|---|---|---|---|
+| GET | `/api/dashboard/admin` | Admin or Superadmin | — | `{ sites: [{ id, label, color, url, gsc, ga4, health_score, last_crawl }], task_summary: { backlog, in_progress, review, done } }`. `gsc` is null if no GSC data. `ga4` is null if no GA4 data. `health_score` is null if no completed crawl. Superadmin sees all companies' sites. Admin sees own company only. `task_summary` scoped to company (global for superadmin). |
+
+**`gsc` object:** `{ clicks, impressions, ctr, position, clicks_delta, impressions_delta }`
+**`ga4` object:** `{ sessions, bounce_rate, avg_duration }`
+
+### Tasks
+
+| Method | Path | Auth | Request | Response |
+|---|---|---|---|---|
+| GET | `/api/tasks` | Any authed | `?site_id=&status=&assignee_id=` | `{ tasks: [{ id, title, description, status, priority, site_id, site_label, site_color, assignee_id, assignee_name, due_date, linear_url, created_at, updated_at }] }`. Scoped to company (superadmin sees all). |
+| POST | `/api/tasks` | Any authed | `{ title (required), site_id (required), description?, status?, priority?, assignee_id?, due_date?, linear_url? }` | Created task object. `status` defaults to `backlog`. `priority` defaults to `medium`. Valid statuses: `backlog`, `in_progress`, `review`, `done`. Valid priorities: `low`, `medium`, `high`, `critical`. 400 if title or site_id missing, or site not found/wrong company. |
+| GET | `/api/tasks/:id` | Any authed | — | `{ task: { ...fields, site_label, site_color, assignee_name }, comments: [{ id, body, created_at, user_id, user_name }] }`. Comments ordered by created_at ASC. 404 if not found. 403 if wrong company. |
+| PATCH | `/api/tasks/:id` | Any authed | Any subset of `{ title, description, status, priority, assignee_id, due_date, linear_url }` | Updated task object. 400 if status/priority not in valid list. 404 if not found. 403 if wrong company. |
+| POST | `/api/tasks/:id/comments` | Any authed | `{ body (required) }` | `{ comment: { id, body, created_at, user_id, user_name } }`. 400 if body empty. 404/403 same as above. |
+
+### AI Recommendations
+
+| Method | Path | Auth | Request | Response |
+|---|---|---|---|---|
+| POST | `/api/ai/suggest` | Any authed | `{ result_id: number }` | **Cached path:** `{ cached: true, id: "uuid", suggestion: "..." }`. **Stream path:** SSE (text/event-stream) — token-by-token deltas then done event. Rate limited: 10 req/min per IP. |
+| GET | `/api/ai/suggest` | Any authed | `?result_id=<number>` | `{ suggestion: "...", id: "uuid", feedback: null }` or `{ suggestion: null }` if not cached. |
+| POST | `/api/ai/suggest/:id/feedback` | Any authed | `{ value: 1 }` (thumbs up) or `{ value: -1 }` (thumbs down) | `{ ok: true }`. Verifies company ownership. |
+
+**AI suggest stream path detail:**
+1. Fetch `audit_results` row by `result_id`. 404 if missing, 403 if wrong company.
+2. Fetch matching `audit_checks` row (by `name = issue_type`). Proceeds even if null.
+3. Resolve Anthropic API key: `process.env.ANTHROPIC_API_KEY` → fallback `settings` table key `anthropic_api_key`.
+4. No key: `503 { error: 'AI recommendations require an Anthropic API key. Configure it in Settings.' }`
+5. Model: `claude-sonnet-4-6`, max 1024 tokens. Streaming via `client.messages.stream()`.
+6. On stream end: INSERT into `ai_suggestions` (keyed by `result_id`).
+
+**SSE event format:**
+```
+data: {"type":"delta","text":"The title..."}
+data: {"type":"done","id":"<suggestion-uuid>"}
+data: [DONE]
+```
+
+**Caching:** One suggestion per `result_id`. UNIQUE index on `ai_suggestions(result_id) WHERE result_id IS NOT NULL`. Fetching the same `result_id` again returns the cached result immediately without calling the API.
+
 ### Not yet implemented (return 501)
 
 All other `/api/*` endpoints return `501 Not Implemented` until their phase is built.
@@ -1075,9 +1148,88 @@ Sidebar (220px expanded / 56px collapsed) + Header (56px) + scrollable main cont
   - "View details →" link at bottom of expanded panel (routes to category-specific audit page)
 - "Start crawl" CTA at bottom
 
-### Stub pages (not yet built — Phases 3–8)
+### Authenticated pages (built — Phase 3)
 
-All other routes in the router render a `Stub` component showing the page title and "Coming in a later phase" message. See `frontend/src/pages/stubs.jsx`.
+#### `/audit/:slug` — Audit Category (`AuditCategory.jsx`)
+- Auth: any authed user, company-scoped
+- Single component handles all 20 audit category routes via `CATEGORY_SLUG_MAP` (slug → DB section name)
+- Fetches `GET /api/reports/:siteId/category?section=<name>` on mount
+- **Accordion layout:** one row per issue_type, shows severity pill + count badge
+- **On expand (lazy):** fetches `GET /api/reports/:siteId/issues?section=...&issue_type=...&limit=50` — shows URL list with parsed `data` key-value pairs
+- **Load more:** increments offset by 50, appends results
+- **URL row click:** navigates to `/audit/issue/:resultId?from=<slug>&issueType=<type>&pos=<n>&total=<n>`
+- Empty state if no completed crawl or no issues in this category
+- Unknown slug renders "Unknown category" empty state
+
+#### `/audit/issue/:resultId` — Issue Detail (`IssueDetail.jsx`)
+- Auth: any authed user, company-scoped
+- On mount, three fetches in parallel:
+  1. `GET /api/reports/results/:resultId` → result + check definition
+  2. `GET /api/ai/suggest?result_id=<resultId>` → populate suggestion if already cached
+  3. After fetch 1 resolves: `GET /api/reports/:siteId/issues?section=...&issue_type=...&limit=200` → sibling IDs for prev/next navigation
+- **Data panel:** `JSON.parse(result.data)` rendered as two-column key→value table. Falls back to `<pre>` if not valid JSON.
+- **Check panel:** shown only if `check` is non-null. Fields: Description, SEO Impact (`seo_impact`), How to Fix (`implementation_rule`).
+- **AI recommendation:** "Get AI Recommendation" button → `POST /api/ai/suggest`. Hybrid response: if cached returns immediately, else SSE stream renders token-by-token. After suggestion displayed: thumbs up / thumbs down feedback buttons (`POST /api/ai/suggest/:id/feedback`).
+- **Prev / Next navigation:** uses `pos` query param + sibling IDs array loaded on mount.
+- **Breadcrumb:** back to `/audit/:slug`.
+- Error states: 404 if resultId not found, 403 if wrong company, "No Anthropic API key" notice with link to `/settings`.
+
+### Authenticated pages (built — Phase 4a)
+
+#### `/admin` — Admin View (`AdminView.jsx`)
+- Auth: admin or superadmin
+- Fetches `GET /api/dashboard/admin` on mount
+- **Sites table:** columns: Site (colour dot + label), Health Score (HealthRing component), GSC Clicks, GSC Impressions, GSC CTR, GSC Position, GA4 Sessions, GA4 Bounce Rate, Last Crawl
+  - GSC cells: show data + delta badge (green/red arrow) if connected, else "Connect GSC" link to `/integrations`
+  - GA4 cells: show sessions if connected, else "Connect GA4" link
+  - Row click: sets active site + navigates to `/audit`
+- **Task KPI row:** 4 KpiCard buttons (Backlog, In Progress, Review, Done), each navigates to `/tasks?status=<status>`
+- **Compact Kanban:** 4 columns (Backlog / In Progress / Review / Done), shows top 5 tasks per column, "+N more →" link if over 5, "View all →" link per column
+- Empty state if no active site selected
+
+#### `/seo` — SEO View (`SeoView.jsx`)
+- Auth: any authed user
+- **Two tabs: Analytics and Issues**
+- **Analytics tab:**
+  - Fetches `GET /api/ga4/:siteId/pages` (paginated, 50 per page, offset-based Load More)
+  - Shows GA4 pages table: URL, Sessions, Bounce Rate, Avg Duration
+- **Issues tab:**
+  - Fetches `GET /api/gsc/:siteId/queries`, `GET /api/gsc/:siteId/pages`, and reports summary in parallel via `Promise.allSettled`
+  - CollapsibleSection components for GSC Queries (top 25) and GSC Pages (top 50)
+  - Columns: Query/URL, Clicks, Impressions, CTR, Position
+- Empty state if no active site
+
+#### `/developer` — Developer View (`DeveloperView.jsx`)
+- Auth: any authed user
+- Fetches `GET /api/reports/:siteId/developer-summary` on mount
+- **Crawl Health section:** 4 StatCards — Total URLs, Health Score, Duration, Completed At
+- **Response Codes section:** Recharts BarChart, per-bar colours (2xx=green `#22c55e`, 3xx=amber `#f59e0b`, 4xx=red `#ef4444`, 5xx=dark-red `#7f1d1d`). Only bars with count > 0 shown.
+- **Top Issues section:** table showing top 10 issues — issue type, section, severity pill, count. Each row links to `/audit/:slug` via SECTION_SLUG mapping.
+- **Custom Extraction section:** table of up to 50 custom extraction results — URL, issue type, data key-value pairs.
+- Empty state if no active site or no completed crawl job.
+
+#### `/tasks` — Task Board (`Tasks.jsx`)
+- Auth: any authed user
+- 4-column Kanban: Backlog / In Progress / Review / Done
+- Fetches `GET /api/tasks` on mount (filtered by active site if selected)
+- **Drag-and-drop:** Native HTML5 drag-and-drop. Optimistic UI update on drop; reverts on `PATCH` failure with `toast.error`.
+- **"allSites" toggle:** Show only active site's tasks or all company tasks.
+- **URL filter:** `?status=<status>` query param scrolls/highlights a column on load.
+- **New Task Modal:** title (required) + site dropdown (required) + priority selector + description textarea. Posts to `POST /api/tasks`.
+- `LoadingSkeleton columns={4}` while loading.
+
+#### `/tasks/:id` — Task Detail (`TaskDetail.jsx`)
+- Auth: any authed user
+- Fetches `GET /api/tasks/:id` on mount
+- 404 state if task not found
+- **Left panel:** inline-editable title (onBlur → PATCH), comments thread
+- **Right panel:** metadata fields — Status dropdown, Priority dropdown, Site (read-only link), Assignee, Due Date, Linear URL, Created date. Status/Priority changes trigger immediate PATCH.
+- **Comments:** `POST /api/tasks/:id/comments`. Appended optimistically. Shows user name + timestamp. Comments ordered by `created_at` ASC.
+- Breadcrumb back to `/tasks`.
+
+### Stub pages (not yet built — Phases 5–8)
+
+Routes not covered above render a `Stub` component showing the page title and "Coming in a later phase" message. See `frontend/src/pages/stubs.jsx`.
 
 ---
 
@@ -1115,10 +1267,10 @@ Auto-generated on first run via `setup.sh`: `JWT_SECRET` (64 hex chars), `ENCRYP
 |---|---|---|
 | **Phase 1** | Foundation: CSS system, P0 components, app shell, auth pages (Login, Setup, InviteAccept), backend auth + DB migrations | ✅ Complete |
 | **Phase 2** | Sites + Crawl Management: live crawl via Socket.io, import CSV, crawl status page. Built-in Playwright/Crawlee crawler (`playwright-crawler/`) replaces external crawler dependency — dual-mode (Cheerio fast pass + Playwright fallback), 9 extractors, 12 SF-compatible datasets, parity-tested. Wired into `crawl-runner.js` behind `USE_PLAYWRIGHT_CRAWLER` feature flag. | ✅ Complete |
-| **Phase 3** | Audit Engine: parse CSV output → `audit_results`, run 291 checks across 19 categories, calculate health score, category pages, issue detail page | 🔄 Partial — CSV parser built (9 CSV files → audit_results), health score calculation live, AuditHealth page built with per-check accordion. Category detail pages and issue detail page still pending. |
-| **Phase 4** | Dashboards: Admin View, SEO Dashboard, Developer View with real data | Pending |
-| **Phase 5** | Integrations: GSC overlay, GA4 overlay, PageSpeed Insights, AI recommendations via Claude | Pending |
-| **Phase 6** | Tasks board, Linear sync, scheduled crawls (cron), notifications feed, Slack webhook | Pending |
+| **Phase 3** | Audit Engine: parse CSV output → `audit_results`, run 291 checks across 19 categories, calculate health score, category pages, issue detail page, AI recommendations | ✅ Complete — CSV parser (9 CSV files → audit_results), health score, AuditHealth accordion, category pages (AuditCategory — all 20 routes), issue detail page (IssueDetail), AI recommendations (`claude-sonnet-4-6` SSE streaming, per-URL caching in `ai_suggestions` via `result_id`, thumbs up/down feedback). |
+| **Phase 4a** | Dashboards: Admin View, SEO View, Developer View with real data; Task board | ✅ Complete — Admin View (sites table + GSC/GA4 data + task KPI + compact kanban), SEO View (Analytics + Issues tabs with GA4 pages and GSC queries/pages), Developer View (crawl health stats + response codes BarChart + top issues + custom extraction), Task board (4-column kanban, native drag-and-drop), Task detail page (inline editing + comments + metadata panel). Backend: `/api/dashboard`, `/api/tasks`, GSC data endpoints, GA4 data endpoints, developer-summary endpoint. |
+| **Phase 5** | Integrations: GSC overlay, GA4 overlay, PageSpeed Insights | Pending |
+| **Phase 6** | Tasks extensions: Linear sync, scheduled crawls (cron), notifications feed, Slack webhook | 🔄 Partial — Tasks board and task detail complete (Phase 4a). Still pending: Linear sync, scheduled crawls (cron), notifications feed, Slack webhook. |
 | **Phase 7** | Exports (CSV, Sheets), compare view, users management UI, settings UI, integrations UI. Fix invite URL mismatch. | 🔄 Partial — Users page and Settings page (Integrations/GSC/GA4/SMTP/Global tabs) built. Exports, compare view, invite URL fix pending. |
 | **Phase 8** | Polish: empty states, error handling, loading states, production build, pm2 setup | Pending |
 | **Phase 9** | Paid Ads API Integration: replace mock data in `AdsDashboard` with live data from Google Ads API, Meta Marketing API, and LinkedIn Campaign Manager API. OAuth per platform, token storage, metrics caching, account selector, date-range-aware fetching. | Planned |
@@ -1169,7 +1321,8 @@ Auto-generated on first run via `setup.sh`: `JWT_SECRET` (64 hex chars), `ENCRYP
 │   │       ├── 001_initial.js            # All core tables
 │   │       ├── 002_v3_additions.js       # Performance indexes
 │   │       ├── 003_gsc_extended.js       # Extended GSC cache
-│   │       └── 004_task_detail.js        # task_comments, task columns, health_score
+│   │       ├── 004_task_detail.js        # task_comments, task columns, health_score
+│   │       └── 015_ai_suggestions_per_url.js  # Adds result_id + feedback to ai_suggestions
 │   │
 │   ├── middleware/
 │   │   ├── auth.js                       # JWT middleware + requireRole
@@ -1180,8 +1333,18 @@ Auto-generated on first run via `setup.sh`: `JWT_SECRET` (64 hex chars), `ENCRYP
 │   │   ├── auth.js                       # /api/auth/*
 │   │   ├── sites.js                      # /api/sites/*
 │   │   ├── crawls.js                     # /api/crawls/*
-│   │   ├── reports.js                    # /api/reports/* (audit health, trend, check counts)
-│   │   └── errors.js                     # /api/errors
+│   │   ├── reports.js                    # /api/reports/* (summary, trend, category, issues, result detail, developer-summary)
+│   │   ├── errors.js                     # /api/errors
+│   │   ├── gsc.js                        # /api/gsc/* (OAuth + summary, queries, pages data endpoints)
+│   │   ├── ga4.js                        # /api/ga4/* (OAuth + summary, pages data endpoints)
+│   │   ├── ai.js                         # /api/ai/suggest (SSE streaming, cache, feedback)
+│   │   ├── dashboard.js                  # /api/dashboard/admin (site + GSC/GA4 + task summary)
+│   │   └── tasks.js                      # /api/tasks/* (CRUD + comments)
+│   │
+│   ├── __tests__/
+│   │   ├── gsc-data.test.js              # GSC data endpoint tests
+│   │   ├── ga4-data.test.js              # GA4 data endpoint tests
+│   │   └── tasks.test.js                 # Tasks CRUD tests
 │   │
 │   └── services/
 │       ├── crawl-runner.js               # Crawl job manager — Playwright path + feature flag
@@ -1264,7 +1427,14 @@ Auto-generated on first run via `setup.sh`: `JWT_SECRET` (64 hex chars), `ENCRYP
             ├── CrawlStatus.jsx           # /crawl/status
             ├── LiveRun.jsx               # /crawl/:jobId/live (CRAWL + LOG tabs)
             ├── AuditHealth.jsx           # /audit (health ring, trend chart, per-check accordion)
-            └── stubs.jsx                 # All not-yet-built pages
+            ├── AuditCategory.jsx         # /audit/:slug — all 20 category routes (accordion + lazy issue load)
+            ├── IssueDetail.jsx           # /audit/issue/:resultId — URL detail + AI recommendation
+            ├── AdminView.jsx             # /admin — sites table + GSC/GA4 + task KPI + compact kanban
+            ├── SeoView.jsx               # /seo — Analytics (GA4 pages) + Issues (GSC queries/pages) tabs
+            ├── DeveloperView.jsx         # /developer — crawl health + response codes chart + top issues + custom extraction
+            ├── Tasks.jsx                 # /tasks — 4-column kanban, drag-and-drop, new task modal
+            ├── TaskDetail.jsx            # /tasks/:id — inline edit + comments + metadata panel
+            └── stubs.jsx                 # Remaining not-yet-built pages
 ```
 
 ---
