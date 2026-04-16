@@ -147,4 +147,57 @@ router.get('/properties', requireRole('admin', 'superadmin'), async (req, res) =
   }
 });
 
+// ─── GET /api/ga4/:siteId/summary ────────────────────────────────────────────
+router.get('/:siteId/summary', (req, res) => {
+  const { siteId } = req.params;
+  const { company_id, role } = req.user;
+
+  const site = db.prepare('SELECT id, company_id FROM sites WHERE id = ?').get(siteId);
+  if (!site) return res.status(404).json({ error: 'Site not found' });
+  if (role !== 'superadmin' && site.company_id !== company_id) {
+    return res.status(403).json({ error: 'Access denied' });
+  }
+
+  const summary = db.prepare(`
+    SELECT
+      COALESCE(SUM(sessions), 0)              AS sessions,
+      COALESCE(AVG(bounce_rate), 0)           AS bounce_rate,
+      COALESCE(AVG(avg_session_duration), 0)  AS avg_duration
+    FROM ga4_cache WHERE site_id = ?
+  `).get(siteId);
+
+  res.json(summary);
+});
+
+// ─── GET /api/ga4/:siteId/pages ──────────────────────────────────────────────
+router.get('/:siteId/pages', (req, res) => {
+  const { siteId } = req.params;
+  const { company_id, role } = req.user;
+  const rawLimit  = req.query.limit;
+  const rawOffset = req.query.offset;
+
+  const site = db.prepare('SELECT id, company_id FROM sites WHERE id = ?').get(siteId);
+  if (!site) return res.status(404).json({ error: 'Site not found' });
+  if (role !== 'superadmin' && site.company_id !== company_id) {
+    return res.status(403).json({ error: 'Access denied' });
+  }
+
+  const limit  = Math.min(Math.max(parseInt(rawLimit  || '50', 10) || 50, 1), 200);
+  const offset = Math.max(parseInt(rawOffset || '0', 10) || 0, 0);
+
+  const pages = db.prepare(`
+    SELECT url, sessions, engaged_sessions, engagement_rate,
+           bounce_rate, avg_session_duration, total_revenue, conversions
+    FROM ga4_cache WHERE site_id = ?
+    ORDER BY sessions DESC
+    LIMIT ? OFFSET ?
+  `).all(siteId, limit, offset);
+
+  const { total } = db.prepare(
+    'SELECT COUNT(*) AS total FROM ga4_cache WHERE site_id = ?'
+  ).get(siteId);
+
+  res.json({ pages, total, limit, offset });
+});
+
 export default router;
