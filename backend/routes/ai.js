@@ -16,11 +16,15 @@ router.get('/suggest', (req, res) => {
   const { result_id } = req.query;
   if (!result_id) return res.status(400).json({ error: 'result_id is required' });
 
+  const { role, company_id } = req.user;
+
   const row = db.prepare(`
-    SELECT id, response_text AS suggestion, feedback
-    FROM ai_suggestions
-    WHERE result_id = ?
-  `).get(result_id);
+    SELECT s.id, s.response_text AS suggestion, s.feedback
+    FROM ai_suggestions s
+    JOIN audit_results r ON r.id = s.result_id
+    WHERE s.result_id = ?
+      AND (? = 'superadmin' OR r.company_id = ?)
+  `).get(result_id, role, company_id);
 
   if (!row) return res.json({ suggestion: null });
   res.json({ suggestion: row.suggestion, id: row.id, feedback: row.feedback });

@@ -596,7 +596,7 @@ export function IssueDetail() {
               </div>
             )}
 
-            {check.how_to_fix && (
+            {check.implementation_rule && (
               <div>
                 <p
                   style={{
@@ -611,7 +611,7 @@ export function IssueDetail() {
                   How to Fix
                 </p>
                 <p style={{ fontSize: '0.875rem', color: 'var(--text-primary)', lineHeight: '1.6' }}>
-                  {check.how_to_fix}
+                  {check.implementation_rule}
                 </p>
               </div>
             )}
