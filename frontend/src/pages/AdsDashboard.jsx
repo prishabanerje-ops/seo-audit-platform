@@ -541,7 +541,7 @@ export function AdsDashboard() {
   const [visiblePlatforms, setVisible] = useState(() => new Set());
   const [expandedCampaigns, setExpanded] = useState(new Set());
 
-  const { user } = useAuth();
+  const { user, viewingCompanyId } = useAuth();
   const [syncing, setSyncing] = useState(false);
 
   // Sync visible platforms when data loads (initialize all to visible)
@@ -556,9 +556,10 @@ export function AdsDashboard() {
 
   // Socket.io — listen for real-time sync progress
   useEffect(() => {
-    if (!user?.company_id) return;
+    const companyId = viewingCompanyId ?? user?.company_id;
+    if (!companyId) return;
     const socket = socketIo('http://localhost:3001', { withCredentials: true });
-    socket.emit('join:company', user.company_id);
+    socket.emit('join:company', companyId);
 
     socket.on('ads:sync:progress', ({ platform, status, data: platformData }) => {
       if (status === 'done' && platformData) {
@@ -575,10 +576,10 @@ export function AdsDashboard() {
     });
 
     return () => {
-      socket.emit('leave:company', user.company_id);
+      socket.emit('leave:company', companyId);
       socket.disconnect();
     };
-  }, [user?.company_id]);
+  }, [user?.company_id, viewingCompanyId]);
 
   const [sortConfig, setSortConfig]      = useState({ column: 'spent', direction: 'desc' });
 
