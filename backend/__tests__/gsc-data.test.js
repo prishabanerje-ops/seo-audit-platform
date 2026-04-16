@@ -10,6 +10,12 @@ const token = jwt.sign(
 );
 const cookie = `auth_token=${token}`;
 
+const tokenCompanyB = jwt.sign(
+  { sub: 'u2', email: 'other@test.com', role: 'seo', company_id: 'company-other' },
+  SECRET, { expiresIn: '1h' }
+);
+const cookieB = `auth_token=${tokenCompanyB}`;
+
 describe('GET /api/gsc/:siteId/summary', () => {
   it('returns 404 for unknown site', async () => {
     const res = await request(app)
@@ -18,12 +24,34 @@ describe('GET /api/gsc/:siteId/summary', () => {
     expect(res.status).toBe(404);
   });
 
-  it('returns summary shape for any accessible site', async () => {
-    // With no GSC data, should return zeros not 500
+  it('returns 404 for unknown site id "site-fake"', async () => {
     const res = await request(app)
       .get('/api/gsc/site-fake/summary')
       .set('Cookie', cookie);
-    expect([200, 404]).toContain(res.status);
+    expect(res.status).toBe(404);
+  });
+});
+
+describe('GET /api/gsc/:siteId/summary — access control', () => {
+  it('returns 404 (not 500) for company-B user on unknown site', async () => {
+    const res = await request(app)
+      .get('/api/gsc/no-such-site/summary')
+      .set('Cookie', cookieB);
+    expect(res.status).toBe(404);
+  });
+});
+
+describe('GET /api/gsc/:siteId/summary — superadmin', () => {
+  it('superadmin gets 404 (not 403) on unknown site — bypass active', async () => {
+    const superToken = jwt.sign(
+      { sub: 'sa1', email: 'sa@test.com', role: 'superadmin', company_id: 'any' },
+      SECRET, { expiresIn: '1h' }
+    );
+    const res = await request(app)
+      .get('/api/gsc/no-such-site/summary')
+      .set('Cookie', `auth_token=${superToken}`);
+    // Superadmin bypasses company check — should hit 404 (site not found) not 403 (wrong company)
+    expect(res.status).toBe(404);
   });
 });
 

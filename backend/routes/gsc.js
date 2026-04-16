@@ -233,7 +233,8 @@ router.get('/:siteId/pages', (req, res) => {
       SUM(impressions) AS impressions,
       CASE WHEN SUM(impressions) > 0
            THEN CAST(SUM(clicks) AS REAL) / SUM(impressions)
-           ELSE 0 END  AS ctr
+           ELSE 0 END  AS ctr,
+      AVG(position)    AS position
     FROM gsc_cache WHERE site_id = ? AND period = 'current'
     GROUP BY url
     ORDER BY clicks DESC
