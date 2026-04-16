@@ -263,9 +263,9 @@ function UsersDrawer({ company, onClose }) {
   }, [company.id]);
 
   const handleImpersonate = async (userId) => {
+    setError('');
     if (!window.confirm('Start an impersonation session as this user?')) return;
     setImpersonating(userId);
-    setError('');
     try {
       const res = await api.post('/auth/impersonate', { user_id: userId });
       setUser(res.data.user);
