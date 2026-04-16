@@ -368,21 +368,29 @@ router.get('/:siteId/developer-summary', (req, res) => {
     'JavaScript Rendering':     'custom',
     'International SEO':        'international',
     'Monitoring & Operations':  'security',
+    'Rankings & Traffic Drops': 'custom',
+    'LLM / AI Crawlers':        'custom',
   };
 
   const topIssueRows = db.prepare(`
-    SELECT issue_type, section, severity, COUNT(*) AS count
+    SELECT
+      issue_type,
+      section,
+      MIN(CASE severity WHEN 'critical' THEN 1 WHEN 'warning' THEN 2 ELSE 3 END) AS sev_rank,
+      COUNT(*) AS count
     FROM audit_results
     WHERE crawl_job_id = ?
-    GROUP BY issue_type
-    ORDER BY CASE severity WHEN 'critical' THEN 1 WHEN 'warning' THEN 2 ELSE 3 END, count DESC
+    GROUP BY issue_type, section
+    ORDER BY sev_rank, count DESC
     LIMIT 10
   `).all(latestJob.id);
+
+  const SEV_LABEL = { 1: 'critical', 2: 'warning', 3: 'info' };
 
   const top_issues = topIssueRows.map(r => ({
     issue_type: r.issue_type,
     section:    r.section,
-    severity:   r.severity,
+    severity:   SEV_LABEL[r.sev_rank] || 'info',
     count:      r.count,
     slug:       SECTION_SLUG[r.section] || 'custom',
   }));
