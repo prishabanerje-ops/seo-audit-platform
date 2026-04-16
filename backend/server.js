@@ -33,6 +33,7 @@ import adsRoutes       from './routes/ads.js';
 import settingsRoutes  from './routes/settings.js';
 import gscRoutes       from './routes/gsc.js';
 import ga4Routes       from './routes/ga4.js';
+import aiRoutes        from './routes/ai.js';
 import { resetStuckJobs, getJobUrlBuffer } from './services/crawl-runner.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -132,6 +133,7 @@ app.use('/api/ads',       adsRoutes);
 app.use('/api/settings',  settingsRoutes);
 app.use('/api/gsc',       gscRoutes);
 app.use('/api/ga4',       ga4Routes);
+app.use('/api/ai',        aiRoutes);
 
 // Placeholder 501 for routes not yet implemented (Phase 3+)
 app.use('/api', (req, res) => {
