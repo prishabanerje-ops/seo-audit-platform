@@ -4,7 +4,7 @@
 >
 > **Do not guess. Do not infer missing product behavior unless explicitly confirmed.**
 >
-> **Last updated:** April 2026 — Phase 3 (audit category + issue detail pages, AI recommendations) and Phase 4a (Admin/SEO/Developer dashboards, Task board) complete. Migration 015 adds `result_id` and `feedback` columns to `ai_suggestions`. GSC/GA4 data-read endpoints added. Dashboard and Tasks routes registered.
+> **Last updated:** April 2026 — Phase 3 (audit category + issue detail pages, AI recommendations) and Phase 4a (Admin/SEO/Developer dashboards, Task board) complete. Migration 015 adds `result_id` and `feedback` columns to `ai_suggestions`. GSC/GA4 data-read endpoints added. Dashboard and Tasks routes registered. Direct user creation (`POST /api/auth/users/create`) added — no email/invite required.
 
 ---
 
@@ -727,7 +727,8 @@ Missing files are skipped gracefully (no error). Returns total findings count.
 | POST | `/api/auth/login` | Public | `{ email, password }` | `{ user }` + sets cookie. `401` on bad creds. `403` if user inactive. `402 { error: 'access_expired' }` if company `is_paid=0` or `status=inactive`. |
 | POST | `/api/auth/logout` | Public | — | `{ ok: true }` + clears cookie |
 | GET | `/api/auth/me` | Public | — | `{ user }` or `{ user: null }` — always 200 |
-| POST | `/api/auth/invite` | Admin or Superadmin | Admin: `{ email, role: 'seo'/'readonly' }` — company inferred from JWT. Superadmin: `{ email, role: 'admin', company_id }` | `{ inviteUrl, token, expiresAt }`. Token expires 48h. If SMTP configured, email sent; otherwise `inviteUrl` must be shared manually. `400` if seat limit reached. |
+| POST | `/api/auth/users/create` | Admin or Superadmin | `{ name, email, role, password (min 8), company_id? }` — Admin: role must be `seo`/`readonly`, company inferred from JWT. Superadmin: any role, `company_id` required. | `{ user }`. 409 if email already exists. 403 if admin tries to create admin. Creates user immediately — no email or token required. |
+| POST | `/api/auth/invite` | Admin or Superadmin | Admin: `{ email, role: 'seo'/'readonly' }` — company inferred from JWT. Superadmin: `{ email, role: 'admin', company_id }` | `{ inviteUrl, token, expiresAt }`. Token expires 48h. If SMTP configured, email sent; otherwise `inviteUrl` must be shared manually. `400` if seat limit reached. Note: invite URL path mismatch — backend generates `/invite/<token>` but frontend route is `/invite/accept?token=<token>`. Use direct user creation (`/api/auth/users/create`) instead. |
 | GET | `/api/auth/invite/validate` | Public | `?token=` | `{ email, role, company_name }`. 400 if invalid/expired. |
 | POST | `/api/auth/invite/accept` | Public | `{ token, name, password (min 8) }` | `{ user }` + sets cookie. Creates user with `company_id` from invite. |
 | GET | `/api/auth/users` | Admin or Superadmin | Admin: returns own company users only. Superadmin: requires `?company_id=` | `{ users: [...], invites: [...pending...] }` |
@@ -1271,7 +1272,7 @@ Auto-generated on first run via `setup.sh`: `JWT_SECRET` (64 hex chars), `ENCRYP
 | **Phase 4a** | Dashboards: Admin View, SEO View, Developer View with real data; Task board | ✅ Complete — Admin View (sites table + GSC/GA4 data + task KPI + compact kanban), SEO View (Analytics + Issues tabs with GA4 pages and GSC queries/pages), Developer View (crawl health stats + response codes BarChart + top issues + custom extraction), Task board (4-column kanban, native drag-and-drop), Task detail page (inline editing + comments + metadata panel). Backend: `/api/dashboard`, `/api/tasks`, GSC data endpoints, GA4 data endpoints, developer-summary endpoint. |
 | **Phase 5** | Integrations: GSC overlay, GA4 overlay, PageSpeed Insights | Pending |
 | **Phase 6** | Tasks extensions: Linear sync, scheduled crawls (cron), notifications feed, Slack webhook | 🔄 Partial — Tasks board and task detail complete (Phase 4a). Still pending: Linear sync, scheduled crawls (cron), notifications feed, Slack webhook. |
-| **Phase 7** | Exports (CSV, Sheets), compare view, users management UI, settings UI, integrations UI. Fix invite URL mismatch. | 🔄 Partial — Users page and Settings page (Integrations/GSC/GA4/SMTP/Global tabs) built. Exports, compare view, invite URL fix pending. |
+| **Phase 7** | Exports (CSV, Sheets), compare view, users management UI, settings UI, integrations UI. | 🔄 Partial — Users page (with direct user creation — no invite email required) and Settings page (Integrations/GSC/GA4/SMTP/Global tabs) built. Exports and compare view pending. |
 | **Phase 8** | Polish: empty states, error handling, loading states, production build, pm2 setup | Pending |
 | **Phase 9** | Paid Ads API Integration: replace mock data in `AdsDashboard` with live data from Google Ads API, Meta Marketing API, and LinkedIn Campaign Manager API. OAuth per platform, token storage, metrics caching, account selector, date-range-aware fetching. | Planned |
 
