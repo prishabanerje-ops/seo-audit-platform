@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router';
 import {
   Building2, Plus, Pencil, Trash2, Users, Eye,
-  CheckCircle2, XCircle, Loader2, ChevronRight, X,
+  CheckCircle2, XCircle, Loader2, ChevronRight, X, UserRoundCog,
 } from 'lucide-react';
 import api from '../api/index.js';
 import { useAuth } from '../context/AuthContext.jsx';
@@ -247,8 +247,13 @@ function DeleteModal({ company, onClose, onDeleted }) {
 // ─── Company Users Drawer ─────────────────────────────────────────────────────
 
 function UsersDrawer({ company, onClose }) {
-  const [data,    setData]    = useState(null);
-  const [loading, setLoading] = useState(true);
+  const { setUser } = useAuth();
+  const navigate    = useNavigate();
+
+  const [data,          setData]          = useState(null);
+  const [loading,       setLoading]       = useState(true);
+  const [impersonating, setImpersonating] = useState('');
+  const [error,         setError]         = useState('');
 
   useEffect(() => {
     api.get(`/companies/${company.id}/users`)
@@ -257,6 +262,22 @@ function UsersDrawer({ company, onClose }) {
       .finally(() => setLoading(false));
   }, [company.id]);
 
+  const handleImpersonate = async (userId) => {
+    if (!window.confirm('Start an impersonation session as this user?')) return;
+    setImpersonating(userId);
+    setError('');
+    try {
+      const res = await api.post('/auth/impersonate', { user_id: userId });
+      setUser(res.data.user);
+      onClose();
+      navigate('/admin');
+    } catch (err) {
+      setError(err.response?.data?.error || 'Impersonation failed.');
+    } finally {
+      setImpersonating('');
+    }
+  };
+
   const ROLE_COLOR = { admin: 'var(--brand)', seo: 'var(--severity-warning)', readonly: 'var(--text-muted)' };
 
   return (
@@ -264,6 +285,7 @@ function UsersDrawer({ company, onClose }) {
       style={{ backgroundColor: 'rgba(0,0,0,0.4)' }}>
       <div className="w-96 h-full flex flex-col overflow-hidden shadow-xl"
         style={{ backgroundColor: 'var(--bg-surface)', borderLeft: '1px solid var(--border-default)' }}>
+
         <div className="flex items-center justify-between px-4 py-3 shrink-0"
           style={{ borderBottom: '1px solid var(--border-default)' }}>
           <div>
@@ -272,6 +294,13 @@ function UsersDrawer({ company, onClose }) {
           </div>
           <button onClick={onClose} style={{ color: 'var(--text-muted)' }}><X className="w-4 h-4" /></button>
         </div>
+
+        {error && (
+          <div className="px-4 py-2 text-xs"
+            style={{ backgroundColor: 'var(--severity-critical-bg)', color: 'var(--severity-critical-text)' }}>
+            {error}
+          </div>
+        )}
 
         <div className="flex-1 overflow-y-auto p-4">
           {loading ? (
@@ -282,20 +311,38 @@ function UsersDrawer({ company, onClose }) {
             <>
               {data?.users?.length > 0 && (
                 <div className="mb-5">
-                  <p className="text-[10px] font-semibold uppercase tracking-widest mb-2" style={{ color: 'var(--text-muted)' }}>
+                  <p className="text-[10px] font-semibold uppercase tracking-widest mb-2"
+                    style={{ color: 'var(--text-muted)' }}>
                     Active Users ({data.users.length})
                   </p>
                   <div className="space-y-1">
                     {data.users.map(u => (
-                      <div key={u.id} className="flex items-center justify-between px-3 py-2 rounded-md"
+                      <div key={u.id}
+                        className="flex items-center justify-between px-3 py-2 rounded-md"
                         style={{ backgroundColor: 'var(--bg-raised)' }}>
                         <div>
                           <p className="text-xs font-medium" style={{ color: 'var(--text-primary)' }}>{u.name}</p>
                           <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{u.email}</p>
                         </div>
-                        <span className="text-xs capitalize" style={{ color: ROLE_COLOR[u.role] || 'var(--text-muted)' }}>
-                          {u.role}
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs capitalize"
+                            style={{ color: ROLE_COLOR[u.role] || 'var(--text-muted)' }}>
+                            {u.role}
+                          </span>
+                          <button
+                            onClick={() => handleImpersonate(u.id)}
+                            disabled={!!impersonating}
+                            title={`Impersonate ${u.name}`}
+                            className="w-6 h-6 flex items-center justify-center rounded transition-colors"
+                            style={{ color: 'var(--text-muted)' }}
+                            onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'var(--bg-base)'; e.currentTarget.style.color = 'var(--brand)'; }}
+                            onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--text-muted)'; }}
+                          >
+                            {impersonating === u.id
+                              ? <Loader2 className="w-3 h-3 animate-spin" />
+                              : <UserRoundCog className="w-3 h-3" />}
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -304,12 +351,14 @@ function UsersDrawer({ company, onClose }) {
 
               {data?.invites?.length > 0 && (
                 <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-widest mb-2" style={{ color: 'var(--text-muted)' }}>
+                  <p className="text-[10px] font-semibold uppercase tracking-widest mb-2"
+                    style={{ color: 'var(--text-muted)' }}>
                     Pending Invites ({data.invites.length})
                   </p>
                   <div className="space-y-1">
                     {data.invites.map(inv => (
-                      <div key={inv.id} className="flex items-center justify-between px-3 py-2 rounded-md"
+                      <div key={inv.id}
+                        className="flex items-center justify-between px-3 py-2 rounded-md"
                         style={{ backgroundColor: 'var(--bg-raised)' }}>
                         <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{inv.email}</p>
                         <span className="text-xs capitalize" style={{ color: 'var(--severity-warning)' }}>{inv.role}</span>
@@ -320,9 +369,7 @@ function UsersDrawer({ company, onClose }) {
               )}
 
               {!data?.users?.length && !data?.invites?.length && (
-                <p className="text-sm text-center py-8" style={{ color: 'var(--text-muted)' }}>
-                  No users yet.
-                </p>
+                <p className="text-sm text-center py-8" style={{ color: 'var(--text-muted)' }}>No users yet.</p>
               )}
             </>
           )}
