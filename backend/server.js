@@ -31,6 +31,7 @@ import companiesRoutes from './routes/companies.js';
 import auditLogRoutes  from './routes/audit-log.js';
 import adsRoutes       from './routes/ads.js';
 import settingsRoutes  from './routes/settings.js';
+import gscRoutes       from './routes/gsc.js';
 import { resetStuckJobs, getJobUrlBuffer } from './services/crawl-runner.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -128,6 +129,7 @@ app.use('/api/companies', companiesRoutes);
 app.use('/api/audit-log', auditLogRoutes);
 app.use('/api/ads',       adsRoutes);
 app.use('/api/settings',  settingsRoutes);
+app.use('/api/gsc',       gscRoutes);
 
 // Placeholder 501 for routes not yet implemented (Phase 3+)
 app.use('/api', (req, res) => {

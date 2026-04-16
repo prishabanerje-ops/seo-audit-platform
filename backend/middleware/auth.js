@@ -17,6 +17,8 @@ const PUBLIC_PATHS = [
   { method: 'GET',  path: '/api/health' },
   { method: 'POST', path: '/api/errors' },
   { method: 'GET',  path: '/api/ads/callback/' },
+  { method: 'GET',  path: '/api/gsc/callback' },
+  { method: 'GET',  path: '/api/ga4/callback' },
 ];
 
 /**
