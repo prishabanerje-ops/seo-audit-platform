@@ -286,6 +286,60 @@ router.post('/invite/accept', authLimiter, validate(acceptInviteSchema), async (
   });
 });
 
+// ─── POST /api/auth/users/create ─────────────────────────────────────────────
+/**
+ * @route POST /api/auth/users/create
+ * @desc  Directly creates a user account — no invite token, no email required.
+ *        Admin: can create seo/readonly for their own company.
+ *        Superadmin: can create any role; company_id required.
+ * @access admin | superadmin
+ */
+const createUserSchema = z.object({
+  name:       z.string().min(1).max(100),
+  email:      z.string().email(),
+  role:       z.enum(['admin', 'seo', 'readonly']),
+  password:   z.string().min(8, 'Password must be at least 8 characters'),
+  company_id: z.string().uuid().optional(),
+});
+
+router.post('/users/create', requireRole('admin', 'superadmin'), validate(createUserSchema), async (req, res) => {
+  try {
+    const { name, email, role, password, company_id: bodyCompanyId } = req.body;
+    const { role: actorRole, company_id: actorCompanyId } = req.user;
+
+    // Admins cannot create other admins
+    if (actorRole === 'admin' && role === 'admin') {
+      return res.status(403).json({ error: 'Admins cannot create admin accounts.' });
+    }
+
+    // Resolve target company
+    const targetCompanyId = actorRole === 'superadmin' ? bodyCompanyId : actorCompanyId;
+    if (!targetCompanyId) {
+      return res.status(400).json({ error: 'company_id is required.' });
+    }
+
+    const company = db.prepare('SELECT id, name FROM companies WHERE id = ?').get(targetCompanyId);
+    if (!company) return res.status(404).json({ error: 'Company not found.' });
+
+    // Check email uniqueness
+    const existing = db.prepare('SELECT id FROM users WHERE email = ?').get(email.toLowerCase());
+    if (existing) return res.status(409).json({ error: 'A user with this email already exists.' });
+
+    const hash = await bcrypt.hash(password, 12);
+    const id = uuidv4();
+
+    db.prepare(
+      'INSERT INTO users (id, email, password_hash, name, role, company_id, status) VALUES (?, ?, ?, ?, ?, ?, ?)'
+    ).run(id, email.toLowerCase(), hash, name, role, targetCompanyId, 'active');
+
+    const created = db.prepare('SELECT id, email, name, role, company_id, status FROM users WHERE id = ?').get(id);
+    res.status(201).json({ user: created });
+  } catch (err) {
+    console.error('[auth] POST /users/create error:', err);
+    res.status(500).json({ error: 'Failed to create user.' });
+  }
+});
+
 // ─── GET /api/auth/users ──────────────────────────────────────────────────────
 /**
  * @route GET /api/auth/users

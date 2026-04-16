@@ -1,30 +1,40 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
-  Users as UsersIcon, Plus, Trash2, Mail, Pencil,
-  CheckCircle2, XCircle, Clock, Loader2, X, Copy,
+  Users as UsersIcon, Plus, Trash2, Pencil, RefreshCw,
+  CheckCircle2, XCircle, Loader2, X, Copy, Eye, EyeOff,
 } from 'lucide-react';
 import api from '../api/index.js';
 import { useAuth } from '../context/AuthContext.jsx';
 
-function InviteModal({ companyId, onClose, onInvited }) {
-  const [form,   setForm]   = useState({ email: '', role: 'seo' });
-  const [saving, setSaving] = useState(false);
-  const [result, setResult] = useState(null);
-  const [error,  setError]  = useState('');
+function generatePassword() {
+  const chars = 'abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789!@#$%';
+  return Array.from({ length: 12 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+}
 
-  const send = async (e) => {
+function CreateUserModal({ companyId, isSuperAdmin, onClose, onCreated }) {
+  const [form,    setForm]    = useState({ name: '', email: '', role: 'seo', password: '' });
+  const [confirm, setConfirm] = useState('');
+  const [saving,  setSaving]  = useState(false);
+  const [created, setCreated] = useState(null);
+  const [error,   setError]   = useState('');
+  const [showPw,  setShowPw]  = useState(false);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    if (form.password !== confirm) { setError('Passwords do not match.'); return; }
     setSaving(true); setError('');
     try {
       const body = { ...form };
       if (companyId) body.company_id = companyId;
-      const res = await api.post('/auth/invite', body);
-      setResult(res.data);
-      onInvited?.();
+      const res = await api.post('/auth/users/create', body);
+      setCreated({ ...res.data.user, password: form.password });
+      onCreated?.();
     } catch (err) {
-      setError(err.response?.data?.error || 'Invite failed.');
+      setError(err.response?.data?.error || 'Failed to create user.');
     } finally { setSaving(false); }
   };
+
+  const inputStyle = { backgroundColor: 'var(--bg-raised)', border: '1px solid var(--border-default)', color: 'var(--text-primary)' };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center px-4"
@@ -33,50 +43,117 @@ function InviteModal({ companyId, onClose, onInvited }) {
         style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}>
         <div className="flex items-center justify-between px-5 py-4"
           style={{ borderBottom: '1px solid var(--border-default)' }}>
-          <h2 className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>Invite User</h2>
+          <h2 className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>Add User</h2>
           <button onClick={onClose} style={{ color: 'var(--text-muted)' }}><X className="w-4 h-4" /></button>
         </div>
-        {result ? (
-          <div className="p-5 space-y-3">
+
+        {created ? (
+          <div className="p-5 space-y-4">
             <div className="flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4" style={{ color: 'var(--severity-pass)' }} />
-              <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>Invite created!</p>
+              <CheckCircle2 className="w-4 h-4 flex-shrink-0" style={{ color: 'var(--severity-pass)' }} />
+              <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
+                User <strong>{created.name}</strong> created successfully.
+              </p>
             </div>
-            <div className="flex items-center gap-2 p-2 rounded-md"
-              style={{ backgroundColor: 'var(--bg-raised)', border: '1px solid var(--border-default)' }}>
-              <p className="flex-1 text-xs truncate" style={{ color: 'var(--text-primary)' }}>{result.inviteUrl}</p>
-              <button onClick={() => navigator.clipboard.writeText(result.inviteUrl)} style={{ color: 'var(--text-muted)' }}>
-                <Copy className="w-3.5 h-3.5" />
-              </button>
+            <div className="rounded-md p-3 space-y-2 text-xs" style={{ backgroundColor: 'var(--bg-raised)', border: '1px solid var(--border-default)' }}>
+              <div className="flex justify-between"><span style={{ color: 'var(--text-muted)' }}>Email</span><span style={{ color: 'var(--text-primary)' }}>{created.email}</span></div>
+              <div className="flex justify-between"><span style={{ color: 'var(--text-muted)' }}>Role</span><span className="capitalize" style={{ color: 'var(--text-primary)' }}>{created.role}</span></div>
+              <div className="flex justify-between items-center gap-2">
+                <span style={{ color: 'var(--text-muted)' }}>Password</span>
+                <div className="flex items-center gap-1.5">
+                  <span className="font-mono" style={{ color: 'var(--text-primary)' }}>{created.password}</span>
+                  <button onClick={() => navigator.clipboard.writeText(created.password)} style={{ color: 'var(--text-muted)' }} title="Copy password">
+                    <Copy className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
             </div>
+            <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+              Share these credentials with the user. They can change their password after logging in.
+            </p>
             <button onClick={onClose} className="h-8 px-4 rounded-md text-xs font-medium"
               style={{ backgroundColor: 'var(--bg-raised)', border: '1px solid var(--border-default)', color: 'var(--text-primary)' }}>
-              Close
+              Done
             </button>
           </div>
         ) : (
-          <form onSubmit={send} className="p-5 space-y-4">
+          <form onSubmit={handleSubmit} className="p-5 space-y-4">
+            {/* Full Name */}
+            <div>
+              <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-primary)' }}>Full Name *</label>
+              <input type="text" required value={form.name}
+                onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
+                placeholder="Jane Smith"
+                className="w-full h-9 px-3 rounded-md text-sm focus:outline-none"
+                style={inputStyle}
+                onFocus={e => e.currentTarget.style.boxShadow = '0 0 0 2px var(--brand)'}
+                onBlur={e  => e.currentTarget.style.boxShadow = ''} />
+            </div>
+
+            {/* Email */}
             <div>
               <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-primary)' }}>Email *</label>
               <input type="email" required value={form.email}
                 onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
+                placeholder="jane@company.com"
                 className="w-full h-9 px-3 rounded-md text-sm focus:outline-none"
-                style={{ backgroundColor: 'var(--bg-raised)', border: '1px solid var(--border-default)', color: 'var(--text-primary)' }}
+                style={inputStyle}
                 onFocus={e => e.currentTarget.style.boxShadow = '0 0 0 2px var(--brand)'}
                 onBlur={e  => e.currentTarget.style.boxShadow = ''} />
             </div>
+
+            {/* Role */}
             <div>
               <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-primary)' }}>Role *</label>
               <select value={form.role} onChange={e => setForm(f => ({ ...f, role: e.target.value }))}
                 className="w-full h-9 px-3 rounded-md text-sm"
-                style={{ backgroundColor: 'var(--bg-raised)', border: '1px solid var(--border-default)', color: 'var(--text-primary)' }}>
+                style={inputStyle}>
                 <option value="seo">SEO</option>
                 <option value="readonly">Readonly</option>
-                <option value="admin">Admin</option>
+                {isSuperAdmin && <option value="admin">Admin</option>}
               </select>
             </div>
+
+            {/* Password */}
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <label className="text-xs font-medium" style={{ color: 'var(--text-primary)' }}>Password *</label>
+                <button type="button" onClick={() => { const p = generatePassword(); setForm(f => ({ ...f, password: p })); setConfirm(p); }}
+                  className="flex items-center gap-1 text-xs"
+                  style={{ color: 'var(--brand)' }}>
+                  <RefreshCw className="w-3 h-3" /> Generate
+                </button>
+              </div>
+              <div className="relative">
+                <input type={showPw ? 'text' : 'password'} required minLength={8} value={form.password}
+                  onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
+                  placeholder="Min 8 characters"
+                  className="w-full h-9 px-3 pr-9 rounded-md text-sm focus:outline-none"
+                  style={inputStyle}
+                  onFocus={e => e.currentTarget.style.boxShadow = '0 0 0 2px var(--brand)'}
+                  onBlur={e  => e.currentTarget.style.boxShadow = ''} />
+                <button type="button" onClick={() => setShowPw(v => !v)}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2"
+                  style={{ color: 'var(--text-muted)' }}>
+                  {showPw ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                </button>
+              </div>
+            </div>
+
+            {/* Confirm Password */}
+            <div>
+              <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-primary)' }}>Confirm Password *</label>
+              <input type={showPw ? 'text' : 'password'} required value={confirm}
+                onChange={e => setConfirm(e.target.value)}
+                className="w-full h-9 px-3 rounded-md text-sm focus:outline-none"
+                style={{ ...inputStyle, border: confirm && confirm !== form.password ? '1px solid var(--severity-critical)' : inputStyle.border }}
+                onFocus={e => e.currentTarget.style.boxShadow = '0 0 0 2px var(--brand)'}
+                onBlur={e  => e.currentTarget.style.boxShadow = ''} />
+            </div>
+
             {error && <p className="text-xs" style={{ color: 'var(--severity-critical-text)' }}>{error}</p>}
-            <div className="flex justify-end gap-2">
+
+            <div className="flex justify-end gap-2 pt-1">
               <button type="button" onClick={onClose} className="h-8 px-4 rounded-md text-xs font-medium"
                 style={{ backgroundColor: 'var(--bg-raised)', border: '1px solid var(--border-default)', color: 'var(--text-primary)' }}>
                 Cancel
@@ -85,7 +162,7 @@ function InviteModal({ companyId, onClose, onInvited }) {
                 className="h-8 px-4 rounded-md text-xs font-semibold text-white flex items-center gap-1.5"
                 style={{ backgroundColor: 'var(--brand)', opacity: saving ? 0.7 : 1 }}>
                 {saving && <Loader2 className="w-3 h-3 animate-spin" />}
-                Send Invite
+                Create User
               </button>
             </div>
           </form>
@@ -105,7 +182,7 @@ export function Users() {
 
   const [data,       setData]       = useState(null);
   const [loading,    setLoading]    = useState(true);
-  const [showInvite, setShowInvite] = useState(false);
+  const [showCreate, setShowCreate] = useState(false);
   const [patching,   setPatching]   = useState('');
   const [deleting,   setDeleting]   = useState('');
 
@@ -148,12 +225,12 @@ export function Users() {
           <p className="text-sm mt-0.5" style={{ color: 'var(--text-muted)' }}>Manage team members for this company.</p>
         </div>
         {isAdmin && (
-          <button onClick={() => setShowInvite(true)}
+          <button onClick={() => setShowCreate(true)}
             className="flex items-center gap-2 h-9 px-4 rounded-md text-sm font-semibold text-white"
             style={{ backgroundColor: 'var(--brand)' }}
             onMouseEnter={e => e.currentTarget.style.backgroundColor = 'var(--brand-hover)'}
             onMouseLeave={e => e.currentTarget.style.backgroundColor = 'var(--brand)'}>
-            <Plus className="w-4 h-4" /> Invite User
+            <Plus className="w-4 h-4" /> Add User
           </button>
         )}
       </div>
@@ -269,11 +346,12 @@ export function Users() {
         </>
       )}
 
-      {showInvite && (
-        <InviteModal
+      {showCreate && (
+        <CreateUserModal
           companyId={targetCompanyId}
-          onClose={() => setShowInvite(false)}
-          onInvited={() => { setShowInvite(false); load(); }}
+          isSuperAdmin={isSuperAdmin}
+          onClose={() => setShowCreate(false)}
+          onCreated={() => load()}
         />
       )}
     </div>
