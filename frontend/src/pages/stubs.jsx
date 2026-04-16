@@ -34,7 +34,6 @@ export function DeveloperView()    { return <Stub title="Developer View"       d
 export function SeoView()          { return <Stub title="SEO Dashboard"        description="SEO analyst overview: scores, issues, recommendations." />; }
 
 
-export function IssueDetail()      { return <Stub title="Issue Detail"        description="Deep-dive into a specific SEO issue." />; }
 export function CoreWebVitals()    { return <Stub title="Core Web Vitals"     description="CWV scores from PageSpeed Insights and CrUX." />; }
 
 export function Tasks()            { return <Stub title="Tasks"               description="SEO task board: backlog, in-progress, done." />; }
@@ -195,26 +194,5 @@ export function Ga4Overlay()       { return <Stub title="GA4 Overlay"        des
 export function ErrorLog()         { return <Stub title="Error Log"          description="Frontend and backend error log." />; }
 export function CompareView()      { return <Stub title="Compare Crawls"     description="Side-by-side comparison of two completed crawls." />; }
 
-/* ── Audit category stubs (20 categories) ────────────────────────────────── */
-export function AuditIndexability()   { return <Stub title="Indexability"    />; }
-export function AuditTitleTags()      { return <Stub title="Title Tags"      />; }
-export function AuditMetaDesc()       { return <Stub title="Meta Descriptions" />; }
-export function AuditHeadings()       { return <Stub title="Headings"        />; }
-export function AuditCanonicals()     { return <Stub title="Canonicals"      />; }
-export function AuditHreflang()       { return <Stub title="Hreflang"        />; }
-export function AuditImages()         { return <Stub title="Images"          />; }
-export function AuditLinks()          { return <Stub title="Links"           />; }
-export function AuditRedirects()      { return <Stub title="Redirects"       />; }
-export function AuditResponseCodes()  { return <Stub title="Response Codes"  />; }
-export function AuditPageSpeed()      { return <Stub title="Page Speed"      />; }
-export function AuditStructuredData() { return <Stub title="Structured Data" />; }
-export function AuditSecurity()       { return <Stub title="Security"        />; }
-export function AuditMobile()         { return <Stub title="Mobile"          />; }
-export function AuditCrawlDepth()     { return <Stub title="Crawl Depth"     />; }
-export function AuditSitemap()        { return <Stub title="Sitemap"         />; }
-export function AuditRobots()         { return <Stub title="Robots.txt"      />; }
-export function AuditInternational()  { return <Stub title="International"   />; }
-export function AuditContent()        { return <Stub title="Content"         />; }
-export function AuditCustom()              { return <Stub title="Custom Checks"      />; }
 export function AuditCustomExtraction()    { return <Stub title="Custom Extraction"  description="Extract custom data points from crawled pages." />; }
 export function AuditLogFile()             { return <Stub title="Log File Intelligence" description="Analyse server log files to understand bot crawl behaviour." />; }
