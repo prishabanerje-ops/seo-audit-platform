@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
   Users as UsersIcon, Plus, Trash2, Pencil, RefreshCw,
-  CheckCircle2, XCircle, Loader2, X, Copy, Eye, EyeOff,
+  CheckCircle2, XCircle, Clock, Mail, Loader2, X, Copy, Eye, EyeOff,
 } from 'lucide-react';
 import api from '../api/index.js';
 import { useAuth } from '../context/AuthContext.jsx';
