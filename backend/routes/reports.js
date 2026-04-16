@@ -18,6 +18,150 @@ router.get('/checks/count', (req, res) => {
   res.json({ total: cnt, seeded: cnt > 0 });
 });
 
+// ─── GET /api/reports/results/:resultId ──────────────────────────────────────
+/**
+ * @route GET /api/reports/results/:resultId
+ * @desc  Returns a single audit result row plus its matching audit_checks entry.
+ * @access auth
+ */
+router.get('/results/:resultId', (req, res) => {
+  const { resultId } = req.params;
+  const { company_id, role } = req.user;
+
+  const result = db.prepare(`
+    SELECT id, url, issue_type, section, severity, data, company_id
+    FROM audit_results
+    WHERE id = ?
+  `).get(resultId);
+
+  if (!result) return res.status(404).json({ error: 'Result not found' });
+  if (role !== 'superadmin' && result.company_id !== company_id) {
+    return res.status(403).json({ error: 'Access denied' });
+  }
+
+  const check = db.prepare(`
+    SELECT id, name, description, seo_impact, implementation_rule, subsection
+    FROM audit_checks
+    WHERE name = ?
+  `).get(result.issue_type) || null;
+
+  res.json({ result, check });
+});
+
+// ─── GET /api/reports/:siteId/category ───────────────────────────────────────
+/**
+ * @route GET /api/reports/:siteId/category
+ * @desc  Returns grouped issue counts by issue_type+severity for a given section.
+ *        Uses the latest completed crawl job unless job_id is provided.
+ * @access auth
+ */
+router.get('/:siteId/category', (req, res) => {
+  const { siteId } = req.params;
+  const { section, job_id } = req.query;
+  const { company_id, role } = req.user;
+
+  if (!section) return res.status(400).json({ error: 'section param is required' });
+
+  const site = db.prepare('SELECT id, company_id FROM sites WHERE id = ?').get(siteId);
+  if (!site) return res.status(404).json({ error: 'Site not found' });
+  if (role !== 'superadmin' && site.company_id !== company_id) {
+    return res.status(403).json({ error: 'Access denied' });
+  }
+
+  let jobId = job_id || null;
+  if (jobId) {
+    const jobCheck = db.prepare(
+      'SELECT id FROM crawl_jobs WHERE id = ? AND site_id = ?'
+    ).get(jobId, siteId);
+    if (!jobCheck) return res.status(404).json({ error: 'Job not found for this site' });
+  }
+  if (!jobId) {
+    const latestJob = db.prepare(`
+      SELECT id FROM crawl_jobs
+      WHERE site_id = ? AND status = 'completed'
+      ORDER BY started_at DESC LIMIT 1
+    `).get(siteId);
+    jobId = latestJob?.id || null;
+  }
+
+  if (!jobId) {
+    return res.json({ jobId: null, section, groups: [] });
+  }
+
+  const groups = db.prepare(`
+    SELECT issue_type, severity, COUNT(*) AS count
+    FROM audit_results
+    WHERE crawl_job_id = ? AND section = ?
+    GROUP BY issue_type, severity
+    ORDER BY
+      CASE severity WHEN 'critical' THEN 1 WHEN 'warning' THEN 2 ELSE 3 END,
+      count DESC
+  `).all(jobId, section);
+
+  res.json({ jobId, section, groups });
+});
+
+// ─── GET /api/reports/:siteId/issues ─────────────────────────────────────────
+/**
+ * @route GET /api/reports/:siteId/issues
+ * @desc  Returns paginated individual audit results for a given section + issue_type.
+ *        Uses the latest completed crawl job unless job_id is provided.
+ * @access auth
+ */
+router.get('/:siteId/issues', (req, res) => {
+  const { siteId } = req.params;
+  const { section, issue_type, job_id, limit: rawLimit, offset: rawOffset } = req.query;
+  const { company_id, role } = req.user;
+
+  if (!section)    return res.status(400).json({ error: 'section param is required' });
+  if (!issue_type) return res.status(400).json({ error: 'issue_type param is required' });
+
+  const site = db.prepare('SELECT id, company_id FROM sites WHERE id = ?').get(siteId);
+  if (!site) return res.status(404).json({ error: 'Site not found' });
+  if (role !== 'superadmin' && site.company_id !== company_id) {
+    return res.status(403).json({ error: 'Access denied' });
+  }
+
+  const limit  = Math.min(Math.max(parseInt(rawLimit  || '50',  10) || 50,  1), 200);
+  const offset = Math.max(parseInt(rawOffset || '0',   10) || 0,  0);
+
+  let jobId = job_id || null;
+  if (jobId) {
+    const jobCheck = db.prepare(
+      'SELECT id FROM crawl_jobs WHERE id = ? AND site_id = ?'
+    ).get(jobId, siteId);
+    if (!jobCheck) return res.status(404).json({ error: 'Job not found for this site' });
+  }
+  if (!jobId) {
+    const latestJob = db.prepare(`
+      SELECT id FROM crawl_jobs
+      WHERE site_id = ? AND status = 'completed'
+      ORDER BY started_at DESC LIMIT 1
+    `).get(siteId);
+    jobId = latestJob?.id || null;
+  }
+
+  if (!jobId) {
+    return res.json({ results: [], total: 0, limit, offset });
+  }
+
+  const results = db.prepare(`
+    SELECT id, url, severity, data
+    FROM audit_results
+    WHERE crawl_job_id = ? AND section = ? AND issue_type = ?
+    ORDER BY url
+    LIMIT ? OFFSET ?
+  `).all(jobId, section, issue_type, limit, offset);
+
+  const { total } = db.prepare(`
+    SELECT COUNT(*) AS total
+    FROM audit_results
+    WHERE crawl_job_id = ? AND section = ? AND issue_type = ?
+  `).get(jobId, section, issue_type);
+
+  res.json({ results, total, limit, offset });
+});
+
 // ─── GET /api/reports/:siteId/summary ────────────────────────────────────────
 /**
  * @route GET /api/reports/:siteId/summary
