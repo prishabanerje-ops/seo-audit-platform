@@ -19,13 +19,14 @@ import { AuditHealth }   from './pages/AuditHealth.jsx';
 import { AdsDashboard }  from './pages/AdsDashboard.jsx';
 import { Companies }     from './pages/Companies.jsx';
 import { AuditLog }      from './pages/AuditLog.jsx';
+import { Settings }      from './pages/Settings.jsx';
 
 import {
   AdminView, DeveloperView, SeoView,
   IssueDetail, CoreWebVitals,
   Tasks, TaskDetail,
   ScheduledCrawls, Exports, Notifications,
-  Integrations, SystemHealth, Users, Settings,
+  Integrations, SystemHealth, Users,
   GscOverlay, Ga4Overlay, ErrorLog, CompareView,
   AuditIndexability, AuditTitleTags, AuditMetaDesc,
   AuditHeadings, AuditCanonicals, AuditHreflang,
