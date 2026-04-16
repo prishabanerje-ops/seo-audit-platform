@@ -7,15 +7,11 @@ export function AuthProvider({ children }) {
   const [user,      setUser]      = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // ── Superadmin company context ─────────────────────────────────────────────
-  // Stored as { id, name } in localStorage so the name is available instantly.
   const [viewingCompany, setViewingCompanyState] = useState(() => {
     try {
       const saved = localStorage.getItem('viewingCompany');
       return saved ? JSON.parse(saved) : null;
-    } catch {
-      return null;
-    }
+    } catch { return null; }
   });
 
   const setViewingCompany = (company) => {
@@ -27,14 +23,10 @@ export function AuthProvider({ children }) {
     setViewingCompanyState(company);
   };
 
-  // Clear viewing company if the logged-in user is not superadmin
   useEffect(() => {
-    if (user && user.role !== 'superadmin') {
-      setViewingCompany(null);
-    }
+    if (user && user.role !== 'superadmin') setViewingCompany(null);
   }, [user]);
 
-  // Fetch current session on mount
   useEffect(() => {
     api.get('/auth/me')
       .then(res => setUser(res.data.user))
@@ -48,7 +40,15 @@ export function AuthProvider({ children }) {
     setUser(null);
   }, []);
 
-  // Convenience derived values
+  const isImpersonating = Boolean(user?.impersonated_by);
+
+  const endImpersonation = useCallback(async () => {
+    const res = await api.post('/auth/impersonate/end');
+    setViewingCompany(null);
+    setUser(res.data.user);
+    return res.data.user;
+  }, []);
+
   const companyId        = user?.company_id ?? null;
   const viewingCompanyId = viewingCompany?.id ?? null;
 
@@ -61,6 +61,8 @@ export function AuthProvider({ children }) {
       viewingCompany,
       viewingCompanyId,
       setViewingCompany,
+      isImpersonating,
+      endImpersonation,
     }}>
       {children}
     </AuthContext.Provider>

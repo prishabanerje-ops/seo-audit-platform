@@ -1,10 +1,48 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router';
-import { Search, Bell, Sun, Moon, ChevronDown, LogOut, Plus, Building2, X } from 'lucide-react';
+import { Search, Bell, Sun, Moon, ChevronDown, LogOut, Plus, Building2, X, Loader2 } from 'lucide-react';
 import { useSites } from '../context/SitesContext.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useToast } from '../context/ToastContext.jsx';
 import api from '../api/index.js';
+
+// ─── Impersonation Banner ─────────────────────────────────────────────────────
+
+function ImpersonationBanner() {
+  const { user, endImpersonation } = useAuth();
+  const navigate = useNavigate();
+  const [ending, setEnding] = useState(false);
+
+  const handleEnd = async () => {
+    setEnding(true);
+    try {
+      await endImpersonation();
+      navigate('/companies');
+    } finally {
+      setEnding(false);
+    }
+  };
+
+  return (
+    <div
+      className="flex items-center justify-between px-4 py-1.5 text-xs font-medium shrink-0"
+      style={{ backgroundColor: 'var(--severity-warning)', color: '#000' }}
+    >
+      <span>
+        Impersonating <strong>{user?.name}</strong> ({user?.email})
+      </span>
+      <button
+        onClick={handleEnd}
+        disabled={ending}
+        className="flex items-center gap-1 px-2 py-0.5 rounded font-semibold"
+        style={{ backgroundColor: 'rgba(0,0,0,0.15)', color: '#000', opacity: ending ? 0.6 : 1 }}
+      >
+        {ending && <Loader2 className="w-3 h-3 animate-spin" />}
+        End Session
+      </button>
+    </div>
+  );
+}
 
 function useTheme() {
   const [theme, setTheme] = useState(
@@ -135,7 +173,7 @@ function CompanySwitcher() {
 
 export function Header() {
   const { sites, activeSite, setActiveSite } = useSites();
-  const { user, logout }   = useAuth();
+  const { user, logout, isImpersonating } = useAuth();
   const { toast }          = useToast();
   const navigate           = useNavigate();
   const { theme, toggle }  = useTheme();
@@ -166,10 +204,12 @@ export function Header() {
     : 'U';
 
   return (
-    <header
-      className="h-14 flex items-center px-4 gap-3 shrink-0 sticky top-0 z-10"
-      style={{ backgroundColor: 'var(--bg-surface)', borderBottom: '1px solid var(--border-default)' }}
-    >
+    <>
+      {isImpersonating && <ImpersonationBanner />}
+      <header
+        className="h-14 flex items-center px-4 gap-3 shrink-0 sticky top-0 z-10"
+        style={{ backgroundColor: 'var(--bg-surface)', borderBottom: '1px solid var(--border-default)' }}
+      >
       {/* Site selector */}
       <div className="w-52 relative shrink-0" ref={siteRef}>
         <button
@@ -325,6 +365,7 @@ export function Header() {
           )}
         </div>
       </div>
-    </header>
+      </header>
+    </>
   );
 }

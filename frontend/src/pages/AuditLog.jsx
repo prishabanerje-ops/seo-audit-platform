@@ -3,12 +3,15 @@ import { ClipboardList, ChevronLeft, ChevronRight, Loader2, Filter } from 'lucid
 import api from '../api/index.js';
 
 const ACTION_LABELS = {
-  'company.create': 'Company created',
-  'company.update': 'Company updated',
-  'company.delete': 'Company deleted',
-  'user.invite':    'User invited',
-  'user.update':    'User updated',
-  'user.delete':    'User deleted',
+  'company.create':        'Company created',
+  'company.update':        'Company updated',
+  'company.delete':        'Company deleted',
+  'user.invite':           'User invited',
+  'user.update':           'User updated',
+  'user.delete':           'User deleted',
+  'user.impersonate':      'Impersonation started',
+  'user.impersonate_end':  'Impersonation ended',
+  'user.password_changed': 'Password changed',
 };
 
 function formatDate(iso) {
