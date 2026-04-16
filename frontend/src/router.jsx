@@ -24,14 +24,18 @@ import { Settings }      from './pages/Settings.jsx';
 import { Users }         from './pages/Users.jsx';
 
 import {
-  AdminView, DeveloperView, SeoView,
   CoreWebVitals,
-  Tasks, TaskDetail,
   ScheduledCrawls, Exports, Notifications,
   Integrations, SystemHealth,
   GscOverlay, Ga4Overlay, ErrorLog, CompareView,
   AuditCustomExtraction, AuditLogFile,
 } from './pages/stubs.jsx';
+
+import { AdminView }     from './pages/AdminView.jsx';
+import { SeoView }       from './pages/SeoView.jsx';
+import { DeveloperView } from './pages/DeveloperView.jsx';
+import { Tasks }         from './pages/Tasks.jsx';
+import { TaskDetail }    from './pages/TaskDetail.jsx';
 
 import { AuditCategory } from './pages/AuditCategory.jsx';
 import { IssueDetail }   from './pages/IssueDetail.jsx';

@@ -29,15 +29,7 @@ function Stub({ title, description }) {
   );
 }
 
-export function AdminView()        { return <Stub title="Admin View"           description="Admin-level overview of platform health and activity." />; }
-export function DeveloperView()    { return <Stub title="Developer View"       description="Developer-focused audit summary and technical checks." />; }
-export function SeoView()          { return <Stub title="SEO Dashboard"        description="SEO analyst overview: scores, issues, recommendations." />; }
-
-
 export function CoreWebVitals()    { return <Stub title="Core Web Vitals"     description="CWV scores from PageSpeed Insights and CrUX." />; }
-
-export function Tasks()            { return <Stub title="Tasks"               description="SEO task board: backlog, in-progress, done." />; }
-export function TaskDetail()       { return <Stub title="Task Detail"         description="Individual task with comments and Linear sync." />; }
 
 export function ScheduledCrawls()  { return <Stub title="Scheduled Crawls"   description="Recurring crawl schedules and history." />; }
 export function Exports()          { return <Stub title="Exports"            description="Download audit reports as CSV or PDF." />; }
