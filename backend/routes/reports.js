@@ -25,27 +25,32 @@ router.get('/checks/count', (req, res) => {
  * @access auth
  */
 router.get('/results/:resultId', (req, res) => {
-  const { resultId } = req.params;
-  const { company_id, role } = req.user;
+  try {
+    const { resultId } = req.params;
+    const { company_id, role } = req.user;
 
-  const result = db.prepare(`
-    SELECT id, url, issue_type, section, severity, data, company_id
-    FROM audit_results
-    WHERE id = ?
-  `).get(resultId);
+    const result = db.prepare(`
+      SELECT id, url, issue_type, section, severity, data, company_id
+      FROM audit_results
+      WHERE id = ?
+    `).get(resultId);
 
-  if (!result) return res.status(404).json({ error: 'Result not found' });
-  if (role !== 'superadmin' && result.company_id !== company_id) {
-    return res.status(403).json({ error: 'Access denied' });
+    if (!result) return res.status(404).json({ error: 'Result not found' });
+    if (role !== 'superadmin' && result.company_id !== company_id) {
+      return res.status(403).json({ error: 'Access denied' });
+    }
+
+    const check = db.prepare(`
+      SELECT id, name, description, seo_impact, implementation_rule, subsection
+      FROM audit_checks
+      WHERE name = ?
+    `).get(result.issue_type) || null;
+
+    res.json({ result, check });
+  } catch (err) {
+    console.error('[reports] GET /results/:resultId error:', err);
+    res.status(500).json({ error: 'Failed to load result' });
   }
-
-  const check = db.prepare(`
-    SELECT id, name, description, seo_impact, implementation_rule, subsection
-    FROM audit_checks
-    WHERE name = ?
-  `).get(result.issue_type) || null;
-
-  res.json({ result, check });
 });
 
 // ─── GET /api/reports/:siteId/category ───────────────────────────────────────
@@ -56,6 +61,7 @@ router.get('/results/:resultId', (req, res) => {
  * @access auth
  */
 router.get('/:siteId/category', (req, res) => {
+  try {
   const { siteId } = req.params;
   const { section, job_id } = req.query;
   const { company_id, role } = req.user;
@@ -99,6 +105,10 @@ router.get('/:siteId/category', (req, res) => {
   `).all(jobId, section);
 
   res.json({ jobId, section, groups });
+  } catch (err) {
+    console.error('[reports] GET /:siteId/category error:', err);
+    res.status(500).json({ error: 'Failed to load category data' });
+  }
 });
 
 // ─── GET /api/reports/:siteId/issues ─────────────────────────────────────────
@@ -109,6 +119,7 @@ router.get('/:siteId/category', (req, res) => {
  * @access auth
  */
 router.get('/:siteId/issues', (req, res) => {
+  try {
   const { siteId } = req.params;
   const { section, issue_type, job_id, limit: rawLimit, offset: rawOffset } = req.query;
   const { company_id, role } = req.user;
@@ -160,6 +171,10 @@ router.get('/:siteId/issues', (req, res) => {
   `).get(jobId, section, issue_type);
 
   res.json({ results, total, limit, offset });
+  } catch (err) {
+    console.error('[reports] GET /:siteId/issues error:', err);
+    res.status(500).json({ error: 'Failed to load issues' });
+  }
 });
 
 // ─── GET /api/reports/:siteId/summary ────────────────────────────────────────
@@ -307,6 +322,7 @@ router.get('/:siteId/trend', (req, res) => {
 
 // ─── GET /api/reports/:siteId/developer-summary ───────────────────────────────
 router.get('/:siteId/developer-summary', (req, res) => {
+  try {
   const { siteId } = req.params;
   const { company_id, role } = req.user;
 
@@ -416,6 +432,10 @@ router.get('/:siteId/developer-summary', (req, res) => {
     top_issues,
     custom_extraction,
   });
+  } catch (err) {
+    console.error('[reports] GET /:siteId/developer-summary error:', err);
+    res.status(500).json({ error: 'Failed to load developer summary' });
+  }
 });
 
 export default router;
