@@ -49,10 +49,6 @@ function AuthedShell() {
   );
 }
 
-/* Company-scoped wrapper */
-function CompanyScoped() {
-  return <RequireCompany />;
-}
 
 /* Admin-only wrapper */
 function AdminOnly() {
@@ -95,7 +91,7 @@ export const router = createBrowserRouter([
 
       /* Company-scoped routes */
       {
-        element: <CompanyScoped />,
+        element: <RequireCompany />,
         children: [
           /* Sites */
           { path: '/sites',          element: <Sites /> },
