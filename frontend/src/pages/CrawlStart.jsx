@@ -23,7 +23,13 @@ export function CrawlStart() {
   const { toast }           = useToast();
   const [mode,    setMode]    = useState('spider');
   const [siteId,  setSiteId]  = useState(activeSite?.id || '');
-  const [config,  setConfig]  = useState({ ...DEFAULT_CONFIG });
+  const [config,  setConfig]  = useState(() => {
+    if (activeSite?.crawl_config) {
+      try { return { ...DEFAULT_CONFIG, ...JSON.parse(activeSite.crawl_config) }; }
+      catch { /* fall through */ }
+    }
+    return { ...DEFAULT_CONFIG };
+  });
   const [loading, setLoading] = useState(false);
   const [error,   setError]   = useState('');
 
@@ -38,7 +44,15 @@ export function CrawlStart() {
   const handleSiteChange = (id) => {
     setSiteId(id);
     const s = sites.find(s => s.id === id);
-    if (s) setActiveSite(s);
+    if (s) {
+      setActiveSite(s);
+      if (s.crawl_config) {
+        try { setConfig({ ...DEFAULT_CONFIG, ...JSON.parse(s.crawl_config) }); }
+        catch { setConfig({ ...DEFAULT_CONFIG }); }
+      } else {
+        setConfig({ ...DEFAULT_CONFIG });
+      }
+    }
   };
 
   // ── Submit helpers ────────────────────────────────────────────────────────

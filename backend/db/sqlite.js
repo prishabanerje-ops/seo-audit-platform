@@ -14,6 +14,7 @@ import { up as migration009 } from './migrations/009_ads_integration.js';
 import { up as migration010 } from './migrations/010_audit_checks_v2.js';
 import { up as migration011 } from './migrations/011_performance_indexes.js';
 import { up as migration012 } from './migrations/012_company_settings.js';
+import { up as migration013 } from './migrations/013_site_crawl_config.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DB_PATH = join(__dirname, '..', 'seo-automation.db');
@@ -43,6 +44,7 @@ const MIGRATIONS = [
   { id: 10, fn: migration010, name: '010_audit_checks_v2' },
   { id: 11, fn: migration011, name: '011_performance_indexes' },
   { id: 12, fn: migration012, name: '012_company_settings' },
+  { id: 13, fn: migration013, name: '013_site_crawl_config' },
 ];
 
 /**

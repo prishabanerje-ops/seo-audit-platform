@@ -9,6 +9,7 @@ const router = Router();
 const ALLOWED_PATCH_FIELDS = [
   'label', 'url', 'gsc_property', 'ga4_property_id',
   'color', 'sheets_tab_name', 'linear_project_id', 'project_id',
+  'crawl_config',
 ];
 
 const siteSchema = z.object({
@@ -20,6 +21,8 @@ const siteSchema = z.object({
   sheets_tab_name:   z.string().max(100).optional().default(''),
   linear_project_id: z.string().max(100).optional().default(''),
   project_id:        z.string().max(100).optional().default(''),
+  // Crawl configuration — JSON string serialised by the frontend
+  crawl_config:      z.string().optional().nullable(),
   // Superadmin may specify a target company when creating a site
   company_id:        z.string().uuid().optional(),
 });
@@ -62,12 +65,12 @@ router.post('/', validate(siteSchema), (req, res) => {
   if (!company_id) return res.status(403).json({ error: 'No company context. Select a company first.' });
 
   const id = uuidv4();
-  const { label, url, gsc_property, ga4_property_id, color, sheets_tab_name, linear_project_id, project_id } = req.body;
+  const { label, url, gsc_property, ga4_property_id, color, sheets_tab_name, linear_project_id, project_id, crawl_config } = req.body;
 
   db.prepare(`
-    INSERT INTO sites (id, company_id, label, url, gsc_property, ga4_property_id, color, sheets_tab_name, linear_project_id, project_id)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `).run(id, company_id, label, url, gsc_property, ga4_property_id, color, sheets_tab_name, linear_project_id, project_id);
+    INSERT INTO sites (id, company_id, label, url, gsc_property, ga4_property_id, color, sheets_tab_name, linear_project_id, project_id, crawl_config)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(id, company_id, label, url, gsc_property, ga4_property_id, color, sheets_tab_name, linear_project_id, project_id, crawl_config ?? null);
 
   res.status(201).json(db.prepare('SELECT * FROM sites WHERE id = ?').get(id));
 });

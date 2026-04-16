@@ -290,6 +290,7 @@ export function NewSiteWizard() {
         color,
         gsc_property:    gsc.trim(),
         ga4_property_id: ga4.trim(),
+        crawl_config:    JSON.stringify(crawlConfig),
       });
       toast.success(`"${label}" created`);
       navigate('/sites');
