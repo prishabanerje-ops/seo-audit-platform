@@ -470,12 +470,17 @@ const impersonateSchema = z.object({
   user_id: z.string().uuid(),
 });
 
-router.post('/impersonate', requireSuperAdmin, validate(impersonateSchema), (req, res) => {
+router.post('/impersonate', authLimiter, requireSuperAdmin, validate(impersonateSchema), (req, res) => {
   const { user_id } = req.body;
 
   // Guard: cannot impersonate yourself
   if (user_id === req.user.sub) {
     return res.status(400).json({ error: 'Cannot impersonate yourself.' });
+  }
+
+  // Guard: cannot chain impersonation sessions
+  if (req.user.impersonated_by) {
+    return res.status(403).json({ error: 'Cannot impersonate while already in an impersonation session.' });
   }
 
   const target = db.prepare('SELECT id, email, name, role, company_id, status FROM users WHERE id = ?').get(user_id);
@@ -537,7 +542,7 @@ router.post('/impersonate/end', (req, res) => {
 
   const superadmin = db.prepare('SELECT id, email, name, role, company_id, status FROM users WHERE id = ?').get(req.user.impersonated_by);
 
-  if (!superadmin || superadmin.role !== 'superadmin') {
+  if (!superadmin || superadmin.role !== 'superadmin' || superadmin.status === 'inactive') {
     res.clearCookie('auth_token');
     return res.status(401).json({ error: 'Original superadmin session not found. Please log in again.' });
   }
