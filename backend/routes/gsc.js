@@ -146,4 +146,101 @@ router.get('/properties', requireRole('admin', 'superadmin'), async (req, res) =
   }
 });
 
+// ─── GET /api/gsc/:siteId/summary ────────────────────────────────────────────
+router.get('/:siteId/summary', (req, res) => {
+  const { siteId } = req.params;
+  const { company_id, role } = req.user;
+
+  const site = db.prepare('SELECT id, company_id FROM sites WHERE id = ?').get(siteId);
+  if (!site) return res.status(404).json({ error: 'Site not found' });
+  if (role !== 'superadmin' && site.company_id !== company_id) {
+    return res.status(403).json({ error: 'Access denied' });
+  }
+
+  const current = db.prepare(`
+    SELECT
+      COALESCE(SUM(clicks), 0)      AS clicks,
+      COALESCE(SUM(impressions), 0) AS impressions,
+      CASE WHEN COALESCE(SUM(impressions), 0) > 0
+           THEN CAST(SUM(clicks) AS REAL) / SUM(impressions)
+           ELSE 0 END               AS ctr,
+      COALESCE(AVG(position), 0)    AS position
+    FROM gsc_cache WHERE site_id = ? AND period = 'current'
+  `).get(siteId);
+
+  const previous = db.prepare(`
+    SELECT
+      COALESCE(SUM(clicks), 0)      AS clicks,
+      COALESCE(SUM(impressions), 0) AS impressions
+    FROM gsc_cache WHERE site_id = ? AND period = 'previous'
+  `).get(siteId);
+
+  res.json({
+    clicks:            current.clicks,
+    impressions:       current.impressions,
+    ctr:               current.ctr,
+    position:          current.position,
+    clicks_delta:      current.clicks - previous.clicks,
+    impressions_delta: current.impressions - previous.impressions,
+  });
+});
+
+// ─── GET /api/gsc/:siteId/queries ────────────────────────────────────────────
+router.get('/:siteId/queries', (req, res) => {
+  const { siteId } = req.params;
+  const { company_id, role } = req.user;
+
+  const site = db.prepare('SELECT id, company_id FROM sites WHERE id = ?').get(siteId);
+  if (!site) return res.status(404).json({ error: 'Site not found' });
+  if (role !== 'superadmin' && site.company_id !== company_id) {
+    return res.status(403).json({ error: 'Access denied' });
+  }
+
+  const queries = db.prepare(`
+    SELECT
+      top_query                                                     AS query,
+      SUM(clicks)                                                   AS clicks,
+      SUM(impressions)                                              AS impressions,
+      CASE WHEN SUM(impressions) > 0
+           THEN CAST(SUM(clicks) AS REAL) / SUM(impressions)
+           ELSE 0 END                                               AS ctr,
+      AVG(position)                                                 AS position
+    FROM gsc_cache
+    WHERE site_id = ? AND period = 'current' AND top_query IS NOT NULL
+    GROUP BY top_query
+    ORDER BY clicks DESC
+    LIMIT 25
+  `).all(siteId);
+
+  res.json({ queries });
+});
+
+// ─── GET /api/gsc/:siteId/pages ──────────────────────────────────────────────
+router.get('/:siteId/pages', (req, res) => {
+  const { siteId } = req.params;
+  const { company_id, role } = req.user;
+
+  const site = db.prepare('SELECT id, company_id FROM sites WHERE id = ?').get(siteId);
+  if (!site) return res.status(404).json({ error: 'Site not found' });
+  if (role !== 'superadmin' && site.company_id !== company_id) {
+    return res.status(403).json({ error: 'Access denied' });
+  }
+
+  const pages = db.prepare(`
+    SELECT
+      url,
+      SUM(clicks)      AS clicks,
+      SUM(impressions) AS impressions,
+      CASE WHEN SUM(impressions) > 0
+           THEN CAST(SUM(clicks) AS REAL) / SUM(impressions)
+           ELSE 0 END  AS ctr
+    FROM gsc_cache WHERE site_id = ? AND period = 'current'
+    GROUP BY url
+    ORDER BY clicks DESC
+    LIMIT 50
+  `).all(siteId);
+
+  res.json({ pages });
+});
+
 export default router;
