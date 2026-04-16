@@ -121,18 +121,20 @@ Click the sun/moon toggle in the top-right header. Your preference is saved in `
 
 ### Step 1 — Register a Site
 
-Go to **Sites → Add New Site** and enter:
-- Site name
-- Root URL (e.g. `https://www.example.com`)
-- Optional: GSC property, GA4 property ID
+Go to **Sites → Add New Site** and complete the 5-step wizard:
+1. **Basic info** — site name, root URL, colour
+2. **Integrations** — optional GSC property and GA4 property ID
+3. **Crawl config** — set default crawl depth, max URLs, URL filters, and other options. These become the defaults every time you start a crawl for this site.
+4. **Connect APIs** — links to integrations (can be done later)
+5. **Review** — confirm everything before creating
 
 ### Step 2 — Start a Crawl
 
-Go to **Crawls → Start Crawl** and configure:
-- Crawl depth
+Go to **Crawls → Start Crawl**. Select a site — its saved crawl config is automatically pre-loaded. Adjust if needed, then configure:
+- Crawl mode: Spider / List / Sitemap
+- Crawl depth and max URLs
 - Include/exclude URL patterns
 - User agent
-- Whether to run a live spider crawl or import a pre-existing CSV export
 
 **Spider crawl:** the built-in Playwright/Crawlee crawler runs automatically and streams progress in real time.
 

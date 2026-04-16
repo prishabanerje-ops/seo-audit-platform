@@ -231,6 +231,7 @@ Migration runner: `backend/db/sqlite.js`. Tracks applied migrations in `_migrati
 | `005_founder_to_admin.js` | Renames `founder` role to `admin`, adds AI token budget settings, adds `cms_type` to sites |
 | `006_multi_tenancy.js` | Adds `companies` table, `audit_log` table, `company_id` column to all data tables, partial unique index enforcing single superadmin, seeds Cars24 company, promotes `aakash.srivastava@cars24.com` to superadmin, creates `admin@c24.com` as Cars24 admin |
 | `012_company_settings.js` | Adds `company_settings` (key-value settings per company) and `company_oauth_tokens` (GSC/GA4 OAuth tokens per company) tables |
+| `013_site_crawl_config.js` | Adds `crawl_config TEXT` column to `sites` table — stores per-site default crawl configuration as a JSON string |
 
 ### Tables
 
@@ -783,7 +784,7 @@ All routes require authentication.
 | Method | Path | Auth | Request | Response |
 |---|---|---|---|---|
 | GET | `/api/sites` | Any authed | — | Array of site objects with extra fields: `crawl_count`, `latest_job_id`, `latest_job_status`, `latest_health_score`, `last_crawled_at` |
-| POST | `/api/sites` | Any authed | `{ label, url, gsc_property?, ga4_property_id?, color?, sheets_tab_name?, linear_project_id?, project_id? }` | Created site object. `color` must be `#rrggbb`. |
+| POST | `/api/sites` | Any authed | `{ label, url, gsc_property?, ga4_property_id?, color?, sheets_tab_name?, linear_project_id?, project_id?, crawl_config? }` | Created site object. `color` must be `#rrggbb`. `crawl_config` is a JSON string of crawl settings. |
 | GET | `/api/sites/:id` | Any authed | — | Site object |
 | PATCH | `/api/sites/:id` | Any authed | Partial of POST body. Allowed fields whitelisted server-side. | Updated site object |
 | DELETE | `/api/sites/:id` | Any authed | — | 204. Cascades to crawl_jobs, audit_results, etc. |
@@ -1013,11 +1014,15 @@ Sidebar (220px expanded / 56px collapsed) + Header (56px) + scrollable main cont
 - Empty state: Globe icon + "Add Site" CTA
 
 #### `/sites/new` — Add New Site
-- Two-card form layout
-- Card 1 (Basic): site name, root URL, colour picker (8 preset hex colours)
-- Card 2 (Integrations — optional): GSC property string, GA4 property ID
-- On submit: `POST /api/sites` → `createSite()` → navigates to `/sites`
+- 5-step wizard: Basic info → Integrations → Crawl config → Connect APIs → Review
+- Step 1 (Basic): site name, root URL, colour picker (8 preset hex colours)
+- Step 2 (Integrations — optional): GSC property string, GA4 property ID
+- Step 3 (Crawl config): full `CrawlConfigPanel` — depth, max URLs, follow settings, URL patterns, headers, auth. Defaults applied from `DEFAULT_CONFIG`.
+- Step 4 (Connect APIs): informational links to integrations (no action required)
+- Step 5 (Review): shows site name, URL, GSC/GA4 properties, crawl config summary before confirming
+- On submit: `POST /api/sites` with `crawl_config` (JSON string) — saved to `sites.crawl_config` column
 - Client-side validation: name required, URL must be valid (includes protocol)
+- Crawl config set in the wizard is pre-loaded on the Start Crawl page when that site is selected
 
 #### `/crawl` — Start Crawl
 - Site selector dropdown (all registered sites)
