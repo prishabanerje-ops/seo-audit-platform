@@ -140,16 +140,6 @@ export function Users() {
     finally { setDeleting(''); }
   };
 
-  if (!targetCompanyId) {
-    return (
-      <div className="p-6 flex items-center justify-center h-64">
-        <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-          Select a company from the header to manage its users.
-        </p>
-      </div>
-    );
-  }
-
   return (
     <div className="p-6 max-w-4xl mx-auto">
       <div className="flex items-center justify-between mb-6">
