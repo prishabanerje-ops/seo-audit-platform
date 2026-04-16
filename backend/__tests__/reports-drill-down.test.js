@@ -51,3 +51,19 @@ describe('GET /api/reports/results/:resultId', () => {
     expect(res.status).toBe(404);
   });
 });
+
+describe('GET /api/reports/:siteId/developer-summary', () => {
+  it('returns 404 for unknown site', async () => {
+    const res = await request(app)
+      .get('/api/reports/no-such-site/developer-summary')
+      .set('Cookie', cookie);
+    expect(res.status).toBe(404);
+  });
+
+  it('returns 404 for unknown site with different id format', async () => {
+    const res = await request(app)
+      .get('/api/reports/site-does-not-exist/developer-summary')
+      .set('Cookie', cookie);
+    expect(res.status).toBe(404);
+  });
+});
