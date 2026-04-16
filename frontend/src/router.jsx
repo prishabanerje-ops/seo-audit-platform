@@ -25,18 +25,16 @@ import { Users }         from './pages/Users.jsx';
 
 import {
   AdminView, DeveloperView, SeoView,
-  IssueDetail, CoreWebVitals,
+  CoreWebVitals,
   Tasks, TaskDetail,
   ScheduledCrawls, Exports, Notifications,
   Integrations, SystemHealth,
   GscOverlay, Ga4Overlay, ErrorLog, CompareView,
-  AuditIndexability, AuditTitleTags, AuditMetaDesc,
-  AuditHeadings, AuditCanonicals, AuditHreflang,
-  AuditImages, AuditLinks, AuditRedirects, AuditResponseCodes,
-  AuditPageSpeed, AuditStructuredData, AuditSecurity, AuditMobile,
-  AuditCrawlDepth, AuditSitemap, AuditRobots, AuditInternational,
-  AuditContent, AuditCustom, AuditCustomExtraction, AuditLogFile,
+  AuditCustomExtraction, AuditLogFile,
 } from './pages/stubs.jsx';
+
+import { AuditCategory } from './pages/AuditCategory.jsx';
+import { IssueDetail }   from './pages/IssueDetail.jsx';
 
 /* Authenticated shell wrapper */
 function AuthedShell() {
@@ -104,33 +102,33 @@ export const router = createBrowserRouter([
 
           /* Audit */
           { path: '/audit',                element: <AuditHealth /> },
-          { path: '/audit/issue/:id',      element: <IssueDetail /> },
+          { path: '/audit/issue/:resultId', element: <IssueDetail /> },
           { path: '/audit/cwv',            element: <CoreWebVitals /> },
           { path: '/audit/compare',        element: <CompareView /> },
           { path: '/audit/gsc',            element: <GscOverlay /> },
           { path: '/audit/ga4',            element: <Ga4Overlay /> },
 
           /* Audit categories */
-          { path: '/audit/indexability',   element: <AuditIndexability /> },
-          { path: '/audit/title-tags',     element: <AuditTitleTags /> },
-          { path: '/audit/meta-desc',      element: <AuditMetaDesc /> },
-          { path: '/audit/headings',       element: <AuditHeadings /> },
-          { path: '/audit/canonicals',     element: <AuditCanonicals /> },
-          { path: '/audit/hreflang',       element: <AuditHreflang /> },
-          { path: '/audit/images',         element: <AuditImages /> },
-          { path: '/audit/links',          element: <AuditLinks /> },
-          { path: '/audit/redirects',      element: <AuditRedirects /> },
-          { path: '/audit/response-codes', element: <AuditResponseCodes /> },
-          { path: '/audit/page-speed',     element: <AuditPageSpeed /> },
-          { path: '/audit/structured-data',element: <AuditStructuredData /> },
-          { path: '/audit/security',       element: <AuditSecurity /> },
-          { path: '/audit/mobile',         element: <AuditMobile /> },
-          { path: '/audit/crawl-depth',    element: <AuditCrawlDepth /> },
-          { path: '/audit/sitemap',        element: <AuditSitemap /> },
-          { path: '/audit/robots',         element: <AuditRobots /> },
-          { path: '/audit/international',  element: <AuditInternational /> },
-          { path: '/audit/content',             element: <AuditContent /> },
-          { path: '/audit/custom',              element: <AuditCustom /> },
+          { path: '/audit/indexability',        element: <AuditCategory /> },
+          { path: '/audit/title-tags',          element: <AuditCategory /> },
+          { path: '/audit/meta-desc',           element: <AuditCategory /> },
+          { path: '/audit/headings',            element: <AuditCategory /> },
+          { path: '/audit/canonicals',          element: <AuditCategory /> },
+          { path: '/audit/hreflang',            element: <AuditCategory /> },
+          { path: '/audit/images',              element: <AuditCategory /> },
+          { path: '/audit/links',               element: <AuditCategory /> },
+          { path: '/audit/redirects',           element: <AuditCategory /> },
+          { path: '/audit/response-codes',      element: <AuditCategory /> },
+          { path: '/audit/page-speed',          element: <AuditCategory /> },
+          { path: '/audit/structured-data',     element: <AuditCategory /> },
+          { path: '/audit/security',            element: <AuditCategory /> },
+          { path: '/audit/mobile',              element: <AuditCategory /> },
+          { path: '/audit/crawl-depth',         element: <AuditCategory /> },
+          { path: '/audit/sitemap',             element: <AuditCategory /> },
+          { path: '/audit/robots',              element: <AuditCategory /> },
+          { path: '/audit/international',       element: <AuditCategory /> },
+          { path: '/audit/content',             element: <AuditCategory /> },
+          { path: '/audit/custom',              element: <AuditCategory /> },
           { path: '/audit/custom-extraction',   element: <AuditCustomExtraction /> },
           { path: '/audit/log-file',            element: <AuditLogFile /> },
 
