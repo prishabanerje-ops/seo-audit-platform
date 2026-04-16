@@ -13,6 +13,7 @@ import { up as migration008 } from './migrations/008_force_password_reset.js';
 import { up as migration009 } from './migrations/009_ads_integration.js';
 import { up as migration010 } from './migrations/010_audit_checks_v2.js';
 import { up as migration011 } from './migrations/011_performance_indexes.js';
+import { up as migration012 } from './migrations/012_company_settings.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DB_PATH = join(__dirname, '..', 'seo-automation.db');
@@ -41,6 +42,7 @@ const MIGRATIONS = [
   { id: 9, fn: migration009, name: '009_ads_integration' },
   { id: 10, fn: migration010, name: '010_audit_checks_v2' },
   { id: 11, fn: migration011, name: '011_performance_indexes' },
+  { id: 12, fn: migration012, name: '012_company_settings' },
 ];
 
 /**
