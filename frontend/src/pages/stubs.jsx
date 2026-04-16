@@ -189,7 +189,6 @@ export function Integrations() {
   );
 }
 export function SystemHealth()     { return <Stub title="System Health"      description="Backend service status and error log." />; }
-export function Users()            { return <Stub title="Users"              description="Manage team members and pending invites." />; }
 
 export function GscOverlay()       { return <Stub title="GSC Overlay"        description="Google Search Console data overlay on audit results." />; }
 export function Ga4Overlay()       { return <Stub title="GA4 Overlay"        description="Google Analytics 4 traffic data overlay." />; }
