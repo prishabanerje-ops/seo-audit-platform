@@ -180,9 +180,7 @@ npm run dev
 | 8.3 | Crawl conflict | Start a second crawl for the same site while one is running | `409 Conflict` error shown in UI |
 | 8.4 | Invalid site ID | `GET /api/crawls?site_id=fake` | Returns empty list, no 500 error |
 | 8.5 | DB not deleted | `backend/seo-automation.db` exists | Admin account and seed data intact |
-| 8.6 | SF binary exists | Run `ls "/Applications/Screaming Frog SEO Spider.app/Contents/MacOS/"` | `ScreamingFrogSEOSpiderLauncher` is present |
-| 8.7 | SF binary path in .env | Check `SF_BINARY_PATH` in `.env` | Matches the exact filename from 8.6 |
-| 8.8 | Crawl actually runs | Start a spider crawl, watch the live view | Progress lines stream in, URL count increments — confirms binary launched correctly |
+| 8.6 | Crawl actually runs | Start a spider crawl, watch the live view | Progress lines stream in, URL count increments — confirms Playwright crawler launched correctly |
 
 ---
 

@@ -222,7 +222,7 @@ export function HomePage() {
             fontSize: 17, color: T.textSub, lineHeight: 1.65,
             maxWidth: 500, margin: '0 auto 40px',
           }}>
-            A self-hosted SEO audit platform that crawls your sites via Screaming Frog, detects 477+ technical issues, and streams Claude AI fix recommendations — all in one place.
+            A self-hosted SEO audit platform that crawls your sites with a built-in Playwright crawler, detects 291+ technical issues, and streams Claude AI fix recommendations — all in one place.
           </p>
 
           <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>

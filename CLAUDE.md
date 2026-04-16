@@ -9,7 +9,7 @@
 
 - **Name:** SEO Audit Platform v2.0
 - **Owner:** Aakash Srivastava (aakash.srivastava@cars24.com) — Admin role
-- **Purpose:** Self-hosted technical SEO tool — crawls via Screaming Frog CLI, detects 477+ issues, delivers AI fix recommendations via Claude, integrates with GSC, GA4, Linear, Slack, Google Sheets, PageSpeed Insights
+- **Purpose:** Self-hosted technical SEO tool — crawls via built-in Playwright/Crawlee crawler, detects 291+ issues, delivers AI fix recommendations via Claude, integrates with GSC, GA4, Linear, Slack, Google Sheets, PageSpeed Insights
 
 ---
 
@@ -20,7 +20,7 @@
 | Frontend | React 18, Vite, Tailwind CSS (via CSS vars), Recharts, Socket.io-client |
 | Backend | Node.js 20+, Express, Socket.io, better-sqlite3, node-cron |
 | Database | SQLite — single file, zero infrastructure |
-| Crawler | Screaming Frog SEO Spider CLI (macOS only) |
+| Crawler | Playwright/Crawlee (built-in, cross-platform) |
 | AI | `claude-sonnet-4-6` via `@anthropic-ai/sdk` — streaming (SSE) |
 | Auth | JWT stored in httpOnly cookie (`auth_token`) |
 
@@ -102,13 +102,12 @@ Key tables: `users`, `sites`, `crawl_jobs`, `audit_results`, `ai_suggestions`, `
 
 ---
 
-## Screaming Frog CLI
+## Playwright Crawler
 
-- **macOS binary:** `/Applications/Screaming Frog SEO Spider.app/Contents/MacOS/ScreamingFrogSEOSpiderLauncher`
-- **Env var:** `SF_BINARY_PATH`
-- **Output format:** CSV files parsed by `sf-parser.service.js`
-- **Config:** XML config generated per crawl by `sf-config.service.js`
-- **Requires a paid SF licence for > 500 URLs**
+- **Location:** `playwright-crawler/` (self-hosted, no external licence required)
+- **Entry:** `playwright-crawler/src/crawler.js` — dual-mode (Cheerio + Playwright)
+- **Output:** SF-format in-memory datasets consumed by `backend/services/audit-parser.service.js`
+- **Extractors:** `playwright-crawler/src/extractors/` (meta, headings, canonical, links, images, …)
 
 ---
 
@@ -116,7 +115,6 @@ Key tables: `users`, `sites`, `crawl_jobs`, `audit_results`, `ai_suggestions`, `
 
 ```
 JWT_SECRET=                    # Required — 64-char hex string
-SF_BINARY_PATH=                # Required — path to SF CLI binary
 ANTHROPIC_API_KEY=             # Required for AI recommendations
 GOOGLE_CLIENT_ID=              # Required for GSC/GA4 OAuth
 GOOGLE_CLIENT_SECRET=          # Required for GSC/GA4 OAuth

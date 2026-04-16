@@ -23,9 +23,8 @@ export function Setup() {
   const { setUser } = useAuth();
 
   const [checks, setChecks] = useState({
-    db:          'idle',
-    screaming:   'idle',
-    anthropic:   'idle',
+    db:        'idle',
+    anthropic: 'idle',
   });
 
   const [name,     setName]     = useState('');
@@ -46,19 +45,18 @@ export function Setup() {
 
   /* Run health checks on mount */
   useEffect(() => {
-    setChecks({ db: 'checking', screaming: 'idle', anthropic: 'idle' });
+    setChecks({ db: 'checking', anthropic: 'idle' });
 
     api.get('/health')
       .then(res => {
-        const { db, screamingFrog, anthropic } = res.data;
+        const { db, anthropic } = res.data;
         setChecks({
           db:        db        === 'ok' ? 'ok' : 'warn',
-          screaming: screamingFrog === 'ok' ? 'ok' : 'warn',
           anthropic: anthropic === 'ok' ? 'ok' : 'warn',
         });
       })
       .catch(() => {
-        setChecks({ db: 'warn', screaming: 'warn', anthropic: 'warn' });
+        setChecks({ db: 'warn', anthropic: 'warn' });
       });
   }, []);
 
@@ -152,9 +150,8 @@ export function Setup() {
             <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--text-muted)' }}>
               System checks
             </p>
-            <CheckRow label="Database"        status={checks.db} />
-            <CheckRow label="Screaming Frog"  status={checks.screaming} />
-            <CheckRow label="Anthropic API"   status={checks.anthropic} />
+            <CheckRow label="Database"       status={checks.db} />
+            <CheckRow label="Anthropic API"  status={checks.anthropic} />
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">

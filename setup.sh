@@ -42,23 +42,7 @@ else
   echo "✓ .env already exists"
 fi
 
-# 6. Detect Screaming Frog
-SF_PATH=""
-if [ -f "/usr/local/bin/screaming-frog" ]; then
-  SF_PATH="/usr/local/bin/screaming-frog"
-elif [ -f "/Applications/Screaming Frog SEO Spider.app/Contents/MacOS/ScreamingFrogSEOSpider" ]; then
-  SF_PATH="/Applications/Screaming Frog SEO Spider.app/Contents/MacOS/ScreamingFrogSEOSpider"
-fi
-
-if [ -n "$SF_PATH" ]; then
-  sed -i '' "s|^SF_BINARY_PATH=.*|SF_BINARY_PATH=$SF_PATH|" .env
-  echo "✓ Screaming Frog found: $SF_PATH"
-else
-  echo "⚠️  Screaming Frog not found. Platform will run in import-only mode."
-  echo "    Download: https://www.screamingfrog.co.uk/seo-spider/"
-fi
-
-# 7. Download JetBrains Mono fonts
+# 6. Download JetBrains Mono fonts
 FONTS_DIR="frontend/public/fonts"
 if [ ! -f "$FONTS_DIR/JetBrainsMono-Regular.woff2" ]; then
   echo "🔤 Downloading JetBrains Mono fonts..."
@@ -71,17 +55,17 @@ else
   echo "✓ Fonts already present"
 fi
 
-# 8. Run migrations
+# 7. Run migrations
 echo "🗄️  Running database migrations..."
 NODE_ENV=development node backend/db/sqlite.js
 echo "✓ Database ready"
 
-# 9. Seed audit checks
+# 8. Seed audit checks
 echo "🌱 Seeding audit checks..."
 node scripts/seed-checks.js
 echo "✓ Audit checks seeded"
 
-# 10. Validate env
+# 9. Validate env
 echo "🔍 Validating environment..."
 node backend/validate-env.js || true
 

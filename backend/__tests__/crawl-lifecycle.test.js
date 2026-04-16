@@ -1,6 +1,6 @@
 /**
  * Crawl lifecycle tests — verifies job state management without
- * requiring a real Screaming Frog binary.
+ * requiring a real crawler binary.
  */
 
 import { describe, it, expect, beforeAll } from 'vitest';
