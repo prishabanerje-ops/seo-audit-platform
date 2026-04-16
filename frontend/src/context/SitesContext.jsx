@@ -48,7 +48,10 @@ export function SitesProvider({ children }) {
   // ── Mutations ──────────────────────────────────────────────────────────────
 
   const createSite = async (data) => {
-    const res = await api.post('/sites', data);
+    const body = (user.role === 'superadmin' && viewingCompanyId)
+      ? { ...data, company_id: viewingCompanyId }
+      : data;
+    const res = await api.post('/sites', body);
     await reload();
     handleSetActiveSite(res.data);
     return res.data;
