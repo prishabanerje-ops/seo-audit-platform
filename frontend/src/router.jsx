@@ -24,12 +24,15 @@ import { Settings }      from './pages/Settings.jsx';
 import { Users }         from './pages/Users.jsx';
 
 import {
-  CoreWebVitals,
   ScheduledCrawls, Exports, Notifications,
   Integrations, SystemHealth,
-  GscOverlay, Ga4Overlay, ErrorLog, CompareView,
+  ErrorLog, CompareView,
   AuditCustomExtraction, AuditLogFile,
 } from './pages/stubs.jsx';
+
+import { CoreWebVitals } from './pages/CoreWebVitals.jsx';
+import { GscOverlay }    from './pages/GscOverlay.jsx';
+import { Ga4Overlay }    from './pages/Ga4Overlay.jsx';
 
 import { AdminView }     from './pages/AdminView.jsx';
 import { SeoView }       from './pages/SeoView.jsx';

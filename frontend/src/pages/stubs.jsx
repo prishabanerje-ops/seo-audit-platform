@@ -29,8 +29,6 @@ function Stub({ title, description }) {
   );
 }
 
-export function CoreWebVitals()    { return <Stub title="Core Web Vitals"     description="CWV scores from PageSpeed Insights and CrUX." />; }
-
 export function ScheduledCrawls()  { return <Stub title="Scheduled Crawls"   description="Recurring crawl schedules and history." />; }
 export function Exports()          { return <Stub title="Exports"            description="Download audit reports as CSV or PDF." />; }
 export function Notifications()    { return <Stub title="Notifications"      description="Platform notifications and alert history." />; }
@@ -181,8 +179,6 @@ export function Integrations() {
 }
 export function SystemHealth()     { return <Stub title="System Health"      description="Backend service status and error log." />; }
 
-export function GscOverlay()       { return <Stub title="GSC Overlay"        description="Google Search Console data overlay on audit results." />; }
-export function Ga4Overlay()       { return <Stub title="GA4 Overlay"        description="Google Analytics 4 traffic data overlay." />; }
 export function ErrorLog()         { return <Stub title="Error Log"          description="Frontend and backend error log." />; }
 export function CompareView()      { return <Stub title="Compare Crawls"     description="Side-by-side comparison of two completed crawls." />; }
 
