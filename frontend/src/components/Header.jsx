@@ -196,9 +196,16 @@ export function Header() {
 
   // Fetch unread notification count on mount
   useEffect(() => {
-    api.get('/notifications', { params: { unread: true } })
+    api.get('/notifications')
       .then(({ data }) => setUnreadCount(data.unread_count ?? 0))
       .catch(() => {});
+  }, []);
+
+  // Sync badge when Notifications page mutates (mark read / delete / mark all)
+  useEffect(() => {
+    function onCount(e) { setUnreadCount(e.detail?.count ?? 0); }
+    window.addEventListener('notifications:count', onCount);
+    return () => window.removeEventListener('notifications:count', onCount);
   }, []);
 
   const handleLogout = async () => {

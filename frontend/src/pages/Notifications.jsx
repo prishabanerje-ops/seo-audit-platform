@@ -5,9 +5,15 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link }                              from 'react-router';
 import { Bell, Trash2, Check }               from 'lucide-react';
+import { toast }                             from 'sonner';
 import api                                   from '../api/index.js';
 import { LoadingSkeleton }                   from '../components/LoadingSkeleton.jsx';
 import { EmptyState }                        from '../components/EmptyState.jsx';
+
+/** Notify the Header bell badge of the new unread count. */
+function emitUnreadCount(count) {
+  window.dispatchEvent(new CustomEvent('notifications:count', { detail: { count } }));
+}
 
 export function Notifications() {
   const [notifications, setNotifications] = useState([]);
@@ -37,36 +43,55 @@ export function Notifications() {
   }, [filter, fetchNotifications]);
 
   const handleMarkRead = async (id) => {
+    // Snapshot before optimistic update
+    const prevNotifications = notifications;
+    const prevCount = unreadCount;
+    setNotifications(prev => prev.map(n => n.id === id ? { ...n, is_read: 1 } : n));
+    setUnreadCount(prev => Math.max(0, prev - 1));
     try {
       await api.patch(`/notifications/${id}/read`);
-      setNotifications(prev =>
-        prev.map(n => n.id === id ? { ...n, is_read: 1 } : n)
-      );
-      setUnreadCount(prev => Math.max(0, prev - 1));
-    } catch {
-      // silently ignore
+      emitUnreadCount(Math.max(0, prevCount - 1));
+    } catch (err) {
+      // Rollback
+      setNotifications(prevNotifications);
+      setUnreadCount(prevCount);
+      toast.error(err?.response?.data?.error || 'Failed to mark notification as read');
     }
   };
 
   const handleDelete = async (id) => {
-    const wasUnread = notifications.find(n => n.id === id)?.is_read === 0;
+    // Snapshot before optimistic update — avoids stale closure issues
+    const snapshot = notifications.slice();
+    const item = snapshot.find(n => n.id === id);
+    const wasUnread = item?.is_read === 0;
+    const prevCount = unreadCount;
+    setNotifications(prev => prev.filter(n => n.id !== id));
+    if (wasUnread) setUnreadCount(prev => Math.max(0, prev - 1));
     try {
       await api.delete(`/notifications/${id}`);
-      setNotifications(prev => prev.filter(n => n.id !== id));
-      if (wasUnread) setUnreadCount(prev => Math.max(0, prev - 1));
-    } catch {
-      // silently ignore
+      if (wasUnread) emitUnreadCount(Math.max(0, prevCount - 1));
+    } catch (err) {
+      // Rollback
+      setNotifications(snapshot);
+      setUnreadCount(prevCount);
+      toast.error(err?.response?.data?.error || 'Failed to delete notification');
     }
   };
 
   const handleMarkAllRead = async () => {
+    const snapshot = notifications.slice();
+    const prevCount = unreadCount;
     setMarkingAll(true);
+    setNotifications(prev => prev.map(n => ({ ...n, is_read: 1 })));
+    setUnreadCount(0);
     try {
       await api.patch('/notifications/read-all');
-      setNotifications(prev => prev.map(n => ({ ...n, is_read: 1 })));
-      setUnreadCount(0);
-    } catch {
-      // silently ignore
+      emitUnreadCount(0);
+    } catch (err) {
+      // Rollback
+      setNotifications(snapshot);
+      setUnreadCount(prevCount);
+      toast.error(err?.response?.data?.error || 'Failed to mark all as read');
     } finally {
       setMarkingAll(false);
     }
