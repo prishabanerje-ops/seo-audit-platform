@@ -116,7 +116,7 @@ function ScoreGauge({ score }) {
         backgroundColor: 'var(--bg-raised)',
         minWidth:       '140px',
       }}
-      aria-label={`Performance score: ${score} out of 100`}
+      aria-label={`Performance score: ${score ?? 'unknown'} out of 100`}
     >
       <span
         style={{
