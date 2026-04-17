@@ -430,15 +430,14 @@ export function AuditHealth() {
           >
             Refresh
           </Button>
-          <Link to={`/exports?siteId=${activeSite.id}`}>
-            <Button
-              variant="secondary"
-              size="sm"
-              iconLeft={<Download className="w-3.5 h-3.5" />}
-            >
-              Export
-            </Button>
-          </Link>
+          <Button
+            variant="secondary"
+            size="sm"
+            iconLeft={<Download className="w-3.5 h-3.5" />}
+            onClick={() => navigate(`/exports?siteId=${activeSite.id}`)}
+          >
+            Export
+          </Button>
         </div>
       </div>
 
