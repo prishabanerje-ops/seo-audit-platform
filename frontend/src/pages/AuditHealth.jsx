@@ -15,7 +15,7 @@ import {
 } from 'recharts';
 import {
   ChevronDown, ChevronRight, AlertTriangle,
-  Info, CheckCircle2, RefreshCw, Activity,
+  Info, CheckCircle2, RefreshCw, Activity, Download,
 } from 'lucide-react';
 import api                from '../api/index.js';
 import { useSites }       from '../context/SitesContext.jsx';
@@ -421,14 +421,25 @@ export function AuditHealth() {
               : '—'}
           </p>
         </div>
-        <Button
-          variant="secondary"
-          size="sm"
-          iconLeft={<RefreshCw className="w-3.5 h-3.5" />}
-          onClick={load}
-        >
-          Refresh
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="secondary"
+            size="sm"
+            iconLeft={<RefreshCw className="w-3.5 h-3.5" />}
+            onClick={load}
+          >
+            Refresh
+          </Button>
+          <Link to={`/exports?siteId=${activeSite.id}`}>
+            <Button
+              variant="secondary"
+              size="sm"
+              iconLeft={<Download className="w-3.5 h-3.5" />}
+            >
+              Export
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {/* Top section: health ring + KPIs */}

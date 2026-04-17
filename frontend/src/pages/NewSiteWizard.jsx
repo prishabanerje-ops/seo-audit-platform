@@ -121,7 +121,7 @@ function Step1({ label, setLabel, url, setUrl, color, setColor, errors, setError
   );
 }
 
-function Step2({ gsc, setGsc, ga4, setGa4 }) {
+function Step2({ gsc, setGsc, ga4, setGa4, sheetsTab, setSheetsTab, sheetsSpreadsheet, setSheetsSpreadsheet }) {
   return (
     <Card>
       <CardHeading sub="Optional — you can add these later in Settings → Integrations.">
@@ -139,6 +139,18 @@ function Step2({ gsc, setGsc, ga4, setGa4 }) {
           placeholder="G-XXXXXXXXXX  or  123456789"
           value={ga4}
           onChange={e => setGa4(e.target.value)}
+        />
+        <Input
+          label="Sheets tab name"
+          placeholder="e.g. Audit Results"
+          value={sheetsTab}
+          onChange={e => setSheetsTab(e.target.value)}
+        />
+        <Input
+          label="Sheets spreadsheet ID"
+          placeholder="1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms"
+          value={sheetsSpreadsheet}
+          onChange={e => setSheetsSpreadsheet(e.target.value)}
         />
       </div>
     </Card>
@@ -213,7 +225,7 @@ function Step4({ siteUrl }) {
   );
 }
 
-function Step5({ label, url, color, gsc, ga4, crawlConfig }) {
+function Step5({ label, url, color, gsc, ga4, sheetsTab, sheetsSpreadsheet, crawlConfig }) {
   const configSummary = [
     `Depth: ${crawlConfig.max_depth}`,
     `Max URLs: ${crawlConfig.max_urls === 0 ? 'Unlimited' : crawlConfig.max_urls?.toLocaleString()}`,
@@ -241,6 +253,8 @@ function Step5({ label, url, color, gsc, ga4, crawlConfig }) {
         <ReviewRow label="Root URL"      value={url} />
         <ReviewRow label="GSC property"  value={gsc  || '—'} />
         <ReviewRow label="GA4 property"  value={ga4  || '—'} />
+        <ReviewRow label="Sheets tab"       value={sheetsTab || '—'} />
+        <ReviewRow label="Spreadsheet ID"   value={sheetsSpreadsheet || '—'} />
         <ReviewRow label="Crawl config"  value={configSummary} />
       </div>
     </Card>
@@ -260,6 +274,8 @@ export function NewSiteWizard() {
   const [color,       setColor]       = useState('#6366f1');
   const [gsc,         setGsc]         = useState('');
   const [ga4,         setGa4]         = useState('');
+  const [sheetsTab,       setSheetsTab]       = useState('');
+  const [sheetsSpreadsheet, setSheetsSpreadsheet] = useState('');
   const [crawlConfig, setCrawlConfig] = useState({ ...DEFAULT_CONFIG });
   const [errors,      setErrors]      = useState({});
   const [loading,     setLoading]     = useState(false);
@@ -290,6 +306,8 @@ export function NewSiteWizard() {
         color,
         gsc_property:    gsc.trim(),
         ga4_property_id: ga4.trim(),
+        sheets_tab_name:       sheetsTab.trim(),
+        sheets_spreadsheet_id: sheetsSpreadsheet.trim(),
         crawl_config:    JSON.stringify(crawlConfig),
       });
       toast.success(`"${label}" created`);
@@ -347,6 +365,8 @@ export function NewSiteWizard() {
             <Step2
               gsc={gsc} setGsc={setGsc}
               ga4={ga4} setGa4={setGa4}
+              sheetsTab={sheetsTab}             setSheetsTab={setSheetsTab}
+              sheetsSpreadsheet={sheetsSpreadsheet} setSheetsSpreadsheet={setSheetsSpreadsheet}
             />
           )}
           {step === 3 && (
@@ -360,6 +380,7 @@ export function NewSiteWizard() {
             <Step5
               label={label} url={url} color={color}
               gsc={gsc} ga4={ga4}
+              sheetsTab={sheetsTab} sheetsSpreadsheet={sheetsSpreadsheet}
               crawlConfig={crawlConfig}
             />
           )}

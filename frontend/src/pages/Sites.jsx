@@ -75,6 +75,8 @@ export function Sites() {
   const [editColor,    setEditColor]      = useState('');
   const [editGsc,      setEditGsc]        = useState('');
   const [editGa4,      setEditGa4]        = useState('');
+  const [editSheetsTab,    setEditSheetsTab]    = useState('');
+  const [editSpreadsheet,  setEditSpreadsheet]  = useState('');
   const [editErrors,   setEditErrors]     = useState({});
   const [saving,       setSaving]         = useState(false);
 
@@ -85,6 +87,8 @@ export function Sites() {
     setEditColor(site.color || '#6366f1');
     setEditGsc(site.gsc_property || '');
     setEditGa4(site.ga4_property_id || '');
+    setEditSheetsTab(site.sheets_tab_name || '');
+    setEditSpreadsheet(site.sheets_spreadsheet_id || '');
     setEditErrors({});
   };
 
@@ -103,6 +107,8 @@ export function Sites() {
         color:           editColor,
         gsc_property:    editGsc.trim(),
         ga4_property_id: editGa4.trim(),
+        sheets_tab_name:       editSheetsTab.trim(),
+        sheets_spreadsheet_id: editSpreadsheet.trim(),
       });
       toast.success(`"${editLabel}" updated`);
       setEditTarget(null);
@@ -330,6 +336,18 @@ export function Sites() {
             placeholder="G-XXXXXXXXXX"
             value={editGa4}
             onChange={e => setEditGa4(e.target.value)}
+          />
+          <Input
+            label="Sheets tab name"
+            placeholder="e.g. Audit Results"
+            value={editSheetsTab}
+            onChange={e => setEditSheetsTab(e.target.value)}
+          />
+          <Input
+            label="Sheets spreadsheet ID"
+            placeholder="1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms"
+            value={editSpreadsheet}
+            onChange={e => setEditSpreadsheet(e.target.value)}
           />
         </div>
         <div className="flex justify-end gap-2 mt-6">
