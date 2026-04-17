@@ -23,10 +23,11 @@ import { AuditLog }      from './pages/AuditLog.jsx';
 import { Settings }      from './pages/Settings.jsx';
 import { Users }         from './pages/Users.jsx';
 
-import { Exports } from './pages/Exports.jsx';
+import { Exports }      from './pages/Exports.jsx';
+import { CompareView }  from './pages/CompareView.jsx';
 import {
   Integrations, SystemHealth,
-  ErrorLog, CompareView,
+  ErrorLog,
   AuditCustomExtraction, AuditLogFile,
 } from './pages/stubs.jsx';
 

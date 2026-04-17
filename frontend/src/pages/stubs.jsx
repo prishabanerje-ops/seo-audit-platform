@@ -178,7 +178,6 @@ export function Integrations() {
 export function SystemHealth()     { return <Stub title="System Health"      description="Backend service status and error log." />; }
 
 export function ErrorLog()         { return <Stub title="Error Log"          description="Frontend and backend error log." />; }
-export function CompareView()      { return <Stub title="Compare Crawls"     description="Side-by-side comparison of two completed crawls." />; }
 
 export function AuditCustomExtraction()    { return <Stub title="Custom Extraction"  description="Extract custom data points from crawled pages." />; }
 export function AuditLogFile()             { return <Stub title="Log File Intelligence" description="Analyse server log files to understand bot crawl behaviour." />; }
