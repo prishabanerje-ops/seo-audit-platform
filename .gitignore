@@ -10,3 +10,4 @@ frontend/dist/
 google-service-account.json
 coverage/
 .DS_Store
+.worktrees/
