@@ -14,6 +14,7 @@ import { toast }                            from 'sonner';
 import api                 from '../api/index.js';
 import { useSites }        from '../context/SitesContext.jsx';
 import { LoadingSkeleton } from '../components/LoadingSkeleton.jsx';
+import { Button }          from '../components/ui/Button.jsx';
 
 const SEVERITIES = ['critical', 'warning', 'info'];
 
@@ -34,40 +35,51 @@ export function Exports() {
   const [pushing,            setPushing]            = useState(false);
 
   // Load completed crawl jobs when site changes
-  const loadJobs = useCallback(async (sid) => {
+  const loadJobs = useCallback(async (sid, signal) => {
     setLoadingJobs(true);
     setJobs([]);
     setJobId('');
     setSections([]);
     try {
-      const res = await api.get('/exports/jobs', { params: { siteId: sid } });
+      const res = await api.get('/exports/jobs', { params: { siteId: sid }, signal });
       setJobs(res.data.jobs || []);
-    } catch {
-      // toast shown by axios interceptor
+    } catch (err) {
+      if (err.name !== 'CanceledError') { /* interceptor handles toast */ }
     } finally {
       setLoadingJobs(false);
     }
   }, []);
 
   // Load distinct sections present in the selected job
-  const loadSections = useCallback(async (jid) => {
+  const loadSections = useCallback(async (jid, signal) => {
     setLoadingSections(true);
     setSections([]);
     setSelectedSections(new Set());
     try {
-      const res = await api.get('/exports/sections', { params: { jobId: jid } });
+      const res = await api.get('/exports/sections', { params: { jobId: jid }, signal });
       const list = res.data.sections || [];
       setSections(list);
       setSelectedSections(new Set(list));
-    } catch {
-      // toast shown by axios interceptor
+    } catch (err) {
+      if (err.name !== 'CanceledError') { /* interceptor handles toast */ }
     } finally {
       setLoadingSections(false);
     }
   }, []);
 
-  useEffect(() => { if (siteId) loadJobs(siteId); }, [siteId, loadJobs]);
-  useEffect(() => { if (jobId)  loadSections(jobId); }, [jobId, loadSections]);
+  useEffect(() => {
+    if (!siteId) return;
+    const controller = new AbortController();
+    loadJobs(siteId, controller.signal);
+    return () => controller.abort();
+  }, [siteId, loadJobs]);
+
+  useEffect(() => {
+    if (!jobId) return;
+    const controller = new AbortController();
+    loadSections(jobId, controller.signal);
+    return () => controller.abort();
+  }, [jobId, loadSections]);
 
   // Build query params shared between CSV and Sheets
   function buildParams() {
@@ -97,7 +109,7 @@ export function Exports() {
       document.body.removeChild(a);
       URL.revokeObjectURL(blobUrl);
     } catch {
-      toast.error('Failed to download CSV');
+      // toast shown by axios interceptor
     } finally {
       setDownloading(false);
     }
@@ -112,8 +124,8 @@ export function Exports() {
       if (secs)     body.sections  = secs.split(',');
       const res = await api.post('/exports/sheets', body);
       toast.success(`Pushed ${res.data.rowsWritten.toLocaleString()} rows to Sheets`);
-    } catch (err) {
-      toast.error(err.response?.data?.error || 'Failed to push to Sheets');
+    } catch {
+      // toast shown by axios interceptor
     } finally {
       setPushing(false);
     }
@@ -302,40 +314,27 @@ export function Exports() {
           style={{ borderTop: '1px solid var(--border-subtle)' }}
         >
           {/* CSV download */}
-          <button
-            type="button"
+          <Button
+            variant="primary"
+            iconLeft={<Download className="w-4 h-4" />}
             onClick={downloadCsv}
-            disabled={!canExport || downloading}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-opacity"
-            style={{
-              backgroundColor: 'var(--brand)',
-              color: '#fff',
-              opacity: (!canExport || downloading) ? 0.5 : 1,
-              cursor: (!canExport || downloading) ? 'not-allowed' : 'pointer',
-            }}
+            disabled={!canExport}
+            loading={downloading}
           >
-            <Download className="w-4 h-4" />
             {downloading ? 'Downloading…' : 'Download CSV'}
-          </button>
+          </Button>
 
           {/* Sheets push with tooltip when not configured */}
           <div className="relative group">
-            <button
-              type="button"
+            <Button
+              variant="secondary"
+              iconLeft={<FileSpreadsheet className="w-4 h-4" />}
               onClick={pushSheets}
-              disabled={!canExport || !sheetsReady || pushing}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-opacity"
-              style={{
-                backgroundColor: 'var(--bg-raised)',
-                border: '1px solid var(--border-default)',
-                color: (!canExport || !sheetsReady || pushing) ? 'var(--text-muted)' : 'var(--text-primary)',
-                opacity: (!canExport || !sheetsReady || pushing) ? 0.6 : 1,
-                cursor: (!canExport || !sheetsReady || pushing) ? 'not-allowed' : 'pointer',
-              }}
+              disabled={!canExport || !sheetsReady}
+              loading={pushing}
             >
-              <FileSpreadsheet className="w-4 h-4" />
               {pushing ? 'Pushing…' : 'Push to Sheets'}
-            </button>
+            </Button>
 
             {/* Tooltip — only shown when job is selected but Sheets is not configured */}
             {jobId && !sheetsReady && (
