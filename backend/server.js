@@ -36,8 +36,10 @@ import ga4Routes       from './routes/ga4.js';
 import psiRoutes       from './routes/psi.js';
 import aiRoutes        from './routes/ai.js';
 import dashboardRoutes from './routes/dashboard.js';
-import tasksRoutes     from './routes/tasks.js';
+import tasksRoutes      from './routes/tasks.js';
+import schedulesRoutes  from './routes/schedules.js';
 import { resetStuckJobs, getJobUrlBuffer } from './services/crawl-runner.js';
+import { initScheduler } from './services/schedule.service.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -139,7 +141,8 @@ app.use('/api/ga4',       ga4Routes);
 app.use('/api/psi',       psiRoutes);
 app.use('/api/ai',        aiRoutes);
 app.use('/api/dashboard', dashboardRoutes);
-app.use('/api/tasks',    tasksRoutes);
+app.use('/api/tasks',     tasksRoutes);
+app.use('/api/schedules', schedulesRoutes);
 
 // Placeholder 501 for routes not yet implemented (Phase 3+)
 app.use('/api', (req, res) => {
@@ -171,6 +174,9 @@ resetStuckJobs();
 // ─── Seed audit checks ───────────────────────────────────────────────────────
 const seeded = seedAuditChecks(db);
 if (seeded > 0) console.log(`[seed] Inserted ${seeded} audit checks`);
+
+// ─── Scheduled crawls ────────────────────────────────────────────────────────
+initScheduler(db, io);
 
 // ─── Start ────────────────────────────────────────────────────────────────────
 const PORT = parseInt(process.env.PORT || '3001', 10);
