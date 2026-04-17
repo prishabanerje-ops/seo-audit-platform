@@ -36,7 +36,7 @@ function verifyJob(jobId, companyId, role) {
   return { job };
 }
 
-function buildFilterQuery(jobId, severity, sections) {
+function buildFilterQuery(jobId, companyId, role, severity, sections) {
   const severityList = severity ? String(severity).split(',').filter(Boolean) : null;
   const sectionList  = sections  ? String(sections).split(',').filter(Boolean)  : null;
 
@@ -46,6 +46,11 @@ function buildFilterQuery(jobId, severity, sections) {
     WHERE crawl_job_id = ?
   `;
   const params = [jobId];
+
+  if (role !== 'superadmin') {
+    query += ' AND company_id = ?';
+    params.push(companyId);
+  }
 
   if (severityList?.length) {
     query += ` AND severity IN (${severityList.map(() => '?').join(',')})`;
@@ -121,7 +126,7 @@ router.get('/csv', (req, res) => {
     if (check.error) return res.status(check.status).json({ error: check.error });
 
     const { job } = check;
-    const { query, params } = buildFilterQuery(jobId, severity, sections);
+    const { query, params } = buildFilterQuery(jobId, company_id, role, severity, sections);
 
     // Derive filename from site label and crawl date
     const dateStr   = job.started_at ? new Date(job.started_at).toISOString().slice(0, 10) : 'export';
@@ -131,12 +136,16 @@ router.get('/csv', (req, res) => {
     res.setHeader('Content-Type', 'text/csv; charset=utf-8');
     res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
 
+    let cancelled = false;
+    req.on('close', () => { cancelled = true; });
+
     // Write CSV header
     res.write('URL,Section,Issue Type,Severity,Details\r\n');
 
     // Stream rows using better-sqlite3 iterator — memory-efficient for large audits
     const stmt = db.prepare(query);
     for (const row of stmt.iterate(...params)) {
+      if (cancelled) break;
       const cols = [row.url, row.section, row.issue_type, row.severity, row.data || '']
         .map(v => `"${String(v == null ? '' : v).replace(/"/g, '""')}"`);
       res.write(cols.join(',') + '\r\n');
@@ -181,7 +190,7 @@ router.post('/sheets', async (req, res) => {
     const severityStr = Array.isArray(severity) ? severity.join(',') : (severity || null);
     const sectionsStr = Array.isArray(sections)  ? sections.join(',')  : (sections  || null);
 
-    const { query, params } = buildFilterQuery(jobId, severityStr, sectionsStr);
+    const { query, params } = buildFilterQuery(jobId, company_id, role, severityStr, sectionsStr);
     const dbRows = db.prepare(query).all(...params);
 
     const rows = [

@@ -1,5 +1,14 @@
 import { describe, it, expect } from 'vitest';
+import request from 'supertest';
+import app from '../server.js';
+import jwt from 'jsonwebtoken';
 import db from '../db/sqlite.js';
+
+const SECRET = process.env.JWT_SECRET || 'test-secret';
+const cookie = `auth_token=${jwt.sign(
+  { sub: 'u1', email: 'test@test.com', role: 'seo', company_id: 'company-test' },
+  SECRET, { expiresIn: '1h' }
+)}`;
 
 describe('Migration 016 — sheets_spreadsheet_id', () => {
   it('sites table has sheets_spreadsheet_id column', () => {
@@ -7,16 +16,6 @@ describe('Migration 016 — sheets_spreadsheet_id', () => {
     expect(cols).toContain('sheets_spreadsheet_id');
   });
 });
-
-import request from 'supertest';
-import app from '../server.js';
-import jwt from 'jsonwebtoken';
-
-const SECRET = process.env.JWT_SECRET || 'test-secret';
-const cookie = `auth_token=${jwt.sign(
-  { sub: 'u1', email: 'test@test.com', role: 'seo', company_id: 'company-test' },
-  SECRET, { expiresIn: '1h' }
-)}`;
 
 describe('GET /api/exports/jobs', () => {
   it('returns 400 when siteId is missing', async () => {
