@@ -23,8 +23,8 @@ import { AuditLog }      from './pages/AuditLog.jsx';
 import { Settings }      from './pages/Settings.jsx';
 import { Users }         from './pages/Users.jsx';
 
+import { Exports } from './pages/Exports.jsx';
 import {
-  Exports,
   Integrations, SystemHealth,
   ErrorLog, CompareView,
   AuditCustomExtraction, AuditLogFile,
