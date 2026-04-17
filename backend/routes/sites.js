@@ -8,7 +8,7 @@ const router = Router();
 
 const ALLOWED_PATCH_FIELDS = [
   'label', 'url', 'gsc_property', 'ga4_property_id',
-  'color', 'sheets_tab_name', 'linear_project_id', 'project_id',
+  'color', 'sheets_tab_name', 'sheets_spreadsheet_id', 'linear_project_id', 'project_id',
   'crawl_config',
 ];
 
@@ -19,6 +19,7 @@ const siteSchema = z.object({
   ga4_property_id:   z.string().max(100).optional().default(''),
   color:             z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Must be a hex colour').optional().default('#6366f1'),
   sheets_tab_name:   z.string().max(100).optional().default(''),
+  sheets_spreadsheet_id: z.string().max(200).optional().default(''),
   linear_project_id: z.string().max(100).optional().default(''),
   project_id:        z.string().max(100).optional().default(''),
   // Crawl configuration — JSON string serialised by the frontend
@@ -65,12 +66,12 @@ router.post('/', validate(siteSchema), (req, res) => {
   if (!company_id) return res.status(403).json({ error: 'No company context. Select a company first.' });
 
   const id = uuidv4();
-  const { label, url, gsc_property, ga4_property_id, color, sheets_tab_name, linear_project_id, project_id, crawl_config } = req.body;
+  const { label, url, gsc_property, ga4_property_id, color, sheets_tab_name, sheets_spreadsheet_id, linear_project_id, project_id, crawl_config } = req.body;
 
   db.prepare(`
-    INSERT INTO sites (id, company_id, label, url, gsc_property, ga4_property_id, color, sheets_tab_name, linear_project_id, project_id, crawl_config)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `).run(id, company_id, label, url, gsc_property, ga4_property_id, color, sheets_tab_name, linear_project_id, project_id, crawl_config ?? null);
+    INSERT INTO sites (id, company_id, label, url, gsc_property, ga4_property_id, color, sheets_tab_name, sheets_spreadsheet_id, linear_project_id, project_id, crawl_config)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(id, company_id, label, url, gsc_property, ga4_property_id, color, sheets_tab_name, sheets_spreadsheet_id || null, linear_project_id, project_id, crawl_config ?? null);
 
   res.status(201).json(db.prepare('SELECT * FROM sites WHERE id = ?').get(id));
 });
