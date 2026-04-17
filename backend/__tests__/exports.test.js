@@ -59,3 +59,29 @@ describe('GET /api/exports/csv', () => {
     expect(res.status).toBe(401);
   });
 });
+
+describe('POST /api/exports/sheets', () => {
+  it('returns 400 when jobId is missing', async () => {
+    const res = await request(app)
+      .post('/api/exports/sheets')
+      .set('Cookie', cookie)
+      .send({});
+    expect(res.status).toBe(400);
+    expect(res.body.error).toMatch(/jobId/i);
+  });
+
+  it('returns 404 for non-existent job', async () => {
+    const res = await request(app)
+      .post('/api/exports/sheets')
+      .set('Cookie', cookie)
+      .send({ jobId: 'no-such-job' });
+    expect(res.status).toBe(404);
+  });
+
+  it('returns 401 when unauthenticated', async () => {
+    const res = await request(app)
+      .post('/api/exports/sheets')
+      .send({ jobId: 'any' });
+    expect(res.status).toBe(401);
+  });
+});
