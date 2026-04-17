@@ -77,10 +77,11 @@ router.patch('/:id/read', (req, res) => {
   try {
     const { id } = req.params;
 
-    // Verify ownership before updating
+    // Verify ownership + company scope before updating
+    const { clause, params } = buildScopeClause(req.user);
     const existing = db.prepare(
-      'SELECT id FROM notifications WHERE id = ? AND user_id = ?'
-    ).get(id, req.user.sub);
+      `SELECT id FROM notifications WHERE id = ? AND ${clause}`
+    ).get(id, ...params);
 
     if (!existing) {
       return res.status(404).json({ error: 'Notification not found' });
@@ -100,10 +101,11 @@ router.delete('/:id', (req, res) => {
   try {
     const { id } = req.params;
 
-    // Verify ownership before deleting
+    // Verify ownership + company scope before deleting
+    const { clause, params } = buildScopeClause(req.user);
     const existing = db.prepare(
-      'SELECT id FROM notifications WHERE id = ? AND user_id = ?'
-    ).get(id, req.user.sub);
+      `SELECT id FROM notifications WHERE id = ? AND ${clause}`
+    ).get(id, ...params);
 
     if (!existing) {
       return res.status(404).json({ error: 'Notification not found' });
