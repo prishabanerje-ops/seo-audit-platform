@@ -247,8 +247,7 @@ export function TaskDetail() {
           )}
 
           {/* Linear sync */}
-          <div className="py-2" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
-            <p className="text-[10px] font-medium uppercase tracking-wide mb-1.5" style={{ color: 'var(--text-muted)' }}>Linear</p>
+          <MetaField label="Linear">
             {task.linear_url ? (
               <a
                 href={task.linear_url}
@@ -276,7 +275,7 @@ export function TaskDetail() {
                 {syncingLinear ? 'Syncing…' : 'Sync to Linear'}
               </button>
             )}
-          </div>
+          </MetaField>
 
           <MetaField label="Created">
             <p className="text-xs" style={{ color: 'var(--text-muted)' }}>

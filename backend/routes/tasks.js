@@ -2,9 +2,10 @@
  * @module routes/tasks
  * Task board CRUD — reads/writes to task_status and task_comments tables.
  */
-import { Router }     from 'express';
-import { randomUUID } from 'crypto';
-import db             from '../db/sqlite.js';
+import { Router }            from 'express';
+import { randomUUID }        from 'crypto';
+import db                    from '../db/sqlite.js';
+import { createLinearIssue } from '../services/linear.service.js';
 
 const router = Router();
 
@@ -241,13 +242,17 @@ router.post('/:id/sync-linear', async (req, res) => {
     // Get the task row
     const task = db.prepare('SELECT * FROM task_status WHERE id = ?').get(id);
 
+    // Idempotency guard — prevent duplicate Linear issues
+    if (task.linear_ticket_id) {
+      return res.status(409).json({ error: 'Task is already linked to a Linear issue' });
+    }
+
     // Resolve company_id for the API key lookup
     // For superadmin, use the task's site's company_id
     const site = db.prepare('SELECT company_id FROM sites WHERE id = ?').get(task.site_id);
     const targetCompanyId = site?.company_id || company_id;
 
     // Create Linear issue
-    const { createLinearIssue } = await import('../services/linear.service.js');
     const { issueId, url } = await createLinearIssue({
       title:       task.title,
       description: task.description || '',
