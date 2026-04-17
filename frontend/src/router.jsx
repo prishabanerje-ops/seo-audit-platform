@@ -24,11 +24,13 @@ import { Settings }      from './pages/Settings.jsx';
 import { Users }         from './pages/Users.jsx';
 
 import {
-  ScheduledCrawls, Exports, Notifications,
+  Exports, Notifications,
   Integrations, SystemHealth,
   ErrorLog, CompareView,
   AuditCustomExtraction, AuditLogFile,
 } from './pages/stubs.jsx';
+
+import { ScheduledCrawls } from './pages/ScheduledCrawls.jsx';
 
 import { CoreWebVitals } from './pages/CoreWebVitals.jsx';
 import { GscOverlay }    from './pages/GscOverlay.jsx';
