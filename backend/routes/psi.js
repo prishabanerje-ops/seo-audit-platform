@@ -2,13 +2,19 @@
  * @module routes/psi
  * PageSpeed Insights (PSI) API v5 — analyze a URL for Core Web Vitals & performance score.
  */
-import { Router } from 'express';
-import db          from '../db/sqlite.js';
+import { Router }     from 'express';
+import db             from '../db/sqlite.js';
+import { psiLimiter } from '../middleware/rateLimiter.js';
 
 const router = Router();
 
 // ─── GET /api/psi/analyze ─────────────────────────────────────────────────────
-router.get('/analyze', async (req, res) => {
+/**
+ * @route GET /api/psi/analyze
+ * @desc  Runs a PageSpeed Insights analysis for a given URL.
+ * @access auth
+ */
+router.get('/analyze', psiLimiter, async (req, res) => {
   try {
     const { url, strategy = 'mobile' } = req.query;
 
@@ -46,13 +52,15 @@ router.get('/analyze', async (req, res) => {
     psiUrl.searchParams.set('key', apiKey);
 
     const psiRes = await fetch(psiUrl.toString());
-    const psiData = await psiRes.json();
 
-    // 5. Handle PSI API errors
+    // 5. Handle PSI API errors — check ok before parsing body (non-JSON bodies e.g. HTML 429 would throw)
     if (!psiRes.ok) {
-      const message = psiData?.error?.message || `PSI API returned status ${psiRes.status}`;
+      let message = `PSI API returned status ${psiRes.status}`;
+      try { message = (await psiRes.json())?.error?.message || message; } catch (_) {}
       return res.status(502).json({ error: message });
     }
+
+    const psiData = await psiRes.json();
 
     // 6. Extract metrics from lighthouseResult
     const audits     = psiData?.lighthouseResult?.audits || {};

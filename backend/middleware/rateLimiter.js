@@ -29,3 +29,12 @@ export const aiLimiter = rateLimit({
   legacyHeaders: false,
   message: { error: 'Too many AI requests. Please wait a minute.' },
 });
+
+// 15 requests per minute per IP — PageSpeed Insights endpoint (PSI is slow; legitimate users won't exceed this)
+export const psiLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 15,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many PSI requests. Please wait a minute.' },
+});
