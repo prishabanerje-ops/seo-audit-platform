@@ -178,8 +178,9 @@ export function Header() {
   const navigate           = useNavigate();
   const { theme, toggle }  = useTheme();
 
-  const [siteOpen, setSiteOpen]   = useState(false);
-  const [userOpen, setUserOpen]   = useState(false);
+  const [siteOpen,    setSiteOpen]    = useState(false);
+  const [userOpen,    setUserOpen]    = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
   const siteRef = useRef(null);
   const userRef = useRef(null);
 
@@ -191,6 +192,13 @@ export function Header() {
     }
     document.addEventListener('mousedown', handle);
     return () => document.removeEventListener('mousedown', handle);
+  }, []);
+
+  // Fetch unread notification count on mount
+  useEffect(() => {
+    api.get('/notifications', { params: { unread: true } })
+      .then(({ data }) => setUnreadCount(data.unread_count ?? 0))
+      .catch(() => {});
   }, []);
 
   const handleLogout = async () => {
@@ -306,6 +314,13 @@ export function Header() {
           onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--text-muted)'; }}
         >
           <Bell className="w-4 h-4" />
+          {unreadCount > 0 && (
+            <span
+              className="absolute top-1 right-1 w-2 h-2 rounded-full"
+              style={{ backgroundColor: 'var(--severity-critical)' }}
+              aria-label={`${unreadCount} unread notifications`}
+            />
+          )}
         </button>
 
         {/* Theme toggle */}

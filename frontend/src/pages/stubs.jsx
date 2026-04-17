@@ -31,7 +31,6 @@ function Stub({ title, description }) {
 
 export function ScheduledCrawls()  { return <Stub title="Scheduled Crawls"   description="Recurring crawl schedules and history." />; }
 export function Exports()          { return <Stub title="Exports"            description="Download audit reports as CSV or PDF." />; }
-export function Notifications()    { return <Stub title="Notifications"      description="Platform notifications and alert history." />; }
 
 const ADS_PLATFORMS = [
   { id: 'google',   label: 'Google Ads',   color: '#4285F4' },

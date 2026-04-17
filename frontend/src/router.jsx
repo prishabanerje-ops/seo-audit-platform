@@ -24,11 +24,13 @@ import { Settings }      from './pages/Settings.jsx';
 import { Users }         from './pages/Users.jsx';
 
 import {
-  Exports, Notifications,
+  Exports,
   Integrations, SystemHealth,
   ErrorLog, CompareView,
   AuditCustomExtraction, AuditLogFile,
 } from './pages/stubs.jsx';
+
+import { Notifications } from './pages/Notifications.jsx';
 
 import { ScheduledCrawls } from './pages/ScheduledCrawls.jsx';
 
