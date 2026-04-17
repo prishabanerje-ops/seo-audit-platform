@@ -4,7 +4,7 @@ import db from '../db/sqlite.js';
  * Resolve the Slack webhook URL for a given company.
  * Checks company_settings first; falls back to process.env.SLACK_WEBHOOK_URL.
  *
- * @param {number|null} companyId
+ * @param {string|null} companyId
  * @returns {string|null}
  */
 function getWebhookUrl(companyId) {
@@ -32,7 +32,7 @@ export async function sendScheduleNotification(schedule, results) {
     const webhookUrl = getWebhookUrl(schedule.company_id);
 
     if (!webhookUrl) {
-      console.debug(
+      console.warn(
         `[slack] No webhook URL configured for schedule ${schedule.id} (company_id=${schedule.company_id ?? 'none'}) — skipping notification`
       );
       return;
@@ -47,6 +47,15 @@ export async function sendScheduleNotification(schedule, results) {
         : r.reason || r.error || r.status;
       return `${emoji} Site ${r.site_id} — ${detail}`;
     });
+
+    // Slack mrkdwn text fields are capped at 3,000 chars.
+    // Truncate to the first 20 lines and add a suffix if needed.
+    const MAX_RESULT_LINES = 20;
+    const truncated = resultLines.length > MAX_RESULT_LINES;
+    const displayLines = truncated ? resultLines.slice(0, MAX_RESULT_LINES) : resultLines;
+    if (truncated) {
+      displayLines.push(`_…and ${resultLines.length - MAX_RESULT_LINES} more site(s)_`);
+    }
 
     const payload = {
       blocks: [
@@ -83,7 +92,7 @@ export async function sendScheduleNotification(schedule, results) {
           type: 'section',
           text: {
             type: 'mrkdwn',
-            text: resultLines.length > 0 ? resultLines.join('\n') : '_No results_',
+            text: displayLines.length > 0 ? displayLines.join('\n') : '_No results_',
           },
         },
         {
@@ -107,7 +116,8 @@ export async function sendScheduleNotification(schedule, results) {
     if (res.ok) {
       console.log('[slack] Notification sent for schedule:', schedule.id);
     } else {
-      console.warn('[slack] Failed to send notification:', res.status);
+      const body = await res.text().catch(() => '');
+      console.warn(`[slack] Failed to send notification: ${res.status} ${body}`);
     }
   } catch (err) {
     console.warn('[slack] sendScheduleNotification error:', err.message);
