@@ -246,7 +246,7 @@ function ConnectPrompt() {
           display:         'inline-block',
           padding:         '8px 20px',
           backgroundColor: 'var(--brand)',
-          color:           '#fff',
+          color:           'var(--text-inverse)',
           borderRadius:    '8px',
           fontSize:        '13px',
           fontWeight:      600,
@@ -324,7 +324,7 @@ export function GscOverlay() {
       <div style={{ padding: '24px' }}>
         <EmptyState
           icon={Search}
-          message="Select a site to view Search Console data"
+          message="Select a site to view GSC data"
           description="Choose a site from the site selector to see search performance metrics."
         />
       </div>
@@ -391,8 +391,7 @@ export function GscOverlay() {
         </div>
         <EmptyState
           icon={Search}
-          message="No Search Console data available"
-          description="Data sync may still be in progress. Check back shortly."
+          message="No Search Console data available — sync may still be in progress"
         />
       </div>
     );
