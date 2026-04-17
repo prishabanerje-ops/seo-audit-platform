@@ -149,7 +149,10 @@ export function CompareView() {
   }, []);
 
   useEffect(() => {
-    if (!jobIdA || !jobIdB) return;
+    if (!jobIdA || !jobIdB) {
+      setComparison(null); // clear stale result when either picker is reset
+      return;
+    }
     const controller = new AbortController();
     loadComparison(jobIdA, jobIdB, controller.signal);
     return () => controller.abort();
