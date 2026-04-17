@@ -8,7 +8,7 @@
  *
  * No auto-fetch on mount — all analysis is user-triggered.
  */
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Zap, AlertTriangle, Loader2 } from 'lucide-react';
 import api from '../api/index.js';
 import { useSites } from '../context/SitesContext.jsx';
@@ -36,6 +36,7 @@ function getStatus(value, goodMax, needsMax) {
 
 /** Returns the CSS color for a performance score (0–100). */
 function scoreColor(score) {
+  if (score === null || score === undefined) return 'var(--text-muted)';
   if (score >= 90) return 'var(--severity-pass)';
   if (score >= 50) return 'var(--severity-warning)';
   return 'var(--severity-critical)';
@@ -126,7 +127,7 @@ function ScoreGauge({ score }) {
           lineHeight:         1,
         }}
       >
-        {score}
+        {score ?? '–'}
       </span>
       <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: 500 }}>
         Performance Score
@@ -192,6 +193,13 @@ export function CoreWebVitals() {
   const [validationError, setValidationError] = useState(null);
   const [result,    setResult]    = useState(null);
 
+  useEffect(() => {
+    setInputUrl(activeSite?.url ?? '');
+    setResult(null);
+    setError(null);
+    setValidationError(null);
+  }, [activeSite]);
+
   const handleAnalyze = useCallback(async () => {
     // Form validation
     const trimmedUrl = inputUrl.trim();
@@ -214,7 +222,6 @@ export function CoreWebVitals() {
         params: { url: trimmedUrl, strategy },
       });
       setResult(data);
-      setError(null);
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to run analysis. Check PSI API key in Settings.');
       setResult(null);
@@ -284,7 +291,7 @@ export function CoreWebVitals() {
               id="cwv-url"
               type="url"
               value={inputUrl}
-              onChange={e => { setInputUrl(e.target.value); setValidationError(null); }}
+              onChange={e => { setInputUrl(e.target.value); setValidationError(null); setResult(null); }}
               placeholder="https://example.com/page"
               disabled={loading}
               style={{
@@ -370,7 +377,7 @@ export function CoreWebVitals() {
             }}
           >
             {loading
-              ? <Loader2 className="animate-spin" style={{ width: 16, height: 16 }} />
+              ? <Loader2 style={{ width: 16, height: 16, animation: 'spin 1s linear infinite' }} />
               : <Zap style={{ width: 16, height: 16 }} />}
             {loading ? 'Analyzing…' : 'Analyze'}
           </button>
