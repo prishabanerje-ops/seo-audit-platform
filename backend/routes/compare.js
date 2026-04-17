@@ -32,7 +32,7 @@ router.get('/jobs', (req, res) => {
     const jobs = role === 'superadmin'
       ? db.prepare(`
           SELECT j.id, j.site_id, s.label AS siteLabel,
-                 j.started_at, j.total_urls, j.health_score
+                 j.started_at AS startedAt, j.total_urls AS totalUrls, j.health_score AS healthScore
           FROM crawl_jobs j
           JOIN sites s ON s.id = j.site_id
           WHERE j.status = 'completed'
@@ -40,7 +40,7 @@ router.get('/jobs', (req, res) => {
         `).all()
       : db.prepare(`
           SELECT j.id, j.site_id, s.label AS siteLabel,
-                 j.started_at, j.total_urls, j.health_score
+                 j.started_at AS startedAt, j.total_urls AS totalUrls, j.health_score AS healthScore
           FROM crawl_jobs j
           JOIN sites s ON s.id = j.site_id
           WHERE j.status = 'completed' AND s.company_id = ?
