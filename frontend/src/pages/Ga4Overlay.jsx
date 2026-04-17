@@ -11,7 +11,7 @@
  */
 import { useState, useEffect, useCallback } from 'react';
 import { Link }                             from 'react-router';
-import { BarChart2, AlertTriangle, TrendingUp, TrendingDown } from 'lucide-react';
+import { BarChart2, AlertTriangle } from 'lucide-react';
 import api                 from '../api/index.js';
 import { useSites }        from '../context/SitesContext.jsx';
 import { useAuth }         from '../context/AuthContext.jsx';
@@ -370,7 +370,7 @@ export function Ga4Overlay() {
         <PagesTable pages={pages} />
 
         {/* Pagination */}
-        {total > 0 && (
+        {total > 50 && (
           <div
             style={{
               display:        'flex',
