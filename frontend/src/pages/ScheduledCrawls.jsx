@@ -95,7 +95,7 @@ function CreateScheduleModal({ sites, onClose, onCreated }) {
       style={{
         position:        'fixed',
         inset:           0,
-        backgroundColor: 'rgba(0, 0, 0, 0.45)',
+        backgroundColor: 'var(--bg-overlay)',
         display:         'flex',
         alignItems:      'center',
         justifyContent:  'center',
@@ -526,7 +526,28 @@ export function ScheduledCrawls() {
 
   const isAdminLike = user?.role === 'admin' || user?.role === 'superadmin';
 
-  // ── Access guard ───────────────────────────────────────────────────────────
+  // ── Data fetching ──────────────────────────────────────────────────────────
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const params = {};
+      if (user?.role === 'superadmin') {
+        params.company_id = user.company_id;
+      }
+      const { data } = await api.get('/schedules', { params });
+      setSchedules(data.schedules || []);
+    } catch (err) {
+      setError(err.response?.data?.error || 'Failed to load schedules');
+    } finally {
+      setLoading(false);
+    }
+  }, [user]);
+
+  useEffect(() => { load(); }, [load]);
+
+  // ── Access guard (after all hooks) ─────────────────────────────────────────
 
   if (!isAdminLike) {
     return (
@@ -539,29 +560,6 @@ export function ScheduledCrawls() {
       </div>
     );
   }
-
-  // ── Data fetching ──────────────────────────────────────────────────────────
-
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const params = {};
-      if (user?.role === 'superadmin' && user?.company_id) {
-        params.company_id = user.company_id;
-      }
-      const { data } = await api.get('/schedules', { params });
-      setSchedules(data.schedules || []);
-    } catch (err) {
-      setError(err.response?.data?.error || 'Failed to load schedules');
-    } finally {
-      setLoading(false);
-    }
-  }, [user]);
-
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  useEffect(() => { load(); }, [load]);
 
   // ── Actions ────────────────────────────────────────────────────────────────
 
