@@ -38,6 +38,7 @@ import aiRoutes        from './routes/ai.js';
 import dashboardRoutes from './routes/dashboard.js';
 import tasksRoutes      from './routes/tasks.js';
 import schedulesRoutes  from './routes/schedules.js';
+import notificationsRoutes from './routes/notifications.js';
 import { resetStuckJobs, getJobUrlBuffer } from './services/crawl-runner.js';
 import { initScheduler } from './services/schedule.service.js';
 
@@ -142,7 +143,8 @@ app.use('/api/psi',       psiRoutes);
 app.use('/api/ai',        aiRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/tasks',     tasksRoutes);
-app.use('/api/schedules', schedulesRoutes);
+app.use('/api/schedules',      schedulesRoutes);
+app.use('/api/notifications',  notificationsRoutes);
 
 // Placeholder 501 for routes not yet implemented (Phase 3+)
 app.use('/api', (req, res) => {
