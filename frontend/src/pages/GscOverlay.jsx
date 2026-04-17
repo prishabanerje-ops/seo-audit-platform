@@ -89,9 +89,10 @@ const TABS = [
 function TabBar({ active, onChange }) {
   return (
     <div
+      role="tablist"
       style={{
         display:      'flex',
-        gap:          '0',
+        gap:          0,
         borderBottom: '1px solid var(--border)',
         marginBottom: '0',
       }}
@@ -102,6 +103,8 @@ function TabBar({ active, onChange }) {
           <button
             key={tab.id}
             type="button"
+            role="tab"
+            aria-selected={isActive}
             onClick={() => onChange(tab.id)}
             style={{
               padding:         '10px 18px',
@@ -151,6 +154,7 @@ function DataTable({ activeTab, pages, queries }) {
             {headers.map(h => (
               <th
                 key={h}
+                scope="col"
                 style={{
                   padding:   '10px 14px',
                   textAlign: h === headers[0] ? 'left' : 'right',
@@ -170,7 +174,7 @@ function DataTable({ activeTab, pages, queries }) {
             const primaryValue = activeTab === 'pages' ? row.url : row.query;
             return (
               <tr
-                key={idx}
+                key={row.url ?? row.query ?? idx}
                 style={{ borderBottom: '1px solid var(--border)' }}
                 onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'var(--bg-raised)'; }}
                 onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; }}
@@ -191,19 +195,19 @@ function DataTable({ activeTab, pages, queries }) {
                 </td>
                 {/* Clicks */}
                 <td style={{ padding: '10px 14px', textAlign: 'right', color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums' }}>
-                  {row.clicks.toLocaleString()}
+                  {(row.clicks ?? 0).toLocaleString()}
                 </td>
                 {/* Impressions */}
                 <td style={{ padding: '10px 14px', textAlign: 'right', color: 'var(--text-muted)', fontVariantNumeric: 'tabular-nums' }}>
-                  {row.impressions.toLocaleString()}
+                  {(row.impressions ?? 0).toLocaleString()}
                 </td>
                 {/* CTR */}
                 <td style={{ padding: '10px 14px', textAlign: 'right', color: 'var(--text-muted)', fontVariantNumeric: 'tabular-nums' }}>
-                  {(row.ctr * 100).toFixed(1)}%
+                  {((row.ctr ?? 0) * 100).toFixed(1)}%
                 </td>
                 {/* Position */}
                 <td style={{ padding: '10px 14px', textAlign: 'right', color: 'var(--text-muted)', fontVariantNumeric: 'tabular-nums' }}>
-                  {row.position.toFixed(1)}
+                  {(row.position ?? 0).toFixed(1)}
                 </td>
               </tr>
             );
@@ -275,6 +279,17 @@ export function GscOverlay() {
   const [activeTab, setActiveTab] = useState('pages');
 
   const isAdminLike = user?.role === 'admin' || user?.role === 'superadmin';
+
+  const pageHeader = (
+    <div style={{ marginBottom: '24px' }}>
+      <h1 style={{ fontSize: '20px', fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
+        Search Console
+      </h1>
+      <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginTop: '4px', marginBottom: 0 }}>
+        Last 28 days of search performance data
+      </p>
+    </div>
+  );
 
   const load = useCallback(async () => {
     if (!activeSite) return;
@@ -355,15 +370,7 @@ export function GscOverlay() {
   if (isAdminLike && gscConnected === false) {
     return (
       <div style={{ padding: '24px', maxWidth: '960px', margin: '0 auto' }}>
-        {/* Header */}
-        <div style={{ marginBottom: '24px' }}>
-          <h1 style={{ fontSize: '20px', fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
-            Search Console
-          </h1>
-          <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginTop: '4px', marginBottom: 0 }}>
-            Last 28 days of search performance data
-          </p>
-        </div>
+        {pageHeader}
         <ConnectPrompt />
       </div>
     );
@@ -380,15 +387,7 @@ export function GscOverlay() {
   if (!hasData) {
     return (
       <div style={{ padding: '24px', maxWidth: '960px', margin: '0 auto' }}>
-        {/* Header */}
-        <div style={{ marginBottom: '24px' }}>
-          <h1 style={{ fontSize: '20px', fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
-            Search Console
-          </h1>
-          <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginTop: '4px', marginBottom: 0 }}>
-            Last 28 days of search performance data
-          </p>
-        </div>
+        {pageHeader}
         <EmptyState
           icon={Search}
           message="No Search Console data available — sync may still be in progress"
@@ -402,15 +401,7 @@ export function GscOverlay() {
   return (
     <div style={{ padding: '24px', maxWidth: '960px', margin: '0 auto' }}>
 
-      {/* Header */}
-      <div style={{ marginBottom: '24px' }}>
-        <h1 style={{ fontSize: '20px', fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
-          Search Console
-        </h1>
-        <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginTop: '4px', marginBottom: 0 }}>
-          Last 28 days of search performance data
-        </p>
-      </div>
+      {pageHeader}
 
       {/* KPI cards row */}
       <div
@@ -423,21 +414,21 @@ export function GscOverlay() {
       >
         <KpiCard
           label="Clicks"
-          value={summary.clicks.toLocaleString()}
+          value={(summary.clicks ?? 0).toLocaleString()}
           delta={summary.clicks_delta}
         />
         <KpiCard
           label="Impressions"
-          value={summary.impressions.toLocaleString()}
+          value={(summary.impressions ?? 0).toLocaleString()}
           delta={summary.impressions_delta}
         />
         <KpiCard
           label="CTR"
-          value={`${(summary.ctr * 100).toFixed(1)}%`}
+          value={`${((summary.ctr ?? 0) * 100).toFixed(1)}%`}
         />
         <KpiCard
           label="Avg Position"
-          value={summary.position.toFixed(1)}
+          value={(summary.position ?? 0).toFixed(1)}
         />
       </div>
 
@@ -456,11 +447,16 @@ export function GscOverlay() {
         </div>
 
         {/* Table */}
-        <DataTable
-          activeTab={activeTab}
-          pages={pages}
-          queries={queries}
-        />
+        <div
+          role="tabpanel"
+          aria-label={TABS.find(t => t.id === activeTab)?.label}
+        >
+          <DataTable
+            activeTab={activeTab}
+            pages={pages}
+            queries={queries}
+          />
+        </div>
       </div>
     </div>
   );
