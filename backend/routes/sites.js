@@ -71,7 +71,7 @@ router.post('/', validate(siteSchema), (req, res) => {
   db.prepare(`
     INSERT INTO sites (id, company_id, label, url, gsc_property, ga4_property_id, color, sheets_tab_name, sheets_spreadsheet_id, linear_project_id, project_id, crawl_config)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `).run(id, company_id, label, url, gsc_property, ga4_property_id, color, sheets_tab_name, sheets_spreadsheet_id || null, linear_project_id, project_id, crawl_config ?? null);
+  `).run(id, company_id, label, url, gsc_property, ga4_property_id, color, sheets_tab_name, sheets_spreadsheet_id, linear_project_id, project_id, crawl_config ?? null);
 
   res.status(201).json(db.prepare('SELECT * FROM sites WHERE id = ?').get(id));
 });

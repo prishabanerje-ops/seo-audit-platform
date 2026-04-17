@@ -7,6 +7,6 @@
 export function up(db) {
   const cols = db.pragma('table_info(sites)').map(c => c.name);
   if (!cols.includes('sheets_spreadsheet_id')) {
-    db.prepare('ALTER TABLE sites ADD COLUMN sheets_spreadsheet_id TEXT').run();
+    db.prepare('ALTER TABLE sites ADD COLUMN sheets_spreadsheet_id TEXT DEFAULT NULL').run();
   }
 }
