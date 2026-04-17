@@ -224,4 +224,64 @@ router.post('/:id/comments', (req, res) => {
   }
 });
 
+// ─── POST /api/tasks/:id/sync-linear ─────────────────────────────────────────
+router.post('/:id/sync-linear', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { company_id, role, sub } = req.user;
+
+    // Only admin/superadmin can sync to Linear
+    if (role !== 'admin' && role !== 'superadmin') {
+      return res.status(403).json({ error: 'Admin access required to sync with Linear' });
+    }
+
+    const check = verifyTaskOwnership(id, company_id, role);
+    if (check.error) return res.status(check.status).json({ error: check.error });
+
+    // Get the task row
+    const task = db.prepare('SELECT * FROM task_status WHERE id = ?').get(id);
+
+    // Resolve company_id for the API key lookup
+    // For superadmin, use the task's site's company_id
+    const site = db.prepare('SELECT company_id FROM sites WHERE id = ?').get(task.site_id);
+    const targetCompanyId = site?.company_id || company_id;
+
+    // Create Linear issue
+    const { createLinearIssue } = await import('../services/linear.service.js');
+    const { issueId, url } = await createLinearIssue({
+      title:       task.title,
+      description: task.description || '',
+      companyId:   targetCompanyId,
+    });
+
+    // Update task_status with Linear URL
+    const now = new Date().toISOString();
+    db.prepare(
+      `UPDATE task_status SET linear_ticket_id = ?, linear_url = ?, updated_at = ? WHERE id = ?`
+    ).run(issueId, url, now, id);
+
+    // Insert into linear_tickets
+    db.prepare(`
+      INSERT INTO linear_tickets (id, site_id, linear_issue_id, linear_url, title, created_at, created_by, company_id)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `).run(randomUUID(), task.site_id, issueId, url, task.title, now, sub, targetCompanyId);
+
+    // Return updated task
+    const updated = db.prepare(`
+      SELECT t.*, u.name AS assignee_name, u.email AS assignee_email,
+        s.label AS site_label, s.color AS site_color
+      FROM task_status t
+      LEFT JOIN users u ON u.id = t.assignee_id
+      LEFT JOIN sites s ON s.id = t.site_id
+      WHERE t.id = ?
+    `).get(id);
+
+    res.json({ task: updated });
+  } catch (err) {
+    console.error('[tasks] POST /:id/sync-linear error:', err);
+    const message = err.message?.includes('Linear') ? err.message : 'Failed to sync with Linear';
+    res.status(500).json({ error: message });
+  }
+});
+
 export default router;

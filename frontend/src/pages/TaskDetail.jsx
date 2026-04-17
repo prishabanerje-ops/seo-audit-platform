@@ -57,6 +57,7 @@ export function TaskDetail() {
   const [newComment, setNewComment] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [saving,     setSaving]   = useState(false);
+  const [syncingLinear, setSyncingLinear] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -82,6 +83,19 @@ export function TaskDetail() {
       // toast shown by interceptor
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function syncLinear() {
+    setSyncingLinear(true);
+    try {
+      const res = await api.post(`/tasks/${id}/sync-linear`);
+      setTask(res.data.task);
+      toast.success('Synced to Linear');
+    } catch (err) {
+      toast.error(err.response?.data?.error || 'Failed to sync to Linear');
+    } finally {
+      setSyncingLinear(false);
     }
   }
 
@@ -232,8 +246,10 @@ export function TaskDetail() {
             </MetaField>
           )}
 
-          {task.linear_url && (
-            <MetaField label="Linear">
+          {/* Linear sync */}
+          <div className="py-2" style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+            <p className="text-[10px] font-medium uppercase tracking-wide mb-1.5" style={{ color: 'var(--text-muted)' }}>Linear</p>
+            {task.linear_url ? (
               <a
                 href={task.linear_url}
                 target="_blank"
@@ -243,8 +259,24 @@ export function TaskDetail() {
               >
                 View in Linear <ExternalLink className="w-3 h-3" />
               </a>
-            </MetaField>
-          )}
+            ) : (
+              <button
+                type="button"
+                onClick={syncLinear}
+                disabled={syncingLinear}
+                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors"
+                style={{
+                  backgroundColor: 'var(--bg-raised)',
+                  border: '1px solid var(--border-default)',
+                  color: syncingLinear ? 'var(--text-muted)' : 'var(--text-primary)',
+                  opacity: syncingLinear ? 0.7 : 1,
+                  cursor: syncingLinear ? 'not-allowed' : 'pointer',
+                }}
+              >
+                {syncingLinear ? 'Syncing…' : 'Sync to Linear'}
+              </button>
+            )}
+          </div>
 
           <MetaField label="Created">
             <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
