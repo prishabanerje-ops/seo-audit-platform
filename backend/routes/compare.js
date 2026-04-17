@@ -74,14 +74,14 @@ router.get('/', (req, res) => {
     const { job: jB } = checkB;
 
     // Aggregate counts per (section, issue_type, severity) for each job
-    const aggQuery = `
+    const aggStmt = db.prepare(`
       SELECT section, issue_type, severity, COUNT(*) AS count
       FROM audit_results
       WHERE crawl_job_id = ?
       GROUP BY section, issue_type, severity
-    `;
-    const rowsA = db.prepare(aggQuery).all(jobA);
-    const rowsB = db.prepare(aggQuery).all(jobB);
+    `);
+    const rowsA = aggStmt.all(jobA);
+    const rowsB = aggStmt.all(jobB);
 
     // Build lookup maps keyed by "section|||issue_type|||severity"
     const mapA = {};
@@ -101,7 +101,7 @@ router.get('/', (req, res) => {
       const [section, issue_type, severity] = key.split('|||');
       const countA = mapA[key] || 0;
       const countB = mapB[key] || 0;
-      const delta  = countB - countA;
+      const delta  = countB - countA; // positive = more issues in B (regression)
 
       if (severity === 'critical')     { criticalA += countA; criticalB += countB; }
       else if (severity === 'warning') { warningA  += countA; warningB  += countB; }
