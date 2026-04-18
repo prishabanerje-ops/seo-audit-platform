@@ -91,7 +91,7 @@ router.get('/:siteId/category', (req, res) => {
   }
 
   if (!jobId) {
-    return res.json({ jobId: null, section, groups: [] });
+    return res.json({ jobId: null, section, groups: [], covered: false });
   }
 
   const groups = db.prepare(`
