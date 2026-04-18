@@ -11,6 +11,7 @@ import db                 from '../db/sqlite.js';
 import { crawl }          from '../../playwright-crawler/src/index.js';
 import { toSfFormat }     from '../../playwright-crawler/src/index.js';
 import { parseAndStoreFromDatasets } from './audit-parser.service.js';
+import { runRankingsAudit }          from './rankings-audit.service.js';
 import { fetchUrlsFromSitemaps }     from './sitemap-fetcher.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -220,9 +221,12 @@ export async function startCrawl(job, io) {
     const datasets = toSfFormat(pages);
     const count = parseAndStoreFromDatasets(datasets, job.id, job.site_id, job.company_id || null, siteData);
 
-    console.log(`[crawl-runner] Parsed ${count} findings for job ${job.id}`);
-    io.to(`job:${job.id}`).emit('crawl:parsed', { jobId: job.id, findings: count });
-    io.emit('crawl:updated', { jobId: job.id, status: 'completed', findings: count });
+    const rankingsCount = runRankingsAudit(job.site_id, job.id, job.company_id || null);
+    const totalCount    = count + rankingsCount;
+
+    console.log(`[crawl-runner] Parsed ${count} findings + ${rankingsCount} rankings findings for job ${job.id}`);
+    io.to(`job:${job.id}`).emit('crawl:parsed', { jobId: job.id, findings: totalCount });
+    io.emit('crawl:updated', { jobId: job.id, status: 'completed', findings: totalCount });
 
   } catch (err) {
     // Ignore errors that are just a side-effect of cancellation
