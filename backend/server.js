@@ -99,6 +99,8 @@ io.on('connection', (socket) => {
   socket.on('leave:job', (jobId) => socket.leave(`job:${jobId}`));
   socket.on('join:company',  (companyId) => socket.join(`company:${companyId}`));
   socket.on('leave:company', (companyId) => socket.leave(`company:${companyId}`));
+  socket.on('join:site',     (siteId)    => socket.join(`site:${siteId}`));
+  socket.on('leave:site',    (siteId)    => socket.leave(`site:${siteId}`));
 });
 
 // ─── Global Auth ─────────────────────────────────────────────────────────────

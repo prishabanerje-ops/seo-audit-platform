@@ -4,6 +4,7 @@
  */
 import { Router } from 'express';
 import db         from '../db/sqlite.js';
+import { runSpeedAudit } from '../services/speed-audit.service.js';
 
 const router = Router();
 
@@ -513,6 +514,60 @@ router.get('/:siteId/issues/export', (req, res) => {
   } catch (err) {
     console.error('[reports] GET /:siteId/issues/export error:', err);
     res.status(500).json({ error: 'Failed to generate export' });
+  }
+});
+
+// ─── POST /api/reports/:siteId/speed-audit ────────────────────────────────────
+/**
+ * @route POST /api/reports/:siteId/speed-audit
+ * @desc  Trigger an on-demand PageSpeed Insights audit for a site.
+ *        Responds 202 immediately; progress is emitted via Socket.io
+ *        to the site:${siteId} room (speed:start, speed:progress, speed:complete, speed:error).
+ * @access auth
+ */
+router.post('/:siteId/speed-audit', async (req, res) => {
+  try {
+    const { siteId }             = req.params;
+    const { company_id, role }   = req.user;
+
+    // Verify site exists and belongs to this company
+    const site = db.prepare('SELECT id, url, company_id FROM sites WHERE id = ?').get(siteId);
+    if (!site) return res.status(404).json({ error: 'Site not found' });
+    if (role !== 'superadmin' && site.company_id !== company_id) {
+      return res.status(403).json({ error: 'Access denied' });
+    }
+
+    // Require PSI API key before starting
+    const apiKey = process.env.PSI_API_KEY ||
+      db.prepare(`SELECT value FROM settings WHERE key = 'psi_api_key'`).get()?.value;
+    if (!apiKey) {
+      return res.status(503).json({
+        error: 'PSI API key not configured. Add PSI_API_KEY to .env or Settings.',
+      });
+    }
+
+    // Require at least one completed crawl job so we have a valid job FK
+    const latestJob = db.prepare(`
+      SELECT id FROM crawl_jobs
+      WHERE site_id = ? AND status = 'completed'
+      ORDER BY completed_at DESC
+      LIMIT 1
+    `).get(siteId);
+    if (!latestJob) {
+      return res.status(422).json({ error: 'Run a crawl before triggering the speed audit.' });
+    }
+
+    // Accept immediately — audit runs in background
+    res.status(202).json({ message: 'Speed audit started', siteId });
+
+    const io = req.app.get('io');
+    runSpeedAudit(siteId, latestJob.id, site.company_id, io).catch((err) => {
+      console.error(`[reports] speed-audit background error for site ${siteId}:`, err);
+    });
+
+  } catch (err) {
+    console.error('[reports] POST /:siteId/speed-audit error:', err);
+    if (!res.headersSent) res.status(500).json({ error: 'Failed to start speed audit' });
   }
 });
 
