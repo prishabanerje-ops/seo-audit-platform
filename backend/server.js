@@ -184,13 +184,15 @@ if (seeded > 0) console.log(`[seed] Inserted ${seeded} audit checks`);
 // ─── Scheduled crawls ────────────────────────────────────────────────────────
 initScheduler(db, io);
 
-// ─── Start ────────────────────────────────────────────────────────────────────
-const PORT = parseInt(process.env.PORT || '3001', 10);
-httpServer.listen(PORT, () => {
-  console.log(`\n[server] SEO Audit Platform v2.0.0`);
-  console.log(`[server] Listening on http://localhost:${PORT}`);
-  console.log(`[server] Crawler: playwright`);
-  console.log(`[server] Env:  ${process.env.NODE_ENV || 'development'}\n`);
-});
+// ─── Start (only when run directly, not when imported by tests) ──────────────
+if (process.argv[1] && new URL(import.meta.url).pathname === process.argv[1]) {
+  const PORT = parseInt(process.env.PORT || '3001', 10);
+  httpServer.listen(PORT, () => {
+    console.log(`\n[server] SEO Audit Platform v2.0.0`);
+    console.log(`[server] Listening on http://localhost:${PORT}`);
+    console.log(`[server] Crawler: playwright`);
+    console.log(`[server] Env:  ${process.env.NODE_ENV || 'development'}\n`);
+  });
+}
 
 export default app;
