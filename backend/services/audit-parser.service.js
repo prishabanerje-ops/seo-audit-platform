@@ -459,6 +459,110 @@ function checkStructuredDataValidation(errorRows, warningRows, jobId, siteId) {
   return findings;
 }
 
+function checkRobotsIndexability(robots, siteOrigin, jobId, siteId) {
+  const findings = [];
+  if (!robots) return findings;
+
+  const robotsUrl = `${siteOrigin}/robots.txt`;
+
+  if (!robots.robotsTxtExists) {
+    findings.push({
+      crawlJobId: jobId, siteId,
+      section: 'Robots & Indexability', url: robotsUrl,
+      severity: 'warning', issueType: 'Missing Robots.txt',
+      data: JSON.stringify({ statusCode: robots.robotsTxtStatusCode }),
+    });
+    return findings;
+  }
+
+  const disallowAllWildcard  = robots.disallowRules.some(r => r.agent === '*' && r.path === '/');
+  const disallowAllGooglebot = robots.disallowRules.some(r => r.agent === 'Googlebot' && r.path === '/');
+
+  if (disallowAllWildcard) {
+    findings.push({
+      crawlJobId: jobId, siteId,
+      section: 'Robots & Indexability', url: robotsUrl,
+      severity: 'critical', issueType: 'Disallow All in Robots.txt',
+      data: JSON.stringify({ agent: '*' }),
+    });
+  }
+
+  if (disallowAllGooglebot) {
+    findings.push({
+      crawlJobId: jobId, siteId,
+      section: 'Robots & Indexability', url: robotsUrl,
+      severity: 'critical', issueType: 'Googlebot Blocked in Robots.txt',
+      data: JSON.stringify({ agent: 'Googlebot' }),
+    });
+  }
+
+  if (robots.hasMalformedRules) {
+    findings.push({
+      crawlJobId: jobId, siteId,
+      section: 'Robots & Indexability', url: robotsUrl,
+      severity: 'warning', issueType: 'Malformed Robots.txt Rules',
+      data: JSON.stringify({}),
+    });
+  }
+
+  if (!robots.sitemapDeclared) {
+    findings.push({
+      crawlJobId: jobId, siteId,
+      section: 'Robots & Indexability', url: robotsUrl,
+      severity: 'info', issueType: 'Sitemap Not Declared in Robots.txt',
+      data: JSON.stringify({}),
+    });
+  }
+
+  return findings;
+}
+
+function checkSitemap(sitemap, siteOrigin, jobId, siteId) {
+  const findings = [];
+  if (!sitemap) return findings;
+
+  const sitemapUrl = sitemap.sitemapUrl || `${siteOrigin}/sitemap.xml`;
+
+  if (!sitemap.sitemapExists) {
+    findings.push({
+      crawlJobId: jobId, siteId,
+      section: 'Sitemaps', url: sitemapUrl,
+      severity: 'critical', issueType: 'Missing Sitemap.xml',
+      data: JSON.stringify({}),
+    });
+    return findings;
+  }
+
+  if (sitemap.oversized) {
+    findings.push({
+      crawlJobId: jobId, siteId,
+      section: 'Sitemaps', url: sitemapUrl,
+      severity: 'warning', issueType: 'Sitemap Too Large (>50k URLs)',
+      data: JSON.stringify({ totalUrlCount: sitemap.totalUrlCount }),
+    });
+  }
+
+  if (sitemap.parseErrors?.length > 0) {
+    findings.push({
+      crawlJobId: jobId, siteId,
+      section: 'Sitemaps', url: sitemapUrl,
+      severity: 'warning', issueType: 'Sitemap Parse Errors',
+      data: JSON.stringify({ errors: sitemap.parseErrors.slice(0, 5) }),
+    });
+  }
+
+  if (sitemap.invalidUrls?.length > 0) {
+    findings.push({
+      crawlJobId: jobId, siteId,
+      section: 'Sitemaps', url: sitemapUrl,
+      severity: 'warning', issueType: 'Sitemap Contains Invalid URLs',
+      data: JSON.stringify({ count: sitemap.invalidUrls.length, examples: sitemap.invalidUrls.slice(0, 3) }),
+    });
+  }
+
+  return findings;
+}
+
 // ─── Public API ───────────────────────────────────────────────────────────────
 
 /**
@@ -469,10 +573,18 @@ function checkStructuredDataValidation(errorRows, warningRows, jobId, siteId) {
  * @param {string} jobId      — crawl_jobs.id
  * @param {string} siteId     — sites.id
  * @param {string|null} companyId
+ * @param {{ robots: object|null, sitemap: object|null }|null} siteData
  * @returns {number}          — total findings inserted
  */
-export function parseAndStoreFromDatasets(datasets, jobId, siteId, companyId = null) {
+export function parseAndStoreFromDatasets(datasets, jobId, siteId, companyId = null, siteData = null) {
   console.log(`[audit-parser] Starting parse for job ${jobId} (site ${siteId})`);
+
+  // Derive site origin from the first crawled page (for site-level finding URLs)
+  let siteOrigin = '';
+  try {
+    const firstAddr = (datasets.internal_all || [])[0]?.['Address'];
+    if (firstAddr) siteOrigin = new URL(firstAddr).origin;
+  } catch { /* ignore */ }
 
   const allFindings = [];
 
@@ -481,6 +593,11 @@ export function parseAndStoreFromDatasets(datasets, jobId, siteId, companyId = n
     console.log(`[audit-parser] ${label}: ${f.length} finding(s)`);
     allFindings.push(...f);
   };
+
+  if (siteData) {
+    run('Robots & Indexability', () => checkRobotsIndexability(siteData.robots, siteOrigin, jobId, siteId));
+    run('Sitemaps',              () => checkSitemap(siteData.sitemap, siteOrigin, jobId, siteId));
+  }
 
   run('Response Codes',  () => checkResponseCodes(datasets.response_codes_all || [], jobId, siteId));
   run('Page Titles',     () => checkPageTitles(datasets.page_titles_all || [], jobId, siteId));
