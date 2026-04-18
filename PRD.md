@@ -4,7 +4,7 @@
 >
 > **Do not guess. Do not infer missing product behavior unless explicitly confirmed.**
 >
-> **Last updated:** April 2026 — Phase 6 complete. Scheduled crawls (node-cron, `/api/schedules`, `ScheduledCrawls.jsx`), notifications feed (`/api/notifications`, `Notifications.jsx`, Header bell badge), Slack webhook service (`slack.service.js`), and Linear sync (`linear.service.js`, `POST /api/tasks/:id/sync-linear`, TaskDetail "Sync to Linear" button).
+> **Last updated:** April 2026 — Phase 7 complete. Integration Hub (`/integrations`, 27 integrations, tab-strip, inline expand panels), Compare Crawls (`/audit/compare`, delta summary + diff table), AuditCategories picker (`/audit/categories`), per-issue CSV export (`GET /api/reports/:siteId/issues/export`), Settings refactored to SMTP + Global only (integration tabs moved to Integration Hub), OAuth callbacks redirected to `/integrations`, `covered` boolean added to category API response. Phase 10 planned: Feature A — Skills Library (platform-wide AI instruction layer) and Feature B — Content Pipeline (8-step multi-model content generation).
 
 ---
 
@@ -233,6 +233,9 @@ Migration runner: `backend/db/sqlite.js`. Tracks applied migrations in `_migrati
 | `012_company_settings.js` | Adds `company_settings` (key-value settings per company) and `company_oauth_tokens` (GSC/GA4 OAuth tokens per company) tables |
 | `013_site_crawl_config.js` | Adds `crawl_config TEXT` column to `sites` table — stores per-site default crawl configuration as a JSON string |
 | `015_ai_suggestions_per_url.js` | Adds `result_id INTEGER` (FK → `audit_results.id`, UNIQUE INDEX where NOT NULL) and `feedback INTEGER` (thumbs up +1 / thumbs down -1 / null) columns to `ai_suggestions` |
+| `016_sheets_spreadsheet_id.js` | Adds `sheets_spreadsheet_id` to `company_settings` |
+| `017_skills_library.js` | Adds `content_skills` table. Platform-wide AI instruction layer (Phase 10a). |
+| `018_content_pipeline.js` | Adds `content_pipeline_runs`, `content_pipeline_steps`, `content_pages`, `content_pipeline_logs` tables. Adds `publish_webhook_url` column to `sites`. (Phase 10b). |
 
 ### Tables
 
@@ -315,6 +318,7 @@ Visible only to superadmin. Accessible via Phase 2 Audit Log page under the Admi
 | `color` | TEXT | Hex colour, default `#6366f1` |
 | `sheets_tab_name` | TEXT | For Google Sheets export |
 | `linear_project_id` | TEXT | For Linear sync |
+| `publish_webhook_url` | TEXT | nullable. URL called on content publish (Phase 10b). POST with JSON content page payload. |
 | `created_at` | TIMESTAMP | |
 
 #### `crawl_jobs`
@@ -466,6 +470,146 @@ Seeded by: `scripts/seed-checks.js` (run via `npm run seed`).
 | `rating` | INTEGER | 1 = helpful, -1 = not helpful |
 | `created_at` | TIMESTAMP | |
 | UNIQUE | (suggestion_id, user_id) | |
+
+#### `content_skills` (added migration 017 — Phase 10a)
+Platform-wide AI instruction layer. Skills are injected into AI prompts across the entire platform — both audit check suggestions and content pipeline steps.
+
+| Column | Type | Notes |
+|---|---|---|
+| `id` | TEXT PK | UUID |
+| `company_id` | TEXT | FK → companies. NULL for global platform skills. |
+| `name` | TEXT NOT NULL | Display name e.g. "E-E-A-T Compliance Rules" |
+| `description` | TEXT | One-line summary of what this skill does |
+| `skill_type` | TEXT | `writing_style \| seo_rules \| brand_voice \| reference \| tone \| custom` |
+| `content` | TEXT NOT NULL | The actual instruction text injected into prompts |
+| `applies_to_steps` | TEXT | JSON array of step numbers e.g. `[4,5]`. NULL = applies to all steps. For audit suggestions, treated as applicable always. |
+| `applies_to_categories` | TEXT | JSON array of audit category names e.g. `["Content","Title Tags"]`. NULL = all categories. |
+| `is_global` | INTEGER | `1` = platform-managed skill (superadmin only). `0` = company skill (admin/superadmin). |
+| `is_active` | INTEGER | `1` = active, `0` = disabled. Default 1. |
+| `created_by` | TEXT | user.id |
+| `created_at` | TIMESTAMP | |
+| `updated_at` | TIMESTAMP | |
+
+**Permission rules:**
+- `is_global = 1`: only superadmin can create, edit, or delete
+- `is_global = 0`, company skill: admin or superadmin of that company can create/edit/delete
+- `seo` and `readonly` roles: view only, cannot modify
+
+**Auto-application rules (audit suggestions):**
+Skills are injected automatically based on `applies_to_categories` matching the audit check's category. Company skills for the requesting company are always included if active. Global skills are always included if active and category matches.
+
+**Auto-application rules (content pipeline):**
+Skills injected per step based on `applies_to_steps`. If null, injected into all steps.
+
+**Pre-seeded global skills (seeded on migration 017):**
+| Name | Skill Type | Applies To Categories | Applies To Steps |
+|---|---|---|---|
+| Title Tag Rules | seo_rules | Title Tags | 4, 7 |
+| Meta Description Rules | seo_rules | Meta Description | 4, 7 |
+| Heading Structure Rules | seo_rules | Headings | 4, 5, 7 |
+| E-E-A-T Compliance Guidelines | seo_rules | Content | 4, 5, 7 |
+| Keyword Density Rules | seo_rules | Content | 5, 7 |
+| Internal Linking Strategy | seo_rules | Internal Linking | 5, 7 |
+| Schema Markup Guidelines | seo_rules | Schema / Structured Data | 7 |
+| AIO Content Quality Framework | seo_rules | LLM / AI Crawlers | 4, 5 |
+
+#### `content_pipeline_runs` (added migration 018 — Phase 10b)
+| Column | Type | Notes |
+|---|---|---|
+| `id` | TEXT PK | UUID |
+| `company_id` | TEXT | FK → companies |
+| `site_id` | TEXT | FK → sites |
+| `created_by` | TEXT | FK → users.id |
+| `status` | TEXT | `pending \| running \| awaiting_trust_review \| trust_rejected \| completed \| failed \| cancelled` |
+| `input_keyword` | TEXT | Seed keyword provided by user |
+| `input_context` | TEXT | JSON — `{ business_type, page_type, target_url?, extra_instructions? }` |
+| `model_config` | TEXT | JSON — per-step model priority overrides set by user at run creation. Shape: `{ "1": ["deepseek","claude","openai"], "3": ["gemini","claude"], ... }` |
+| `current_step` | INTEGER | 1–8. Which step is currently running. |
+| `skill_ids` | TEXT | JSON array of `content_skills.id` values selected for this run |
+| `started_at` | TIMESTAMP | |
+| `completed_at` | TIMESTAMP | |
+| `error_message` | TEXT | Max 1000 chars. Set on failure. |
+| `created_at` | TIMESTAMP | |
+
+**Default model priority per step (overridable per run):**
+| Step | Default Priority |
+|---|---|
+| 1 — Keyword Expansion | deepseek → claude → openai → gemini |
+| 2 — Funnel Mapping | custom logic (no AI) |
+| 3 — Intent Classification | gemini → claude → openai → deepseek |
+| 4 — Content Brief | openai → claude → gemini → deepseek |
+| 5 — Content Generation | claude (extended thinking) → openai → gemini |
+| 6 — Trust Layer | human gate (no AI) |
+| 7 — SEO Optimization | openai → claude → gemini → deepseek |
+| 8 — Publish | system action (no AI) |
+
+**Auto-fallback:** If the primary model's API key is not configured or the API returns an error, the pipeline automatically tries the next model in the priority list. Failure is only recorded if all models in the list fail.
+
+#### `content_pipeline_steps` (added migration 018 — Phase 10b)
+| Column | Type | Notes |
+|---|---|---|
+| `id` | TEXT PK | UUID |
+| `run_id` | TEXT | FK → content_pipeline_runs. CASCADE DELETE. |
+| `company_id` | TEXT | FK → companies |
+| `step_number` | INTEGER | 1–8 |
+| `step_name` | TEXT | Human-readable e.g. "Keyword Expansion" |
+| `model_used` | TEXT | Model that actually ran e.g. `claude-sonnet-4-6`, `deepseek-chat`, `custom-logic` |
+| `prompt_used` | TEXT | Full prompt sent to model (including injected skills) |
+| `raw_output` | TEXT | Raw response from model |
+| `parsed_output` | TEXT | JSON — structured version of raw_output |
+| `status` | TEXT | `pending \| running \| completed \| failed \| skipped \| awaiting_trust_review` |
+| `tokens_used` | INTEGER | Total tokens for this step |
+| `cost_usd` | REAL | Estimated cost in USD |
+| `duration_ms` | INTEGER | How long this step took |
+| `started_at` | TIMESTAMP | |
+| `completed_at` | TIMESTAMP | |
+| `error_message` | TEXT | |
+
+#### `content_pages` (added migration 018 — Phase 10b)
+| Column | Type | Notes |
+|---|---|---|
+| `id` | TEXT PK | UUID |
+| `run_id` | TEXT | FK → content_pipeline_runs |
+| `company_id` | TEXT | FK → companies |
+| `site_id` | TEXT | FK → sites |
+| `created_by` | TEXT | FK → users.id |
+| `title` | TEXT | Page title |
+| `meta_title` | TEXT | SEO meta title (max 60 chars) |
+| `meta_description` | TEXT | SEO meta description (max 160 chars) |
+| `h1` | TEXT | Main heading |
+| `content_html` | TEXT | Full HTML content |
+| `content_markdown` | TEXT | Markdown version |
+| `target_keyword` | TEXT | Primary keyword |
+| `secondary_keywords` | TEXT | JSON array |
+| `schema_markup` | TEXT | JSON-LD schema as string |
+| `internal_links` | TEXT | JSON array of suggested internal links |
+| `word_count` | INTEGER | |
+| `readability_score` | REAL | |
+| `seo_score` | INTEGER | 0–100 |
+| `status` | TEXT | `draft \| review \| approved \| published \| rejected` |
+| `published_at` | TIMESTAMP | |
+| `published_url` | TEXT | URL where content was published |
+| `override_fields` | TEXT | JSON — fields manually edited by user. These are NEVER overwritten by automation. |
+| `last_updated_by` | TEXT | `system` or user.id |
+| `created_at` | TIMESTAMP | |
+| `updated_at` | TIMESTAMP | |
+
+**Override protection:** Any field edited via `PATCH /api/content/pages/:id` is added to `override_fields`. The system will never overwrite a field listed in `override_fields` during update loops or re-generation.
+
+#### `content_pipeline_logs` (added migration 018 — Phase 10b)
+Append-only event log. Every pipeline action logged here.
+
+| Column | Type | Notes |
+|---|---|---|
+| `id` | TEXT PK | UUID |
+| `run_id` | TEXT | FK → content_pipeline_runs |
+| `step_id` | TEXT | FK → content_pipeline_steps. Nullable. |
+| `company_id` | TEXT | FK → companies |
+| `site_id` | TEXT | FK → sites |
+| `event_type` | TEXT | `run_started \| step_started \| step_completed \| step_failed \| model_fallback \| trust_waiting \| trust_approved \| trust_rejected \| content_generated \| content_published \| content_rejected \| manual_override \| update_loop_triggered` |
+| `event_data` | TEXT | JSON — full context of the event |
+| `actor` | TEXT | `system` or user.id |
+| `created_at` | TIMESTAMP | |
 
 #### `task_status`
 | Column | Type | Notes |
@@ -768,7 +912,7 @@ All routes require `superadmin` role.
 | Method | Path | Auth | Request | Response |
 |---|---|---|---|---|
 | GET | `/api/gsc/auth` | Admin or Superadmin | `?company_id=` (superadmin) | `{ authUrl }` — Google OAuth initiation URL |
-| GET | `/api/gsc/callback` | Public (OAuth callback) | `?code=&state=` | Redirects to `/settings?gsc_connected=1` or `/settings?gsc_error=...`. Stores tokens in `company_oauth_tokens`. |
+| GET | `/api/gsc/callback` | Public (OAuth callback) | `?code=&state=` | Redirects to `/integrations?gsc_connected=1` or `/integrations?gsc_error=...`. Stores tokens in `company_oauth_tokens`. |
 | GET | `/api/gsc/status` | Admin or Superadmin | `?company_id=` | `{ connected, connected_email, connected_at }` |
 | DELETE | `/api/gsc/disconnect` | Admin or Superadmin | `?company_id=` | `{ ok: true }`. Removes token row. |
 | GET | `/api/gsc/properties` | Admin or Superadmin | `?company_id=` | `{ properties: [{ url, permission_level }] }`. Auto-refreshes token if expired. |
@@ -778,7 +922,7 @@ All routes require `superadmin` role.
 | Method | Path | Auth | Request | Response |
 |---|---|---|---|---|
 | GET | `/api/ga4/auth` | Admin or Superadmin | `?company_id=` (superadmin) | `{ authUrl }` — Google OAuth initiation URL |
-| GET | `/api/ga4/callback` | Public (OAuth callback) | `?code=&state=` | Redirects to `/settings?ga4_connected=1` or `/settings?ga4_error=...`. Stores tokens in `company_oauth_tokens`. |
+| GET | `/api/ga4/callback` | Public (OAuth callback) | `?code=&state=` | Redirects to `/integrations?ga4_connected=1` or `/integrations?ga4_error=...`. Stores tokens in `company_oauth_tokens`. |
 | GET | `/api/ga4/status` | Admin or Superadmin | `?company_id=` | `{ connected, connected_email, connected_at }` |
 | DELETE | `/api/ga4/disconnect` | Admin or Superadmin | `?company_id=` | `{ ok: true }`. Removes token row. |
 | GET | `/api/ga4/properties` | Admin or Superadmin | `?company_id=` | `{ properties: [{ name, display_name, property_id }] }`. Auto-refreshes token if expired. |
@@ -888,10 +1032,18 @@ All routes require authentication.
 
 | Method | Path | Auth | Request | Response |
 |---|---|---|---|---|
-| GET | `/api/reports/:siteId/category` | Any authed | `?section=<name>&job_id=<optional>` | `{ jobId, section, groups: [{ issue_type, severity, count }] }`. Groups ordered by severity rank then count DESC. `{ jobId: null, section, groups: [] }` if no completed job. |
+| GET | `/api/reports/:siteId/category` | Any authed | `?section=<name>&job_id=<optional>` | `{ jobId, section, groups: [{ issue_type, severity, count }], covered: boolean }`. Groups ordered by severity rank then count DESC. `covered` is `true` if the section has any rows for this job. `{ jobId: null, section, groups: [], covered: false }` if no completed job. |
 | GET | `/api/reports/:siteId/issues` | Any authed | `?section=<name>&issue_type=<name>&job_id=<optional>&limit=50&offset=0` | `{ results: [{ id, url, severity, data }], total, limit, offset }`. Max limit 200. |
 | GET | `/api/reports/results/:resultId` | Any authed | — | `{ result: { id, url, issue_type, section, severity, data }, check: { id, name, description, seo_impact, implementation_rule, subsection } \| null }`. 404 if not found. 403 if wrong company. `check` is null if no matching `audit_checks` row. |
 | GET | `/api/reports/:siteId/developer-summary` | Any authed | — | `{ job: { id, total_urls, health_score, started_at, completed_at, duration_seconds } \| null, response_codes: { 2xx, 3xx, 4xx, 5xx }, top_issues: [{ issue_type, section, severity, count }], custom_extraction: [{ id, url, issue_type, data }] }`. Top 10 issues by severity then count. Up to 50 custom extraction rows. |
+| GET | `/api/reports/:siteId/issues/export` | Any authed | `?section=<name>&issue_type=<name>` (both required) | `text/csv` download. Filename: `<section-slug>-<issue_type-slug>.csv`. Columns: `url` + all `data` JSON keys. Uses latest completed job. 400 if params missing, 404 if no completed job. |
+
+### Compare
+
+| Method | Path | Auth | Request | Response |
+|---|---|---|---|---|
+| GET | `/api/compare/jobs` | Any authed | — | `{ jobs: [{ id, siteId, siteLabel, startedAt, totalUrls, healthScore }] }` — all completed jobs for the company, newest first. |
+| GET | `/api/compare` | Any authed | `?jobA=<id>&jobB=<id>` | `{ jobA: { id, siteLabel, startedAt, totalUrls, healthScore }, jobB: { ... }, summary: { scoreDelta, criticalDelta, warningDelta, infoDelta, urlsDelta }, rows: [{ section, issue_type, severity, countA, countB, delta }] }`. Rows sorted by `abs(delta)` DESC. 400 if same job IDs or params missing. 404/403 per job. |
 
 ### GSC Data
 
@@ -951,6 +1103,76 @@ data: [DONE]
 ```
 
 **Caching:** One suggestion per `result_id`. UNIQUE index on `ai_suggestions(result_id) WHERE result_id IS NOT NULL`. Fetching the same `result_id` again returns the cached result immediately without calling the API.
+
+### Skills Library (Phase 10a)
+
+Registered as `/api/skills` in `server.js`.
+
+| Method | Path | Auth | Request | Response |
+|---|---|---|---|---|
+| GET | `/api/skills` | Any authed | `?company_id=` (superadmin) | `{ skills: [...] }` — company skills + all active global skills. Each skill: `{ id, name, description, skill_type, content, applies_to_steps, applies_to_categories, is_global, is_active, created_at }` |
+| POST | `/api/skills` | Admin or Superadmin | `{ name, skill_type, content, description?, applies_to_steps?, applies_to_categories?, is_global? }` | Created skill object. Only superadmin may set `is_global = 1`. |
+| PATCH | `/api/skills/:id` | Admin or Superadmin | Any subset of POST body fields | Updated skill. 403 if non-superadmin tries to edit a global skill. 403 if admin tries to edit another company's skill. |
+| DELETE | `/api/skills/:id` | Admin or Superadmin | — | `{ ok: true }`. 403 if non-superadmin tries to delete global skill. Cannot delete pre-seeded global skills (returns 403 with message). |
+
+**Skill injection into AI suggest (`POST /api/ai/suggest`):**
+When generating an audit AI suggestion, relevant skills are loaded and appended to the system prompt:
+1. Load all active global skills where `applies_to_categories` includes the check's category (or is null)
+2. Load all active company skills for the requesting company where `applies_to_categories` includes the check's category (or is null)
+3. Append each skill's `content` to the system prompt under a `## Instructions` heading before calling the model
+
+### Content Pipeline (Phase 10b)
+
+Registered as `/api/content` in `server.js`.
+
+#### Pipeline Runs
+
+| Method | Path | Auth | Request | Response |
+|---|---|---|---|---|
+| POST | `/api/content/runs` | `seo` or `admin` | `{ site_id, keyword, business_type, page_type, extra_instructions?, model_config?, skill_ids? }` | Created run object. Pipeline starts via `setImmediate`. |
+| GET | `/api/content/runs` | Any authed | `?site_id=&limit=20&offset=0&status=` | `{ runs: [...], total }` |
+| GET | `/api/content/runs/:id` | Any authed | — | Full run object with `steps` array (8 items) |
+| POST | `/api/content/runs/:id/cancel` | `seo` or `admin` | — | `{ ok: true }`. Only if `status = pending`. |
+| POST | `/api/content/runs/:id/trust-approve` | `seo` or `admin` | `{ checklist: { facts_verified, data_checked, expert_reviewed, brand_approved, compliance_checked } }` | `{ ok: true }`. All 5 checklist booleans must be `true`. Resumes pipeline from Step 7. |
+| POST | `/api/content/runs/:id/trust-reject` | `seo` or `admin` | `{ reason }` | `{ ok: true }`. Sets run status to `trust_rejected`. |
+
+#### Content Pages
+
+| Method | Path | Auth | Request | Response |
+|---|---|---|---|---|
+| GET | `/api/content/pages` | Any authed | `?site_id=&status=&limit=20&offset=0` | `{ pages: [...], total }` |
+| GET | `/api/content/pages/:id` | Any authed | — | Full page object including `override_fields` |
+| PATCH | `/api/content/pages/:id` | `seo` or `admin` | `{ field: value, ... }` | Updated page. Any updated field added to `override_fields`. |
+| POST | `/api/content/pages/:id/approve` | `admin` | — | Sets `status = approved` |
+| POST | `/api/content/pages/:id/reject` | `admin` | `{ reason }` | Sets `status = rejected` |
+| POST | `/api/content/pages/:id/publish` | `admin` | `{ target_url? }` | Sets `status = published`, records `published_at` + `published_url`. Calls site's `publish_webhook_url` if configured (POST with full content page JSON). |
+
+#### Cost & Logs
+
+| Method | Path | Auth | Request | Response |
+|---|---|---|---|---|
+| GET | `/api/content/cost-summary` | `admin` | `?site_id=&days=30` | `{ total_runs, total_cost_usd, avg_cost_per_run, cost_by_step: [{ step_number, step_name, model_used, total_cost_usd }] }` |
+| GET | `/api/content/runs/:id/logs` | Any authed | — | `{ logs: [...] }` — all log entries for the run, ordered by created_at ASC |
+
+**Validation (Zod):**
+- `keyword`: string, min 2, max 200 chars
+- `business_type`: string, min 2, max 100 chars
+- `page_type`: enum `landing | blog | comparison | category | product | local`
+- All routes scope to `company_id` from JWT
+
+**Socket.IO events emitted during pipeline:**
+| Event | Payload | When |
+|---|---|---|
+| `pipeline:step:start` | `{ run_id, step_number, step_name, model }` | Step begins |
+| `pipeline:step:complete` | `{ run_id, step_number, cost_usd, duration_ms }` | Step done |
+| `pipeline:step:failed` | `{ run_id, step_number, error }` | Step failed |
+| `pipeline:model:fallback` | `{ run_id, step_number, from_model, to_model }` | Auto-fallback triggered |
+| `pipeline:content:chunk` | `{ run_id, text }` | Step 5 streaming (text chunks only, not thinking) |
+| `pipeline:trust:waiting` | `{ run_id }` | Step 6 gate reached |
+| `pipeline:trust:approved` | `{ run_id }` | Trust approved, Step 7 starting |
+| `pipeline:trust:rejected` | `{ run_id, reason }` | Trust rejected |
+| `pipeline:completed` | `{ run_id, page_id }` | All 8 steps done |
+| `pipeline:failed` | `{ run_id, step_number, error }` | Run failed |
 
 ### Not yet implemented (return 501)
 
@@ -1031,9 +1253,11 @@ Sidebar (220px expanded / 56px collapsed) + Header (56px) + scrollable main cont
 
 **PLATFORM**
 - Sites → `/sites`
-- Crawls → `/crawl`
+- Crawls → `/crawl/status`
+- Paid Ads → `/ads`
 - Audit Health → `/audit`
-- Audit Categories → `/audit/response-codes`
+- Audit Categories → `/audit/categories` (custom `isActiveFn` — active for any `/audit/:slug` except `/audit/compare`, `/audit/cwv`, `/audit/custom-extraction`, `/audit/log-file`, `/audit/gsc`, `/audit/ga4`)
+- Compare Crawls → `/audit/compare`
 - Core Web Vitals → `/audit/cwv`
 - Custom Extraction → `/audit/custom-extraction`
 - Log File Intel. → `/audit/log-file`
@@ -1043,6 +1267,11 @@ Sidebar (220px expanded / 56px collapsed) + Header (56px) + scrollable main cont
 - Reports/Exports → `/exports`
 - Scheduled Crawls → `/schedules`
 - Notifications → `/notifications`
+
+**CONTENT** (seo or admin)
+- Content Pipeline → `/content`
+- Content Pages → `/content/pages`
+- Skills Library → `/skills`
 
 **SYSTEM** (admin only)
 - Integrations → `/integrations`
@@ -1151,13 +1380,23 @@ Sidebar (220px expanded / 56px collapsed) + Header (56px) + scrollable main cont
 
 ### Authenticated pages (built — Phase 3)
 
+#### `/audit/categories` — Audit Categories Picker (`AuditCategories.jsx`)
+- Auth: any authed user, company-scoped
+- Fetches `GET /api/reports/:siteId/summary` on mount (same endpoint as AuditHealth)
+- **Flat list of all 19 audit categories** sorted by severity: critical → warning → info → pass (covered, 0 issues) → notAudited
+- Each row: category name, left-border colour by state, `SeverityBadge` (CRITICAL / WARNING / INFO / ✓ PASS / NOT AUDITED), count pills (critical / warning / info)
+- Not-audited rows (section not in `coveredSections`) are greyed out and non-clickable
+- Row click navigates to the corresponding `/audit/:slug` page via `SECTION_TO_SLUG` map
+- Empty state if no active site; loading skeleton while fetching
+
 #### `/audit/:slug` — Audit Category (`AuditCategory.jsx`)
 - Auth: any authed user, company-scoped
-- Single component handles all 20 audit category routes via `CATEGORY_SLUG_MAP` (slug → DB section name)
+- Single component handles all 20 audit category routes (slug → DB section name via shared `lib/auditCategories.js`)
 - Fetches `GET /api/reports/:siteId/category?section=<name>` on mount
 - **Accordion layout:** one row per issue_type, shows severity pill + count badge
 - **On expand (lazy):** fetches `GET /api/reports/:siteId/issues?section=...&issue_type=...&limit=50` — shows URL list with parsed `data` key-value pairs
 - **Load more:** increments offset by 50, appends results
+- **Export CSV button:** per issue_type — triggers `GET /api/reports/:siteId/issues/export?section=...&issue_type=...`, downloads a CSV of all affected URLs + data fields for the latest completed job
 - **URL row click:** navigates to `/audit/issue/:resultId?from=<slug>&issueType=<type>&pos=<n>&total=<n>`
 - Empty state if no completed crawl or no issues in this category
 - Unknown slug renders "Unknown category" empty state
@@ -1171,7 +1410,7 @@ Sidebar (220px expanded / 56px collapsed) + Header (56px) + scrollable main cont
 - **Data panel:** `JSON.parse(result.data)` rendered as two-column key→value table. Falls back to `<pre>` if not valid JSON.
 - **Check panel:** shown only if `check` is non-null. Fields: Description, SEO Impact (`seo_impact`), How to Fix (`implementation_rule`).
 - **AI recommendation:** "Get AI Recommendation" button → `POST /api/ai/suggest`. Hybrid response: if cached returns immediately, else SSE stream renders token-by-token. After suggestion displayed: thumbs up / thumbs down feedback buttons (`POST /api/ai/suggest/:id/feedback`).
-- **Prev / Next navigation:** uses `pos` query param + sibling IDs array loaded on mount.
+- **Prev / Next navigation:** uses `pos` query param + sibling IDs array loaded on mount. Buttons are disabled (opacity 0.4, `cursor: not-allowed`) when no sibling exists in that direction. If the sibling fetch fails entirely (`siblingError`), both buttons are disabled and show a native tooltip: "Navigation unavailable".
 - **Breadcrumb:** back to `/audit/:slug`.
 - Error states: 404 if resultId not found, 403 if wrong company, "No Anthropic API key" notice with link to `/settings`.
 
@@ -1228,9 +1467,98 @@ Sidebar (220px expanded / 56px collapsed) + Header (56px) + scrollable main cont
 - **Comments:** `POST /api/tasks/:id/comments`. Appended optimistically. Shows user name + timestamp. Comments ordered by `created_at` ASC.
 - Breadcrumb back to `/tasks`.
 
-### Stub pages (not yet built — Phases 5–8)
+### Authenticated pages (built — Phase 7)
 
-Routes not covered above render a `Stub` component showing the page title and "Coming in a later phase" message. See `frontend/src/pages/stubs.jsx`.
+#### `/audit/compare` — Compare Crawls (`CompareView.jsx`)
+- Auth: any authed user, company-scoped
+- On mount: fetches `GET /api/compare/jobs` — all completed jobs for the company
+- **Two job pickers:** dropdowns from the jobs list. Each option shows `siteLabel · date · URL count · Score`. Resetting either picker clears the comparison result.
+- **Compare button:** calls `GET /api/compare?jobA=<id>&jobB=<id>` on both selections
+- **Delta summary cards:** 4 cards — Health Score (positive=good), Critical Issues (negative=good/fewer), Warnings (negative=good), Info (negative=good). Colours inverted for issue-count cards so decreases show green.
+- **Diff table:** columns — Section, Issue Type, Severity (pill), Job A count, Job B count, Delta (with `DeltaBadge`: `NEW` if only in B, `GONE` if only in A, `—` if delta=0, arrow+number otherwise). Filterable by severity and section. Rows sorted by `abs(delta)` DESC.
+- Empty state if fewer than 2 completed jobs exist
+
+#### `/integrations` — Integration Hub (`Integrations.jsx`)
+- Auth: admin only (under `AdminOnly` route guard)
+- **Tab strip:** All / SEO Data / Analytics / Advertising / CRM / Communication / Developer — filters the cards grid
+- **27 integrations** across 6 categories (SEO Data: 5, Analytics: 4, Advertising: 6, CRM: 4, Communication & Workflow: 5, Developer & Data: 3), each rendered as a card with logo, name, description, and a status badge (Connected / Disconnected / Coming Soon)
+- **Integration types:**
+  - `oauth` (GSC, GA4): Connect button → initiates OAuth flow via `/api/gsc/auth` or `/api/ga4/auth`. Status fetched from `/api/gsc/status` or `/api/ga4/status`. Connected state shows connected email + disconnect button.
+  - `apikey` (PSI, Slack, Linear): Inline expand panel with input field. Saves via `PUT /api/settings`. PSI uses key `psi_api_key`; Slack uses `slack_webhook_url`; Linear uses `linear_api_key`.
+  - `ads` (Google Ads, Meta Ads, LinkedIn Ads): Connect/disconnect UI calling `/api/ads/connect/:platform` and `/api/ads/disconnect/:platform`. Shows connection status from `/api/ads/connections`.
+  - `soon`: Greyed-out card with "Coming Soon" badge — non-interactive.
+- **Inline expand/collapse:** clicking a connected/disconnected card expands a panel with the connection form or status details inline.
+- OAuth callbacks (GSC, GA4) redirect back to `/integrations?gsc_connected=1` / `/integrations?ga4_connected=1` and show a success toast on load.
+- Error feedback shown inline if connect/disconnect fails.
+
+#### `/settings` — Settings (`Settings.jsx`)
+- Auth: admin only
+- **SMTP section:** form fields — SMTP Host, Port, Username, Password, From Address. Saves to `PUT /api/settings` (`smtp_host`, `smtp_port`, `smtp_user`, `smtp_pass`, `smtp_from`).
+- **Global section** (superadmin only): Anthropic API Key field. Saves to `PUT /api/settings` with `global: { anthropic_api_key }`.
+- Integration settings (GSC, GA4, PSI, Slack, Linear) have been moved to `/integrations`. Settings page no longer has integration tabs.
+
+### Phase 10a pages (Skills Library — not yet built)
+
+#### `/skills` — Skills Library (`SkillsLibrary.jsx`)
+- Auth: any authed user (view). Admin or superadmin to create/edit/delete.
+- **Two-column layout:** Left = skills list grouped by `skill_type`. Right = skill detail / editor panel.
+- **List:** each skill shows name, type badge, active/inactive toggle, edit button. Global skills show a "Platform" badge and are read-only for non-superadmin.
+- **Skill type filter tabs:** All / Writing Style / SEO Rules / Brand Voice / Reference / Tone / Custom
+- **Create button** (admin/superadmin): opens right panel with empty form.
+- **Form fields:** Name, Skill Type (select), Description, Content (large textarea — the instruction injected into prompts), Applies to Steps (multi-select checkboxes 1–8, or "All Steps"), Applies to Categories (multi-select of the 19 audit categories, or "All Categories"), Is Global (superadmin only toggle).
+- **Pre-seeded global skills** rendered read-only for all non-superadmin users. Superadmin can edit content of global skills.
+- **Active toggle:** admin can toggle any company skill on/off. Takes effect immediately on next AI call.
+- **Delete:** confirmation modal. Cannot delete pre-seeded platform skills.
+
+### Phase 10b pages (Content Pipeline — not yet built)
+
+#### `/content` — Content Pipeline Dashboard (`ContentDashboard.jsx`)
+- Auth: seo or admin
+- **"New Content" button:** opens modal with fields — Keyword (required), Site (dropdown, required), Business Type (required text), Page Type (select: landing/blog/comparison/category/product/local, required), Extra Instructions (textarea, optional), Per-Step Model Override (expandable advanced section — shows each of 8 steps with a model priority picker, pre-filled with system defaults), Skills Selection (multi-select from company + global skills).
+- **Runs table:** columns — Keyword, Site, Status (badge), Progress (e.g. "3/8"), Est. Cost, Created. Newest first. Click row → `/content/runs/:id`.
+- **Filter bar:** by site, by status.
+- **Auto-refresh:** table polls every 5 seconds when any run is in `running` status.
+
+#### `/content/runs/:id` — Pipeline Run Detail (`ContentRunDetail.jsx`)
+- Auth: any authed
+- **Header:** keyword, site, status badge, created by, created at, total cost so far.
+- **8-step vertical timeline:** each step is a card showing step name, model used (or "Custom Logic" for Step 2, "Human Gate" for Step 6), status badge, duration, cost, toggle button to expand prompt + raw output.
+- **Running step:** spinner animation.
+- **Step 5 card:** streaming content rendered in real-time via Socket.IO `pipeline:content:chunk` events. Collapsible "Claude's Reasoning" section (the thinking summary — collapsed by default, never shown in main view).
+- **Step 6 card (Trust Layer):** amber "Awaiting Review" badge when active. Shows 5-item checklist: Facts verified, Data/prices checked, Expert review done, Brand voice approved, Legal/compliance checked. User must check all 5 before "Approve" button activates. "Reject" button always available (requires reason input). Only seo or admin can approve/reject.
+- **Model fallback notice:** if a fallback occurred, shows inline notice "Tried DeepSeek, fell back to Claude" on that step card.
+- **Bottom:** "View Generated Page" button when run status is `completed`.
+
+#### `/content/pages` — Content Pages List (`ContentPages.jsx`)
+- Auth: any authed
+- **Table:** Title, Keyword, Site, Status (badge), SEO Score, Word Count, Created. Click row → `/content/pages/:id`.
+- **Filter tabs:** All / Draft / Review / Approved / Published / Rejected.
+
+#### `/content/pages/:id` — Content Page Editor (`ContentPageEditor.jsx`)
+- Auth: any authed (view). seo or admin to edit. readonly role: view only.
+- **Two-panel layout:** Left 60% = content editor. Right 40% = SEO metadata panel.
+- **Left panel tabs:** Visual (read-only rendered HTML, content sanitized before render), Markdown (textarea), HTML Source (textarea).
+- **Right panel fields (all editable by seo/admin):**
+  - Meta Title — character counter, red if >60
+  - Meta Description — character counter, red if >160
+  - H1
+  - Target Keyword
+  - Secondary Keywords (tag input)
+  - Schema Markup (JSON textarea)
+  - SEO Score (display only)
+  - Internal Links (list with add/remove)
+- **Override indicator:** any manually edited field shows a small orange dot + tooltip "Manually overridden — won't be changed by automation". Per-field "Reset to AI version" button removes the field from `override_fields`.
+- **Action buttons:** Save Draft, Submit for Review (status = review), Approve (admin only), Reject (admin only, requires reason), Publish (admin only).
+- **Publish flow:** admin clicks Publish → confirmation modal with optional target URL input → confirms → POST /api/content/pages/:id/publish → status badge updates to "Published".
+
+### Stub pages (not yet built)
+
+The following routes still render a `Stub` component ("Coming in a later phase"). See `frontend/src/pages/stubs.jsx`.
+
+- `/system` — System Health
+- `/errors` — Error Log
+- `/audit/custom-extraction` — Custom Extraction
+- `/audit/log-file` — Log File Intelligence
 
 ---
 
@@ -1259,6 +1587,9 @@ Auto-generated on first run via `setup.sh`: `JWT_SECRET` (64 hex chars), `ENCRYP
 | `SMTP_USER` | No | — | SMTP username |
 | `SMTP_PASS` | No | — | SMTP password |
 | `SMTP_FROM` | No | — | From address for outgoing emails |
+| `DEEPSEEK_API_KEY` | No | — | DeepSeek API key. Used for Step 1 (Keyword Expansion) in content pipeline. Stubs gracefully if not set — auto-fallbacks to next model in priority list. |
+| `GEMINI_API_KEY` | No | — | Google Gemini API key. Used for Step 3 (Intent Classification). Stubs gracefully if not set. |
+| `OPENAI_API_KEY` | No | — | OpenAI API key. Used for Steps 4 and 7 (Content Brief, SEO Optimization). Stubs gracefully if not set. |
 
 ---
 
@@ -1272,9 +1603,14 @@ Auto-generated on first run via `setup.sh`: `JWT_SECRET` (64 hex chars), `ENCRYP
 | **Phase 4a** | Dashboards: Admin View, SEO View, Developer View with real data; Task board | ✅ Complete — Admin View (sites table + GSC/GA4 data + task KPI + compact kanban), SEO View (Analytics + Issues tabs with GA4 pages and GSC queries/pages), Developer View (crawl health stats + response codes BarChart + top issues + custom extraction), Task board (4-column kanban, native drag-and-drop), Task detail page (inline editing + comments + metadata panel). Backend: `/api/dashboard`, `/api/tasks`, GSC data endpoints, GA4 data endpoints, developer-summary endpoint. |
 | **Phase 5** | Integrations: GSC overlay, GA4 overlay, PageSpeed Insights | ✅ Complete — `GET /api/psi/analyze` (PSI v5, psiLimiter 15 req/min); `GscOverlay.jsx` (KPI cards + Pages/Queries tabs + connect prompt, role-gated /api/gsc/status); `Ga4Overlay.jsx` (KPI cards + paginated pages table + connect prompt); `CoreWebVitals.jsx` (URL form + mobile/desktop toggle + score gauge + metric cards with Good/NI/Poor thresholds); all 3 pages wired in router, removed from stubs. |
 | **Phase 6** | Tasks extensions: Linear sync, scheduled crawls (cron), notifications feed, Slack webhook | ✅ Complete — Scheduled crawls: `node-cron` singleton scheduler (`schedule.service.js`), full CRUD at `/api/schedules` with company scoping, `ScheduledCrawls.jsx` page (cron presets, enabled toggle, per-site multi-select). Notifications: `GET/PATCH/DELETE /api/notifications` with `buildScopeClause` isolation, `Notifications.jsx` page (All/Unread filter, optimistic mutations with rollback, toast errors), Header bell badge with live unread count synced via `notifications:count` custom event. Slack: `sendScheduleNotification` in `slack.service.js` (company_settings lookup → env var fallback, Block Kit payload, 20-line truncation guard). Linear: `createLinearIssue` in `linear.service.js` (Bearer auth, team auto-fetch, `issueCreate` mutation), `POST /api/tasks/:id/sync-linear` (admin-only, idempotency 409 guard, updates `task_status.linear_url` + inserts `linear_tickets`), TaskDetail "Sync to Linear" button. |
-| **Phase 7** | Exports (CSV, Sheets), compare view, users management UI, settings UI, integrations UI. | 🔄 Partial — Users page (with direct user creation — no invite email required) and Settings page (Integrations/GSC/GA4/SMTP/Global tabs) built. Exports and compare view pending. |
+| **Phase 7** | Exports (CSV, Sheets), compare view, users management UI, settings UI, integrations UI. | ✅ Complete — Users page (direct user creation, no invite email required), Settings page (SMTP + Global/Anthropic key; integration tabs removed and moved to Integration Hub), Integration Hub (`/integrations`: 27 integrations, tab-strip filter, inline expand panels, OAuth/API-key/Ads/Coming-soon types), Compare Crawls (`/audit/compare`: job pickers, delta summary cards, filterable diff table), AuditCategories picker (`/audit/categories`: flat sorted list of all 20 categories), per-issue CSV export (`GET /api/reports/:siteId/issues/export`). Sheets export remains pending (future phase). |
 | **Phase 8** | Polish: empty states, error handling, loading states, production build, pm2 setup | Pending |
 | **Phase 9** | Paid Ads API Integration: replace mock data in `AdsDashboard` with live data from Google Ads API, Meta Marketing API, and LinkedIn Campaign Manager API. OAuth per platform, token storage, metrics caching, account selector, date-range-aware fetching. | Planned |
+| **Phase 10a** | **Skills Library** — Platform-wide AI instruction layer. Migration `017_skills_library.js` (`content_skills` table). `/api/skills` routes. Pre-seed 8 global skills from audit check knowledge base. Update `POST /api/ai/suggest` to load and inject relevant skills into system prompt. Frontend: `/skills` — `SkillsLibrary.jsx` (two-column layout, type filter tabs, create/edit/delete, active toggle, global badge). | Planned |
+| **Phase 10b** | **Content Pipeline** — 8-step multi-model AI content generation. Migration `018_content_pipeline.js` (4 tables + `publish_webhook_url` on sites). AI clients: `backend/services/ai-clients/` (deepseek, gemini, openai, anthropic with extended thinking) + `model-router.js` (per-step priority list + auto-fallback). Pipeline service: `content-pipeline.service.js` (orchestrator) + `backend/services/pipeline-steps/` (8 step handlers). Socket.IO streaming for Step 5 (content generation). Step 6 = Trust Layer (human gate, not skippable). Auto-fallback across models if API key missing or error. `/api/content` routes. Frontend: `/content` (dashboard + new run modal with per-step model override + skills selection), `/content/runs/:id` (8-step timeline, streaming, trust layer checklist), `/content/pages` (list), `/content/pages/:id` (editor with override protection + publish flow). Update loop: node-cron job checks GSC rankings 30/60 days post-publish and re-queues content for regeneration if rankings dropped. New env vars: `DEEPSEEK_API_KEY`, `GEMINI_API_KEY`, `OPENAI_API_KEY`. | Planned |
+| **Phase 11** | **Feedback & Learning Loop** — Outcome tracking, pattern extraction, insights dashboard. Separate prompt to be defined after Phase 10 is complete. | Future |
+| **Phase 12** | **Cars Demo Website** — Standalone Next.js website powered by the content pipeline. 300 car pages, fully automated. Separate prompt to be defined after Phase 10 + 11 are proven. | Future |
+| **Phase 13** | **Billing with Stripe** — Subscription billing, plan tiers, seat limits, usage enforcement. Separate prompt to be defined when first paying client is ready. | Future |
 
 ---
 
@@ -1349,7 +1685,23 @@ Auto-generated on first run via `setup.sh`: `JWT_SECRET` (64 hex chars), `ENCRYP
 │   │
 │   └── services/
 │       ├── crawl-runner.js               # Crawl job manager — Playwright path + feature flag
-│       └── sf-parser.service.js          # CSV → audit_results (RFC 4180 parser, 9 CSV files)
+│       ├── sf-parser.service.js          # CSV → audit_results (RFC 4180 parser, 9 CSV files)
+│       ├── content-pipeline.service.js   # Phase 10b — pipeline orchestrator (8 steps)
+│       ├── pipeline-steps/
+│       │   ├── step1-keyword-expansion.js    # DeepSeek (default) — keyword + intent analysis
+│       │   ├── step2-funnel-mapping.js       # Custom logic — no AI, proprietary business rules
+│       │   ├── step3-intent-classification.js # Gemini (default) — audience + pain points
+│       │   ├── step4-content-brief.js        # OpenAI (default) — structured brief generation
+│       │   ├── step5-content-generation.js   # Claude Opus extended thinking — streams via Socket.IO
+│       │   ├── step6-trust-layer.js          # Human gate — pauses pipeline, emits trust:waiting
+│       │   ├── step7-seo-optimization.js     # OpenAI (default) — SEO pass + schema + scoring
+│       │   └── step8-publish.js              # System action — DB update + webhook call
+│       └── ai-clients/
+│           ├── model-router.js               # Per-step priority list + auto-fallback logic
+│           ├── deepseek.client.js            # DeepSeek API (OpenAI-compatible). Stubs if no key.
+│           ├── gemini.client.js              # Google Generative AI. Stubs if no key.
+│           ├── openai.client.js              # OpenAI gpt-4o. Stubs if no key.
+│           └── anthropic.client.js           # Anthropic claude-opus-4-5 extended thinking. Streaming.
 │
 ├── playwright-crawler/
 │   ├── PLAN.md                           # Build plan (all 4 phases complete)
@@ -1432,6 +1784,11 @@ Auto-generated on first run via `setup.sh`: `JWT_SECRET` (64 hex chars), `ENCRYP
             ├── IssueDetail.jsx           # /audit/issue/:resultId — URL detail + AI recommendation
             ├── AdminView.jsx             # /admin — sites table + GSC/GA4 + task KPI + compact kanban
             ├── SeoView.jsx               # /seo — Analytics (GA4 pages) + Issues (GSC queries/pages) tabs
+            ├── SkillsLibrary.jsx         # /skills — Phase 10a skills management (two-column, type filter)
+            ├── ContentDashboard.jsx      # /content — Phase 10b pipeline runs table + new run modal
+            ├── ContentRunDetail.jsx      # /content/runs/:id — 8-step timeline, streaming, trust layer
+            ├── ContentPages.jsx          # /content/pages — content pages list with status filter
+            └── ContentPageEditor.jsx     # /content/pages/:id — editor with override protection
             ├── DeveloperView.jsx         # /developer — crawl health + response codes chart + top issues + custom extraction
             ├── Tasks.jsx                 # /tasks — 4-column kanban, drag-and-drop, new task modal
             ├── TaskDetail.jsx            # /tasks/:id — inline edit + comments + metadata panel
