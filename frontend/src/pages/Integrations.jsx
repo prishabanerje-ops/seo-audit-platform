@@ -116,7 +116,7 @@ function OAuthPanel({ integration, companyId, oauthStatus, onRefresh }) {
     try {
       const r = await api.get(`/${provider}/auth${qs}`);
       window.location.href = r.data.authUrl;
-    } catch { setActioning(false); }
+    } catch { setMsg('Error: Could not initiate connection.'); setActioning(false); }
   };
 
   const disconnect = async () => {
@@ -409,7 +409,7 @@ export function Integrations() {
       api.get(`/gsc/status${qs}`).catch(() => ({ data: { connected: false } })),
       api.get(`/ga4/status${qs}`).catch(() => ({ data: { connected: false } })),
       api.get(`/settings${qs}`).catch(() => ({ data: { settings: {} } })),
-      api.get(`/ads/connections${qs}`).catch(() => ({ data: { connections: [] } })),
+      api.get('/ads/connections').catch(() => ({ data: { connections: [] } })),
     ]).then(([gsc, ga4, settings, ads]) => {
       const s = settings.data.settings || {};
       setConnectionStatus({
