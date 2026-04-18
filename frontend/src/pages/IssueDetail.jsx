@@ -26,8 +26,10 @@ import { Button }         from '../components/ui/Button.jsx';
 const SLUG_LABELS = {
   'response-codes':  'Response Codes',
   'canonicals':      'Canonicals',
-  'robots':          'Robots / Indexability',
-  'sitemap':         'Sitemap',
+  'robots':                'Robots & Indexability',
+  'robots-indexability':   'Robots & Indexability',
+  'sitemap':               'Sitemaps',
+  'sitemaps':              'Sitemaps',
   'crawl-depth':     'Crawl Depth',
   'title-tags':      'Title Tags',
   'meta-desc':       'Meta Descriptions',

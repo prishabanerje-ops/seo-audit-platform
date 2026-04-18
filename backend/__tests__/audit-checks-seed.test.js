@@ -72,23 +72,20 @@ describe('AUDIT_CHECKS array', () => {
     }
   });
 
-  it('covers all 23 expected categories', () => {
+  it('covers all 19 expected categories', () => {
     const expected = [
-      // Original 19
-      'Response Codes', 'Canonical', 'Robots / Indexability', 'Sitemap',
+      'Response Codes', 'Canonical', 'Robots & Indexability', 'Sitemaps',
       'URL Structure', 'Title Tags', 'Meta Description', 'Headings',
       'Internal Linking', 'Images', 'Schema / Structured Data', 'Content',
       'Speed & Performance', 'Mobile SEO', 'JavaScript Rendering',
-      'International SEO', 'Rankings & Traffic Drops',
-      'Monitoring & Operations', 'LLM / AI Crawlers',
-      // Phase 2 additions
-      'Robots & Indexability', 'Sitemaps', 'Security & Monitoring', 'Rankings & Traffic',
+      'International SEO', 'Rankings & Traffic',
+      'Security & Monitoring', 'LLM / AI Crawlers',
     ];
     const actual = new Set(AUDIT_CHECKS.map(c => c.category));
     for (const cat of expected) {
       expect(actual.has(cat), `missing category: ${cat}`).toBe(true);
     }
-    expect(actual.size).toBe(23);
+    expect(actual.size).toBe(19);
   });
 });
 

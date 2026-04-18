@@ -996,7 +996,7 @@ export const AUDIT_CHECKS = [
   {
     check_number: 51,
     name: 'robots.txt file exists and is accessible',
-    category: 'Robots / Indexability',
+    category: 'Robots & Indexability',
     subsection: 'robots.txt',
     description: 'Fetch robots.txt and flag missing or inaccessible files because crawl rules and sitemap discovery depend on it. Validate on both mobile and desktop.',
     implementation_rule: 'if robots_txt_status_code != 200 → flag',
@@ -1008,7 +1008,7 @@ export const AUDIT_CHECKS = [
   {
     check_number: 52,
     name: 'robots.txt returns correct content-type',
-    category: 'Robots / Indexability',
+    category: 'Robots & Indexability',
     subsection: 'robots.txt',
     description: 'Inspect robots.txt response headers and flag wrong content types because malformed delivery can break parser behavior. Validate on both mobile and desktop.',
     implementation_rule: 'if robots_txt_content_type NOT contains \'text/plain\' → flag',
@@ -1020,7 +1020,7 @@ export const AUDIT_CHECKS = [
   {
     check_number: 53,
     name: 'robots.txt file size under 500 KB',
-    category: 'Robots / Indexability',
+    category: 'Robots & Indexability',
     subsection: 'robots.txt',
     description: 'Measure robots.txt payload size and flag oversized files because search engines may truncate them. Validate on both mobile and desktop.',
     implementation_rule: 'if robots_txt_size > 400KB AND robots_txt_size <= 500KB → warn; if robots_txt_size > 500KB → flag',
@@ -1032,7 +1032,7 @@ export const AUDIT_CHECKS = [
   {
     check_number: 54,
     name: 'Sitemap URL declared in robots.txt',
-    category: 'Robots / Indexability',
+    category: 'Robots & Indexability',
     subsection: 'robots.txt',
     description: 'Parse robots.txt and flag missing sitemap declarations because discovery becomes weaker without them. Validate on both mobile and desktop.',
     implementation_rule: 'if \'Sitemap:\' directive absent from robots_txt → flag',
@@ -1044,7 +1044,7 @@ export const AUDIT_CHECKS = [
   {
     check_number: 55,
     name: 'No critical pages blocked by robots.txt',
-    category: 'Robots / Indexability',
+    category: 'Robots & Indexability',
     subsection: 'robots.txt',
     description: 'Compare blocked paths against important templates and URLs because accidental blocking can remove core pages from crawl and search. Validate on both mobile and desktop.',
     implementation_rule: 'if url in critical_url_patterns[] AND url is_blocked_by_robots_txt → flag',
@@ -1056,7 +1056,7 @@ export const AUDIT_CHECKS = [
   {
     check_number: 56,
     name: 'CSS and JS files not blocked in robots.txt',
-    category: 'Robots / Indexability',
+    category: 'Robots & Indexability',
     subsection: 'robots.txt',
     description: 'Detect blocked render-critical assets because search engines need them for proper rendering and evaluation. Validate on both mobile and desktop.',
     implementation_rule: 'if asset_url matches render_critical_assets[] AND asset_url is_blocked_by_robots_txt → flag',
@@ -1068,7 +1068,7 @@ export const AUDIT_CHECKS = [
   {
     check_number: 57,
     name: 'No conflicting Allow/Disallow rules',
-    category: 'Robots / Indexability',
+    category: 'Robots & Indexability',
     subsection: 'robots.txt',
     description: 'Flag contradictory rules in the same path hierarchy because they make crawl intent ambiguous. Validate on both mobile and desktop.',
     implementation_rule: 'if same_path has both Allow and Disallow rules for same_useragent AND specificity_is_equal → flag',
@@ -1080,7 +1080,7 @@ export const AUDIT_CHECKS = [
   {
     check_number: 58,
     name: 'Internal search result pages blocked',
-    category: 'Robots / Indexability',
+    category: 'Robots & Indexability',
     subsection: 'Crawlability',
     description: 'Detect search-result URL patterns and flag cases where they remain crawlable despite low SEO value. Validate on both mobile and desktop.',
     implementation_rule: 'if url matches internal_search_url_patterns[] AND url NOT is_blocked_by_robots_txt AND NOT has_noindex → flag',
@@ -1092,7 +1092,7 @@ export const AUDIT_CHECKS = [
   {
     check_number: 59,
     name: 'Faceted URLs blocked if not indexable',
-    category: 'Robots / Indexability',
+    category: 'Robots & Indexability',
     subsection: 'Crawlability',
     description: 'Identify faceted URL patterns and flag crawlable combinations that should be controlled to avoid crawl waste. Validate on both mobile and desktop.',
     implementation_rule: 'if url matches facet_url_patterns[] AND url NOT in indexable_facets_allowlist[] AND NOT is_blocked_by_robots_txt → flag',
@@ -1104,7 +1104,7 @@ export const AUDIT_CHECKS = [
   {
     check_number: 60,
     name: 'JavaScript-rendered content is crawlable',
-    category: 'Robots / Indexability',
+    category: 'Robots & Indexability',
     subsection: 'Crawlability',
     description: 'Compare raw and rendered states to flag content that only appears after JS and may be inconsistently processed. Validate on both mobile and desktop.',
     implementation_rule: 'if content_in_rendered_dom NOT in raw_html AND content is_critical_seo_element → flag',
@@ -1116,7 +1116,7 @@ export const AUDIT_CHECKS = [
   {
     check_number: 61,
     name: 'Crawl depth of important pages is shallow',
-    category: 'Robots / Indexability',
+    category: 'Robots & Indexability',
     subsection: 'Crawlability',
     description: 'Use crawl depth data to flag key pages that are buried too deep because discoverability and equity flow weaken with depth. Validate on both mobile and desktop.',
     implementation_rule: 'if url in critical_url_patterns[] AND crawl_depth > 3 AND crawl_depth <= 5 → warn; if url in critical_url_patterns[] AND crawl_depth > 5 → flag',
@@ -1128,7 +1128,7 @@ export const AUDIT_CHECKS = [
   {
     check_number: 62,
     name: 'No orphan pages',
-    category: 'Robots / Indexability',
+    category: 'Robots & Indexability',
     subsection: 'Crawlability',
     description: 'Use inlink data to flag URLs with zero internal links because orphan pages are hard to discover and support. Validate on both mobile and desktop.',
     implementation_rule: 'if inbound_internal_links_count == 0 AND page is_indexable → flag',
@@ -1140,7 +1140,7 @@ export const AUDIT_CHECKS = [
   {
     check_number: 63,
     name: 'Excluded by noindex pages are intentional',
-    category: 'Robots / Indexability',
+    category: 'Robots & Indexability',
     subsection: 'Indexing & Coverage',
     description: 'Detect noindex pages and review whether exclusions match business intent because accidental noindex can suppress key URLs. Validate on both mobile and desktop.',
     implementation_rule: 'if page has_noindex AND url NOT in intentional_noindex_list[] → flag; if page has_noindex AND url in critical_url_patterns[] → flag',
@@ -1152,7 +1152,7 @@ export const AUDIT_CHECKS = [
   {
     check_number: 64,
     name: 'Index bloat detected and fixed',
-    category: 'Robots / Indexability',
+    category: 'Robots & Indexability',
     subsection: 'Indexing & Coverage',
     description: 'Flag low-value or duplicate URL populations that appear crawlable or indexable because bloat weakens site focus. Validate on both mobile and desktop.',
     implementation_rule: 'if indexable_url_count > expected_indexable_threshold defined in config[] → warn; if low_value_url_patterns[] are_indexable AND count > bloat_threshold[] → flag',
@@ -1164,7 +1164,7 @@ export const AUDIT_CHECKS = [
   {
     check_number: 65,
     name: 'XML sitemap exists and is accessible',
-    category: 'Sitemap',
+    category: 'Sitemaps',
     subsection: 'XML Sitemap',
     description: 'Fetch configured sitemap URLs and flag missing or inaccessible files because search engines rely on them for URL discovery. Validate on both mobile and desktop.',
     implementation_rule: 'if sitemap_status_code != 200 → flag',
@@ -1176,7 +1176,7 @@ export const AUDIT_CHECKS = [
   {
     check_number: 66,
     name: 'Sitemap is valid XML format',
-    category: 'Sitemap',
+    category: 'Sitemaps',
     subsection: 'XML Sitemap',
     description: 'Parse sitemap XML and flag malformed structure because invalid files may be ignored. Validate on both mobile and desktop.',
     implementation_rule: 'if sitemap_xml_parse_error → flag',
@@ -1188,7 +1188,7 @@ export const AUDIT_CHECKS = [
   {
     check_number: 67,
     name: 'Each sitemap file under 50 MB uncompressed',
-    category: 'Sitemap',
+    category: 'Sitemaps',
     subsection: 'XML Sitemap',
     description: 'Measure file size and flag oversize sitemaps because engines impose hard limits. Validate on both mobile and desktop.',
     implementation_rule: 'if sitemap_file_size > 40MB AND sitemap_file_size <= 50MB → warn; if sitemap_file_size > 50MB → flag',
@@ -1200,7 +1200,7 @@ export const AUDIT_CHECKS = [
   {
     check_number: 68,
     name: 'Each sitemap file has max 50,000 URLs',
-    category: 'Sitemap',
+    category: 'Sitemaps',
     subsection: 'XML Sitemap',
     description: 'Count URLs per sitemap and flag limit breaches because oversized files may be partially ignored. Validate on both mobile and desktop.',
     implementation_rule: 'if url_count_per_sitemap > 45000 AND url_count_per_sitemap <= 50000 → warn; if url_count_per_sitemap > 50000 → flag',
@@ -1212,7 +1212,7 @@ export const AUDIT_CHECKS = [
   {
     check_number: 69,
     name: 'All URLs in sitemap return 200 status',
-    category: 'Sitemap',
+    category: 'Sitemaps',
     subsection: 'XML Sitemap',
     description: 'Request sitemap URLs and flag redirects or errors because sitemaps should contain final live URLs. Validate on both mobile and desktop.',
     implementation_rule: 'if sitemap_url_status_code != 200 → flag',
@@ -1224,7 +1224,7 @@ export const AUDIT_CHECKS = [
   {
     check_number: 70,
     name: 'Sitemap URLs match canonical URLs',
-    category: 'Sitemap',
+    category: 'Sitemaps',
     subsection: 'XML Sitemap',
     description: 'Compare sitemap entries with canonical targets and flag mismatches because sitemap inclusion should reinforce canonical intent. Validate on both mobile and desktop.',
     implementation_rule: 'if sitemap_url != page_canonical_url → flag',
@@ -1236,7 +1236,7 @@ export const AUDIT_CHECKS = [
   {
     check_number: 71,
     name: 'No noindex pages in sitemap',
-    category: 'Sitemap',
+    category: 'Sitemaps',
     subsection: 'XML Sitemap',
     description: 'Compare sitemap URLs against indexability signals and flag noindex entries because they send conflicting crawl/index messages. Validate on both mobile and desktop.',
     implementation_rule: 'if sitemap_url has_noindex → flag',
@@ -1248,7 +1248,7 @@ export const AUDIT_CHECKS = [
   {
     check_number: 72,
     name: 'No blocked pages in sitemap',
-    category: 'Sitemap',
+    category: 'Sitemaps',
     subsection: 'XML Sitemap',
     description: 'Compare sitemap URLs against robots rules and flag blocked entries because they dilute sitemap quality. Validate on both mobile and desktop.',
     implementation_rule: 'if sitemap_url is_blocked_by_robots_txt → flag',
@@ -1260,7 +1260,7 @@ export const AUDIT_CHECKS = [
   {
     check_number: 73,
     name: 'lastmod dates are accurate and updated',
-    category: 'Sitemap',
+    category: 'Sitemaps',
     subsection: 'XML Sitemap',
     description: 'Review lastmod values and flag stale or obviously templated timestamps because low-trust dates reduce sitemap usefulness. Validate on both mobile and desktop.',
     implementation_rule: 'if lastmod_date > current_date → flag; if lastmod_date < current_date - 365 days AND page has_been_updated → warn',
@@ -1272,7 +1272,7 @@ export const AUDIT_CHECKS = [
   {
     check_number: 74,
     name: 'Orphan pages in sitemap that are not linked internally',
-    category: 'Sitemap',
+    category: 'Sitemaps',
     subsection: 'XML Sitemap',
     description: 'Compare sitemap URLs with internal inlink data and flag sitemap-only pages because discovery should not rely solely on XML. Validate on both mobile and desktop.',
     implementation_rule: 'if sitemap_url AND inbound_internal_links_count == 0 → warn; if sitemap_url AND inbound_internal_links_count == 0 AND url in critical_url_patterns[] → flag',
@@ -3348,7 +3348,7 @@ export const AUDIT_CHECKS = [
   {
     check_number: 247,
     name: 'Google algorithm update correlation checked',
-    category: 'Rankings & Traffic Drops',
+    category: 'Rankings & Traffic',
     subsection: 'Ranking Drops Investigation',
     description: 'Review ranking drops against known algorithm update timing because broad visibility loss may be external rather than site-specific. Validate on both mobile and desktop.',
     implementation_rule: 'if traffic_drop_date within 7 days of known_algorithm_update_dates[] → warn (correlate before actioning)',
@@ -3360,7 +3360,7 @@ export const AUDIT_CHECKS = [
   {
     check_number: 248,
     name: 'Manual action check in GSC',
-    category: 'Rankings & Traffic Drops',
+    category: 'Rankings & Traffic',
     subsection: 'Ranking Drops Investigation',
     description: 'Check GSC manual actions because penalties can cause sudden ranking and traffic collapse. Validate on both mobile and desktop.',
     implementation_rule: 'if gsc_manual_actions_count > 0 → flag',
@@ -3372,7 +3372,7 @@ export const AUDIT_CHECKS = [
   {
     check_number: 249,
     name: 'Site-wide vs specific page ranking drop classified',
-    category: 'Rankings & Traffic Drops',
+    category: 'Rankings & Traffic',
     subsection: 'Ranking Drops Investigation',
     description: 'Classify whether losses affect the whole site, a section, or a handful of URLs because diagnosis depends on the pattern of decline. Validate on both mobile and desktop.',
     implementation_rule: 'if traffic_drop affects > 50% of indexed_pages → flag (site-wide); if traffic_drop affects < 10% of pages → warn (targeted)',
@@ -3384,7 +3384,7 @@ export const AUDIT_CHECKS = [
   {
     check_number: 250,
     name: 'Recent site changes correlated with drop',
-    category: 'Rankings & Traffic Drops',
+    category: 'Rankings & Traffic',
     subsection: 'Ranking Drops Investigation',
     description: 'Compare ranking loss timing against deploys, migrations, template edits, or content changes because recent changes are common root causes. Validate on both mobile and desktop.',
     implementation_rule: 'if ranking_drop_date within 7 days of deploy_date in release_log[] → flag',
@@ -3396,7 +3396,7 @@ export const AUDIT_CHECKS = [
   {
     check_number: 251,
     name: 'Robots.txt change blocking pages checked',
-    category: 'Rankings & Traffic Drops',
+    category: 'Rankings & Traffic',
     subsection: 'Ranking Drops Investigation',
     description: 'Review robots changes around the drop period because an accidental block can quickly suppress crawling and traffic. Validate on both mobile and desktop.',
     implementation_rule: 'if robots_txt_changed AND critical_url_patterns[] newly_blocked → flag',
@@ -3408,7 +3408,7 @@ export const AUDIT_CHECKS = [
   {
     check_number: 252,
     name: 'Noindex accidentally added to key pages',
-    category: 'Rankings & Traffic Drops',
+    category: 'Rankings & Traffic',
     subsection: 'Ranking Drops Investigation',
     description: 'Detect new noindex states on important URLs because accidental exclusion can cause immediate visibility loss. Validate on both mobile and desktop.',
     implementation_rule: 'if url in critical_url_patterns[] AND noindex_tag newly_added → flag',
@@ -3420,7 +3420,7 @@ export const AUDIT_CHECKS = [
   {
     check_number: 253,
     name: 'Canonical change pointing to wrong URL',
-    category: 'Rankings & Traffic Drops',
+    category: 'Rankings & Traffic',
     subsection: 'Ranking Drops Investigation',
     description: 'Compare canonical behavior before and after decline because misdirected canonicals can shift signals away from the intended page. Validate on both mobile and desktop.',
     implementation_rule: 'if canonical_url changed AND new_canonical NOT in expected_canonical_map[] → flag',
@@ -3432,7 +3432,7 @@ export const AUDIT_CHECKS = [
   {
     check_number: 254,
     name: 'Page speed regression after deploy',
-    category: 'Rankings & Traffic Drops',
+    category: 'Rankings & Traffic',
     subsection: 'Ranking Drops Investigation',
     description: 'Review speed trends around releases because regressions in CWV or response time can affect rankings and user engagement. Validate on both mobile and desktop.',
     implementation_rule: 'if psi_score drops > 10 points after deploy_date → flag; if psi_score drops 5-10 points → warn',
@@ -3444,7 +3444,7 @@ export const AUDIT_CHECKS = [
   {
     check_number: 255,
     name: 'Content quality drop after large updates',
-    category: 'Rankings & Traffic Drops',
+    category: 'Rankings & Traffic',
     subsection: 'Ranking Drops Investigation',
     description: 'Review major content changes because scaled edits can reduce usefulness, uniqueness, or intent match. Validate on both mobile and desktop.',
     implementation_rule: 'if bulk_content_update detected AND avg_word_count drops > 20% → warn; if unique_content_ratio drops > 30% → flag',
@@ -3456,7 +3456,7 @@ export const AUDIT_CHECKS = [
   {
     check_number: 256,
     name: 'SERP feature lost',
-    category: 'Rankings & Traffic Drops',
+    category: 'Rankings & Traffic',
     subsection: 'Ranking Drops Investigation',
     description: 'Check whether CTR or traffic loss is caused by losing a SERP feature rather than a pure rank change. Validate on both mobile and desktop.',
     implementation_rule: 'if ctr drops AND avg_position unchanged → warn (check SERP feature loss)',
@@ -3468,7 +3468,7 @@ export const AUDIT_CHECKS = [
   {
     check_number: 257,
     name: 'Backlink loss correlated with drop',
-    category: 'Rankings & Traffic Drops',
+    category: 'Rankings & Traffic',
     subsection: 'Ranking Drops Investigation',
     description: 'Check link-loss timing because reduced authority from lost referring domains can trigger ranking declines. Validate on both mobile and desktop.',
     implementation_rule: 'if referring_domain_count drops > 10% within 30 days AND rankings decline → warn; if drops > 20% → flag',
@@ -3480,7 +3480,7 @@ export const AUDIT_CHECKS = [
   {
     check_number: 258,
     name: 'URL change without proper redirect',
-    category: 'Rankings & Traffic Drops',
+    category: 'Rankings & Traffic',
     subsection: 'Ranking Drops Investigation',
     description: 'Review changed slugs and migrations because missing redirects can wipe out historical equity and traffic. Validate on both mobile and desktop.',
     implementation_rule: 'if url_slug changed AND no 301 redirect from old_url → flag',
@@ -3492,7 +3492,7 @@ export const AUDIT_CHECKS = [
   {
     check_number: 259,
     name: 'Server errors causing drop',
-    category: 'Rankings & Traffic Drops',
+    category: 'Rankings & Traffic',
     subsection: 'Ranking Drops Investigation',
     description: 'Correlate ranking loss with 5xx instability because recurring server errors suppress crawl and indexing. Validate on both mobile and desktop.',
     implementation_rule: 'if 5xx_error_rate > 1% AND 5xx_error_rate <= 5% → warn; if 5xx_error_rate > 5% → flag',
@@ -3504,7 +3504,7 @@ export const AUDIT_CHECKS = [
   {
     check_number: 260,
     name: 'GA4 properly installed',
-    category: 'Monitoring & Operations',
+    category: 'Security & Monitoring',
     subsection: 'Analytics & Tracking',
     description: 'Verify analytics implementation because bad tagging breaks reporting, attribution, and traffic diagnostics. Validate on both mobile and desktop.',
     implementation_rule: 'if ga4_tag absent OR ga4_tag fires 0 events on pageload → flag',
@@ -3516,7 +3516,7 @@ export const AUDIT_CHECKS = [
   {
     check_number: 261,
     name: 'GA4 not double-firing',
-    category: 'Monitoring & Operations',
+    category: 'Security & Monitoring',
     subsection: 'Analytics & Tracking',
     description: 'Check duplicate event firing because inflated sessions and conversions distort SEO analysis. Validate on both mobile and desktop.',
     implementation_rule: 'if ga4_pageview_event fires > 1 time per pageload → flag',
@@ -3528,7 +3528,7 @@ export const AUDIT_CHECKS = [
   {
     check_number: 262,
     name: 'Search Console property verified',
-    category: 'Monitoring & Operations',
+    category: 'Security & Monitoring',
     subsection: 'Analytics & Tracking',
     description: 'Confirm property ownership because GSC data and workflows depend on verified access. Validate on both mobile and desktop.',
     implementation_rule: 'if gsc_property_verification_status != \'verified\' → flag',
@@ -3540,7 +3540,7 @@ export const AUDIT_CHECKS = [
   {
     check_number: 263,
     name: 'GSC and GA4 linked',
-    category: 'Monitoring & Operations',
+    category: 'Security & Monitoring',
     subsection: 'Analytics & Tracking',
     description: 'Verify platform linking because combined visibility and engagement analysis becomes easier and more reliable. Validate on both mobile and desktop.',
     implementation_rule: 'if gsc_ga4_link_status != \'linked\' → warn',
@@ -3552,7 +3552,7 @@ export const AUDIT_CHECKS = [
   {
     check_number: 264,
     name: 'Conversion tracking configured',
-    category: 'Monitoring & Operations',
+    category: 'Security & Monitoring',
     subsection: 'Analytics & Tracking',
     description: 'Confirm revenue or lead measurement because SEO performance needs business-outcome visibility. Validate on both mobile and desktop.',
     implementation_rule: 'if conversion_events_count == 0 in GA4 → flag',
@@ -3564,7 +3564,7 @@ export const AUDIT_CHECKS = [
   {
     check_number: 265,
     name: 'Rank tracking set up for target keywords',
-    category: 'Monitoring & Operations',
+    category: 'Security & Monitoring',
     subsection: 'Analytics & Tracking',
     description: 'Confirm keyword tracking coverage because performance diagnosis depends on consistent baseline visibility data. Validate on both mobile and desktop.',
     implementation_rule: 'if tracked_keyword_count < target_keyword_list_size[] → warn; if rank_tracking_tool NOT configured → flag',
@@ -3576,7 +3576,7 @@ export const AUDIT_CHECKS = [
   {
     check_number: 266,
     name: 'Uptime monitoring in place',
-    category: 'Monitoring & Operations',
+    category: 'Security & Monitoring',
     subsection: 'Analytics & Tracking',
     description: 'Verify uptime alerting because recurring downtime directly harms crawl reliability and user access. Validate on both mobile and desktop.',
     implementation_rule: 'if uptime_monitoring_configured == false → flag; if uptime < 99.5% in last 30 days → warn',
@@ -3588,7 +3588,7 @@ export const AUDIT_CHECKS = [
   {
     check_number: 267,
     name: 'SEO dashboard built',
-    category: 'Monitoring & Operations',
+    category: 'Security & Monitoring',
     subsection: 'Analytics & Tracking',
     description: 'Verify dashboarding because stakeholders need a consistent monitoring view across traffic, rankings, and technical health. Validate on both mobile and desktop.',
     implementation_rule: 'if seo_dashboard NOT configured → warn',
@@ -3600,7 +3600,7 @@ export const AUDIT_CHECKS = [
   {
     check_number: 268,
     name: 'Server log files analyzed for Googlebot visits',
-    category: 'Monitoring & Operations',
+    category: 'Security & Monitoring',
     subsection: 'Log File Analysis',
     description: 'Review raw bot hits because log data reveals real crawl behavior better than one-time crawler snapshots. Validate on both mobile and desktop.',
     implementation_rule: 'if log_analysis_last_run > 90 days ago → warn',
@@ -3612,7 +3612,7 @@ export const AUDIT_CHECKS = [
   {
     check_number: 269,
     name: 'Crawl budget waste identified from logs',
-    category: 'Monitoring & Operations',
+    category: 'Security & Monitoring',
     subsection: 'Log File Analysis',
     description: 'Analyze logs for low-value URL crawl patterns because crawl waste often hides in parameters, filters, and stale endpoints. Validate on both mobile and desktop.',
     implementation_rule: 'if low_value_url_patterns[] account for > 30% of googlebot_crawl_hits → warn; if > 50% → flag',
@@ -3624,7 +3624,7 @@ export const AUDIT_CHECKS = [
   {
     check_number: 270,
     name: '4xx and 5xx errors from Googlebot identified in logs',
-    category: 'Monitoring & Operations',
+    category: 'Security & Monitoring',
     subsection: 'Log File Analysis',
     description: 'Review bot-facing errors because crawler failures in logs can explain discovery and indexing problems. Validate on both mobile and desktop.',
     implementation_rule: 'if googlebot_4xx_rate > 5% → warn; if googlebot_5xx_rate > 1% → flag',
@@ -3636,7 +3636,7 @@ export const AUDIT_CHECKS = [
   {
     check_number: 271,
     name: 'Total backlink count baseline established',
-    category: 'Monitoring & Operations',
+    category: 'Security & Monitoring',
     subsection: 'Backlink Profile',
     description: 'Establish a baseline because backlink trend analysis needs a stable starting point. Validate on both mobile and desktop.',
     implementation_rule: 'if backlink_baseline NOT set in monitoring_tool → warn',
@@ -3648,7 +3648,7 @@ export const AUDIT_CHECKS = [
   {
     check_number: 272,
     name: 'Toxic backlinks identified',
-    category: 'Monitoring & Operations',
+    category: 'Security & Monitoring',
     subsection: 'Backlink Profile',
     description: 'Review harmful links because spammy backlink growth can create risk or mislead authority assessment. Validate on both mobile and desktop.',
     implementation_rule: 'if toxic_backlink_score > threshold defined in config[] → warn',
@@ -3660,7 +3660,7 @@ export const AUDIT_CHECKS = [
   {
     check_number: 273,
     name: 'Anchor text distribution is natural',
-    category: 'Monitoring & Operations',
+    category: 'Security & Monitoring',
     subsection: 'Backlink Profile',
     description: 'Review backlink anchor mix because unnatural anchors can indicate manipulative link patterns. Validate on both mobile and desktop.',
     implementation_rule: 'if exact_match_anchor_ratio > 20% of total_anchors → warn; if exact_match_anchor_ratio > 40% → flag',
@@ -3672,7 +3672,7 @@ export const AUDIT_CHECKS = [
   {
     check_number: 274,
     name: 'New backlinks monitored',
-    category: 'Monitoring & Operations',
+    category: 'Security & Monitoring',
     subsection: 'Backlink Profile',
     description: 'Confirm alerting because new-link detection helps measure PR and link-building results. Validate on both mobile and desktop.',
     implementation_rule: 'if new_backlink_alerts NOT configured → warn',
@@ -3684,7 +3684,7 @@ export const AUDIT_CHECKS = [
   {
     check_number: 275,
     name: 'Lost backlinks identified and recovered',
-    category: 'Monitoring & Operations',
+    category: 'Security & Monitoring',
     subsection: 'Backlink Profile',
     description: 'Review lost-link recovery because reclaimed links can restore authority efficiently. Validate on both mobile and desktop.',
     implementation_rule: 'if lost_backlinks_from_high_authority_domains_count > 0 AND recovery_attempted == false → warn',
@@ -3696,7 +3696,7 @@ export const AUDIT_CHECKS = [
   {
     check_number: 276,
     name: 'Google Business Profile claimed and optimized',
-    category: 'Monitoring & Operations',
+    category: 'Security & Monitoring',
     subsection: 'Brand Signals',
     description: 'Review GBP ownership and completeness because local visibility depends on a healthy primary profile. Validate on both mobile and desktop.',
     implementation_rule: 'if gbp_claimed == false → flag; if gbp_completeness_score < 80% → warn',
@@ -3708,7 +3708,7 @@ export const AUDIT_CHECKS = [
   {
     check_number: 277,
     name: 'Brand SERP monitored for brand searches',
-    category: 'Monitoring & Operations',
+    category: 'Security & Monitoring',
     subsection: 'Brand Signals',
     description: 'Track branded SERP appearance because brand-result quality affects trust and navigational performance. Validate on both mobile and desktop.',
     implementation_rule: 'if brand_serp_monitoring NOT configured → warn',
@@ -3720,7 +3720,7 @@ export const AUDIT_CHECKS = [
   {
     check_number: 278,
     name: 'Reviews on third-party platforms',
-    category: 'Monitoring & Operations',
+    category: 'Security & Monitoring',
     subsection: 'Brand Signals',
     description: 'Review off-site review presence because trust and conversion often depend on third-party sentiment. Validate on both mobile and desktop.',
     implementation_rule: 'if avg_review_score < 3.5 on major_platforms[] → warn; if avg_review_score < 3.0 → flag',
@@ -3732,7 +3732,7 @@ export const AUDIT_CHECKS = [
   {
     check_number: 279,
     name: 'Google Business Profile for each city branch',
-    category: 'Monitoring & Operations',
+    category: 'Security & Monitoring',
     subsection: 'Local SEO',
     description: 'Review multi-location profile coverage because branch-level local visibility depends on complete GBP presence. Validate on both mobile and desktop.',
     implementation_rule: 'if branch in branch_list[] AND gbp_profile absent → flag',
@@ -3744,7 +3744,7 @@ export const AUDIT_CHECKS = [
   {
     check_number: 280,
     name: 'GBP NAP consistent',
-    category: 'Monitoring & Operations',
+    category: 'Security & Monitoring',
     subsection: 'Local SEO',
     description: 'Check GBP consistency because mismatched local business data weakens trust and local ranking clarity. Validate on both mobile and desktop.',
     implementation_rule: 'if gbp_name OR gbp_address OR gbp_phone != site_nap_data[] → flag',
@@ -3756,7 +3756,7 @@ export const AUDIT_CHECKS = [
   {
     check_number: 281,
     name: 'LocalBusiness schema on location pages (Monitoring & Operations)',
-    category: 'Monitoring & Operations',
+    category: 'Security & Monitoring',
     subsection: 'Local SEO',
     description: 'Check local pages for LocalBusiness markup because structured local signals support location relevance. Validate on both mobile and desktop.',
     implementation_rule: 'if page matches location_page_template[] AND LocalBusiness_schema absent → warn',
@@ -3768,7 +3768,7 @@ export const AUDIT_CHECKS = [
   {
     check_number: 282,
     name: 'City or location pages unique and optimized',
-    category: 'Monitoring & Operations',
+    category: 'Security & Monitoring',
     subsection: 'Local SEO',
     description: 'Review local landing pages for uniqueness and local usefulness because scaled local pages often drift into duplication. Validate on both mobile and desktop.',
     implementation_rule: 'if location_page content_similarity vs other_location_pages > 85% → flag; if unique_local_content_ratio < 20% → warn',
@@ -3780,7 +3780,7 @@ export const AUDIT_CHECKS = [
   {
     check_number: 283,
     name: 'Local pack visibility monitored',
-    category: 'Monitoring & Operations',
+    category: 'Security & Monitoring',
     subsection: 'Local SEO',
     description: 'Track local-pack presence because map results often drive high-intent local traffic. Validate on both mobile and desktop.',
     implementation_rule: 'if local_pack_rank_tracking NOT configured for priority_local_keywords[] → warn',

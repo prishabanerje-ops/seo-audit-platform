@@ -29,8 +29,8 @@ const CATEGORY_ROUTES = {
   // Core technical
   'Response Codes':           '/audit/response-codes',
   'Canonical':                '/audit/canonicals',
-  'Robots / Indexability':    '/audit/robots',
-  'Sitemap':                  '/audit/sitemap',
+  'Robots & Indexability':    '/audit/robots-indexability',
+  'Sitemaps':                 '/audit/sitemaps',
   'URL Structure':            '/audit/crawl-depth',
 
   // On-page
@@ -47,11 +47,11 @@ const CATEGORY_ROUTES = {
   'Mobile SEO':               '/audit/mobile',
   'JavaScript Rendering':     '/audit/custom',
 
-  // Advanced (no dedicated detail page yet)
-  'International SEO':        '/audit/custom',
-  'Rankings & Traffic Drops': '/audit/custom',
-  'Monitoring & Operations':  '/audit/custom',
-  'LLM / AI Crawlers':        '/audit/custom',
+  // Advanced
+  'International SEO':        '/audit/hreflang',
+  'Security & Monitoring':    '/audit/security-monitoring',
+  'Rankings & Traffic':       '/audit/rankings',
+  'LLM / AI Crawlers':        '/audit/llm-ai',
 };
 
 // ── Helper components ─────────────────────────────────────────────────────────

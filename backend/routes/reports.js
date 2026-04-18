@@ -377,8 +377,8 @@ router.get('/:siteId/developer-summary', (req, res) => {
   const SECTION_SLUG = {
     'Response Codes':           'response-codes',
     'Canonical':                'canonicals',
-    'Robots / Indexability':    'robots',
-    'Sitemap':                  'sitemap',
+    'Robots & Indexability':    'robots-indexability',
+    'Sitemaps':                 'sitemaps',
     'URL Structure':            'crawl-depth',
     'Title Tags':               'title-tags',
     'Meta Description':         'meta-desc',
@@ -391,9 +391,9 @@ router.get('/:siteId/developer-summary', (req, res) => {
     'Mobile SEO':               'mobile',
     'JavaScript Rendering':     'custom',
     'International SEO':        'international',
-    'Monitoring & Operations':  'security',
-    'Rankings & Traffic Drops': 'custom',
-    'LLM / AI Crawlers':        'custom',
+    'Security & Monitoring':    'security-monitoring',
+    'Rankings & Traffic':       'rankings',
+    'LLM / AI Crawlers':        'llm-ai',
   };
 
   const topIssueRows = db.prepare(`
