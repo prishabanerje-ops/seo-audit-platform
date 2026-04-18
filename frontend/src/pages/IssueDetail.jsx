@@ -144,6 +144,7 @@ export function IssueDetail() {
   const [check,        setCheck]        = useState(null);
   const [notFound,     setNotFound]     = useState(false);
   const [siblingIds,   setSiblingIds]   = useState([]);
+  const [siblingError, setSiblingError] = useState(false);
 
   const [suggestion,   setSuggestion]   = useState(null);
   const [suggestionId, setSuggestionId] = useState(null);
@@ -164,6 +165,7 @@ export function IssueDetail() {
     setCheck(null);
     setNotFound(false);
     setSiblingIds([]);
+    setSiblingError(false);
     setSuggestion(null);
     setSuggestionId(null);
     setFeedback(null);
@@ -206,6 +208,7 @@ export function IssueDetail() {
             }
           } catch {
             // Non-fatal — prev/next just won't work
+            setSiblingError(true);
           }
         }
       } else {
@@ -450,7 +453,8 @@ export function IssueDetail() {
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <button
               type="button"
-              disabled={!hasPrev}
+              disabled={!hasPrev || siblingError}
+              title={siblingError ? 'Navigation unavailable' : undefined}
               onClick={() => handleNav(pos - 1)}
               style={{
                 display: 'inline-flex',
@@ -482,7 +486,8 @@ export function IssueDetail() {
 
             <button
               type="button"
-              disabled={!hasNext}
+              disabled={!hasNext || siblingError}
+              title={siblingError ? 'Navigation unavailable' : undefined}
               onClick={() => handleNav(pos + 1)}
               style={{
                 display: 'inline-flex',
