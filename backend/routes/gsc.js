@@ -43,15 +43,15 @@ router.get('/callback', async (req, res) => {
   const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
   const { code, state, error: oauthError } = req.query;
 
-  if (oauthError) return res.redirect(`${frontendUrl}/settings?gsc_error=${encodeURIComponent(oauthError)}`);
-  if (!code || !state) return res.redirect(`${frontendUrl}/settings?gsc_error=missing_params`);
+  if (oauthError) return res.redirect(`${frontendUrl}/integrations?gsc_error=${encodeURIComponent(oauthError)}`);
+  if (!code || !state) return res.redirect(`${frontendUrl}/integrations?gsc_error=missing_params`);
 
   let parsed;
   try { parsed = JSON.parse(state); } catch {
-    return res.redirect(`${frontendUrl}/settings?gsc_error=invalid_state`);
+    return res.redirect(`${frontendUrl}/integrations?gsc_error=invalid_state`);
   }
   if (!parsed.company_id || parsed.provider !== 'gsc') {
-    return res.redirect(`${frontendUrl}/settings?gsc_error=invalid_state`);
+    return res.redirect(`${frontendUrl}/integrations?gsc_error=invalid_state`);
   }
 
   try {
@@ -83,10 +83,10 @@ router.get('/callback', async (req, res) => {
       connectedEmail, now, now,
     );
 
-    res.redirect(`${frontendUrl}/settings?gsc_connected=1`);
+    res.redirect(`${frontendUrl}/integrations?gsc_connected=1`);
   } catch (err) {
     console.error('[GSC callback]', err.message);
-    res.redirect(`${frontendUrl}/settings?gsc_error=token_exchange_failed`);
+    res.redirect(`${frontendUrl}/integrations?gsc_error=token_exchange_failed`);
   }
 });
 
