@@ -104,7 +104,14 @@ router.get('/:siteId/category', (req, res) => {
       count DESC
   `).all(jobId, section);
 
-  res.json({ jobId, section, groups });
+  // covered = true if this section has ever produced audit_results for this job.
+  const covered = groups.length > 0
+    ? true
+    : !!db.prepare(
+        'SELECT 1 FROM audit_results WHERE crawl_job_id = ? AND section = ? LIMIT 1'
+      ).get(jobId, section);
+
+  res.json({ jobId, section, groups, covered });
   } catch (err) {
     console.error('[reports] GET /:siteId/category error:', err);
     res.status(500).json({ error: 'Failed to load category data' });
