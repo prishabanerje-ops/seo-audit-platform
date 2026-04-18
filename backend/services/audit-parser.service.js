@@ -744,6 +744,185 @@ function checkInternationalSeo(hreflangRows, internalRows, jobId, siteId) {
   return findings;
 }
 
+function checkMobileSeo(rows, jobId, siteId) {
+  const findings = [];
+
+  for (const row of rows) {
+    const url = str(row['Address']); if (!url) continue;
+
+    if (row.hasViewport === false) {
+      findings.push({
+        crawlJobId: jobId, siteId,
+        section: 'Mobile SEO', url,
+        severity: 'critical', issueType: 'Missing Viewport Meta Tag',
+        data: JSON.stringify({}),
+      });
+    }
+
+    const blocking = typeof row.renderBlockingCount === 'number'
+      ? row.renderBlockingCount : toInt(row.renderBlockingCount);
+    if (!isNaN(blocking) && blocking > 3) {
+      findings.push({
+        crawlJobId: jobId, siteId,
+        section: 'Mobile SEO', url,
+        severity: 'warning', issueType: 'Too Many Render-Blocking Resources (>3)',
+        data: JSON.stringify({ renderBlockingCount: blocking }),
+      });
+    }
+
+    const thirdParty = typeof row.thirdPartyScriptCount === 'number'
+      ? row.thirdPartyScriptCount : toInt(row.thirdPartyScriptCount);
+    if (!isNaN(thirdParty) && thirdParty > 5) {
+      findings.push({
+        crawlJobId: jobId, siteId,
+        section: 'Mobile SEO', url,
+        severity: 'warning', issueType: 'Excessive Third-Party Scripts (>5)',
+        data: JSON.stringify({ thirdPartyScriptCount: thirdParty }),
+      });
+    }
+  }
+
+  return findings;
+}
+
+function checkMonitoring(rows, jobId, siteId) {
+  const findings = [];
+
+  for (const row of rows) {
+    const url = str(row['Address']); if (!url) continue;
+
+    if (row.isHttps === false) {
+      findings.push({
+        crawlJobId: jobId, siteId,
+        section: 'Security & Monitoring', url,
+        severity: 'critical', issueType: 'Page Not Served Over HTTPS',
+        data: JSON.stringify({}),
+      });
+    }
+
+    if (row.isHttps === true && row.hasHsts === false) {
+      findings.push({
+        crawlJobId: jobId, siteId,
+        section: 'Security & Monitoring', url,
+        severity: 'warning', issueType: 'Missing HSTS Header',
+        data: JSON.stringify({}),
+      });
+    }
+
+    if (row.hasXContentTypeOptions === false) {
+      findings.push({
+        crawlJobId: jobId, siteId,
+        section: 'Security & Monitoring', url,
+        severity: 'info', issueType: 'Missing X-Content-Type-Options Header',
+        data: JSON.stringify({}),
+      });
+    }
+
+    if (row.hasXFrameOptions === false) {
+      findings.push({
+        crawlJobId: jobId, siteId,
+        section: 'Security & Monitoring', url,
+        severity: 'info', issueType: 'Missing X-Frame-Options Header',
+        data: JSON.stringify({}),
+      });
+    }
+
+    if (row.hasContentSecurityPolicy === false) {
+      findings.push({
+        crawlJobId: jobId, siteId,
+        section: 'Security & Monitoring', url,
+        severity: 'info', issueType: 'Missing Content Security Policy Header',
+        data: JSON.stringify({}),
+      });
+    }
+
+    if (row.analyticsDetected === false) {
+      findings.push({
+        crawlJobId: jobId, siteId,
+        section: 'Security & Monitoring', url,
+        severity: 'warning', issueType: 'No Analytics Tag Detected',
+        data: JSON.stringify({}),
+      });
+    }
+
+    if (row.ga4DoubleFiring === true) {
+      findings.push({
+        crawlJobId: jobId, siteId,
+        section: 'Security & Monitoring', url,
+        severity: 'warning', issueType: 'GA4 Double Firing Detected',
+        data: JSON.stringify({ analyticsType: row.analyticsType }),
+      });
+    }
+
+    const responseTime = typeof row.serverResponseTime === 'number'
+      ? row.serverResponseTime : toInt(row.serverResponseTime);
+    if (!isNaN(responseTime) && responseTime > 500) {
+      findings.push({
+        crawlJobId: jobId, siteId,
+        section: 'Security & Monitoring', url,
+        severity: 'warning', issueType: 'Slow Server Response Time (>500ms)',
+        data: JSON.stringify({ serverResponseTime: responseTime }),
+      });
+    }
+  }
+
+  return findings;
+}
+
+// Known AI crawler user-agents (lower-case for matching in llms.txt)
+const AI_CRAWLERS = ['gptbot', 'chatgpt-user', 'claudebot', 'anthropic-ai', 'googleextended', 'perplexitybot', 'ccbot', 'omgilibot'];
+
+function checkLlmAiCrawlers(robots, siteOrigin, jobId, siteId) {
+  const findings = [];
+  if (!robots) return findings;
+
+  const llmsUrl = `${siteOrigin}/llms.txt`;
+
+  if (!robots.llmsTxtExists) {
+    findings.push({
+      crawlJobId: jobId, siteId,
+      section: 'LLM / AI Crawlers', url: llmsUrl,
+      severity: 'info', issueType: 'No llms.txt Found',
+      data: JSON.stringify({}),
+    });
+    return findings;
+  }
+
+  // Check if any known AI crawler is blocked in llms.txt
+  const content = (robots.llmsTxtContent || '').toLowerCase();
+  let currentAgent = null;
+  let blockedCrawlers = [];
+
+  for (const rawLine of content.split('\n')) {
+    const line = rawLine.trim();
+    if (!line || line.startsWith('#')) continue;
+    const colonIdx = line.indexOf(':');
+    if (colonIdx === -1) continue;
+    const directive = line.slice(0, colonIdx).trim();
+    const value     = line.slice(colonIdx + 1).trim();
+
+    if (directive === 'user-agent') {
+      currentAgent = value;
+    } else if (directive === 'disallow' && value === '/' && currentAgent) {
+      const agent = currentAgent.toLowerCase();
+      if (agent === '*' || AI_CRAWLERS.some(c => agent.includes(c))) {
+        blockedCrawlers.push(currentAgent);
+      }
+    }
+  }
+
+  if (blockedCrawlers.length > 0) {
+    findings.push({
+      crawlJobId: jobId, siteId,
+      section: 'LLM / AI Crawlers', url: llmsUrl,
+      severity: 'warning', issueType: 'llms.txt Blocks AI Crawlers',
+      data: JSON.stringify({ blockedAgents: [...new Set(blockedCrawlers)] }),
+    });
+  }
+
+  return findings;
+}
+
 function checkRobotsIndexability(robots, siteOrigin, jobId, siteId) {
   const findings = [];
   if (!robots) return findings;
@@ -882,7 +1061,11 @@ export function parseAndStoreFromDatasets(datasets, jobId, siteId, companyId = n
   if (siteData) {
     run('Robots & Indexability', () => checkRobotsIndexability(siteData.robots, siteOrigin, jobId, siteId));
     run('Sitemaps',              () => checkSitemap(siteData.sitemap, siteOrigin, jobId, siteId));
+    run('LLM / AI Crawlers',     () => checkLlmAiCrawlers(siteData.robots, siteOrigin, jobId, siteId));
   }
+
+  run('Mobile SEO',          () => checkMobileSeo(datasets.mobile_all || [], jobId, siteId));
+  run('Security/Monitoring', () => checkMonitoring(datasets.monitoring_all || [], jobId, siteId));
 
   run('Response Codes',  () => checkResponseCodes(datasets.response_codes_all || [], jobId, siteId));
   run('Page Titles',     () => checkPageTitles(datasets.page_titles_all || [], jobId, siteId));
