@@ -4,7 +4,7 @@ import {
   Heart, FolderKanban, Gauge, FileCode2, FileText,
   List, FileOutput, Calendar, Bell, Plug,
   Stethoscope, Users, Settings, ChevronLeft, ChevronRight,
-  Building2, ClipboardList, BarChart3,
+  Building2, ClipboardList, BarChart3, GitCompareArrows,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
 
@@ -24,7 +24,16 @@ const NAV_SECTIONS = [
       { label: 'Crawls',              icon: Activity,      path: '/crawl/status'            },
       { label: 'Paid Ads',            icon: BarChart3,     path: '/ads'                     },
       { label: 'Audit Health',        icon: Heart,         path: '/audit'                   },
-      { label: 'Audit Categories',    icon: FolderKanban,  path: '/audit/response-codes'    },
+      { label: 'Audit Categories',    icon: FolderKanban,  path: '/audit/categories',
+        isActiveFn: (pathname) => {
+          const excluded = ['/audit', '/audit/compare', '/audit/cwv',
+                            '/audit/custom-extraction', '/audit/log-file',
+                            '/audit/gsc', '/audit/ga4'];
+          return pathname.startsWith('/audit/')
+            && !excluded.some(p => pathname === p || pathname.startsWith(p + '/'));
+        },
+      },
+      { label: 'Compare Crawls',      icon: GitCompareArrows, path: '/audit/compare'         },
       { label: 'Core Web Vitals',     icon: Gauge,         path: '/audit/cwv'               },
       { label: 'Custom Extraction',   icon: FileCode2,     path: '/audit/custom-extraction' },
       { label: 'Log File Intel.',     icon: FileText,      path: '/audit/log-file'          },
@@ -61,8 +70,10 @@ export function Sidebar({ collapsed, onToggleCollapse }) {
   const location = useLocation();
   const { user } = useAuth();
 
-  const isActive = (path) =>
-    location.pathname === path || location.pathname.startsWith(path + '/');
+  const isActive = (item) =>
+    item.isActiveFn
+      ? item.isActiveFn(location.pathname)
+      : (location.pathname === item.path || location.pathname.startsWith(item.path + '/'));
 
   const canSee = (item) => {
     if (!item.roles) return true;
@@ -121,7 +132,7 @@ export function Sidebar({ collapsed, onToggleCollapse }) {
               <div className="space-y-0.5">
                 {visibleItems.map(item => {
                   const Icon   = item.icon;
-                  const active = isActive(item.path);
+                  const active = isActive(item);
                   return (
                     <Link
                       key={item.path}

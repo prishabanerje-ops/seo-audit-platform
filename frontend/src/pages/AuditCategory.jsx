@@ -21,30 +21,7 @@ import api               from '../api/index.js';
 import { useSites }      from '../context/SitesContext.jsx';
 import { EmptyState }    from '../components/EmptyState.jsx';
 import { LoadingSkeleton } from '../components/LoadingSkeleton.jsx';
-
-// ── Slug → DB section name ─────────────────────────────────────────────────────
-const CATEGORY_SLUG_MAP = {
-  'response-codes':  'Response Codes',
-  'canonicals':      'Canonical',
-  'robots':          'Robots / Indexability',
-  'sitemap':         'Sitemap',
-  'crawl-depth':     'URL Structure',
-  'title-tags':      'Title Tags',
-  'meta-desc':       'Meta Description',
-  'headings':        'Headings',
-  'links':           'Internal Linking',
-  'images':          'Images',
-  'structured-data': 'Schema / Structured Data',
-  'content':         'Content',
-  'page-speed':      'Speed & Performance',
-  'mobile':          'Mobile SEO',
-  'custom':          'JavaScript Rendering',
-  'indexability':    'Robots / Indexability',
-  'hreflang':        'International SEO',
-  'redirects':       'Response Codes',
-  'security':        'Monitoring & Operations',
-  'international':   'International SEO',
-};
+import { SLUG_TO_SECTION } from '../lib/auditCategories.js';
 
 const PAGE_LIMIT = 50;
 
@@ -118,7 +95,7 @@ function UrlRow({ row, index, onClick }) {
 }
 
 // ── Accordion group row ────────────────────────────────────────────────────────
-function GroupAccordion({ group, urlEntry, onExpand, onLoadMore, onUrlClick, onRetry }) {
+function GroupAccordion({ group, urlEntry, onExpand, onLoadMore, onUrlClick, onRetry, siteId, sectionName }) {
   const isOpen     = urlEntry !== undefined;
   const isLoading  = urlEntry?.loading;
   const results    = urlEntry?.results || [];
@@ -159,6 +136,23 @@ function GroupAccordion({ group, urlEntry, onExpand, onLoadMore, onUrlClick, onR
           >
             {group.count?.toLocaleString()} URL{group.count !== 1 ? 's' : ''}
           </span>
+          {/* CSV export */}
+          {siteId && sectionName && (
+            <a
+              href={`/api/reports/${siteId}/issues/export?section=${encodeURIComponent(sectionName)}&issue_type=${encodeURIComponent(group.issue_type)}`}
+              download
+              onClick={e => e.stopPropagation()}
+              className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded transition-colors"
+              style={{
+                color: 'var(--brand)',
+                backgroundColor: 'var(--brand-subtle)',
+                textDecoration: 'none',
+              }}
+              title={`Download ${group.issue_type} URLs as CSV`}
+            >
+              ⬇ CSV
+            </a>
+          )}
         </div>
       </button>
 
@@ -231,11 +225,12 @@ export function AuditCategory() {
 
   // Extract slug from static path e.g. /audit/title-tags
   const slug        = location.pathname.replace('/audit/', '').split('/')[0];
-  const sectionName = CATEGORY_SLUG_MAP[slug];
+  const sectionName = SLUG_TO_SECTION[slug];
 
   const [loading, setLoading] = useState(true);
   const [groups,  setGroups]  = useState([]);
   const [jobId,   setJobId]   = useState(null);
+  const [covered, setCovered] = useState(null);
   const [error,   setError]   = useState(null);
 
   // expanded: Set of issue_types whose accordion is open
@@ -251,6 +246,7 @@ export function AuditCategory() {
     setError(null);
     setGroups([]);
     setJobId(null);
+    setCovered(null);
     setExpanded(new Set());
     setUrlMap({});
     try {
@@ -259,6 +255,7 @@ export function AuditCategory() {
       });
       setGroups(res.data.groups  || []);
       setJobId(res.data.jobId    ?? null);
+      setCovered(res.data.covered ?? false);
     } catch (err) {
       setGroups([]);
       setJobId(null);
@@ -414,20 +411,28 @@ export function AuditCategory() {
       <div className="p-6">
         <nav className="mb-4">
           <Link
-            to="/audit"
+            to="/audit/categories"
             className="inline-flex items-center gap-1 text-sm"
             style={{ color: 'var(--text-muted)' }}
           >
             <ArrowLeft className="w-3.5 h-3.5" />
-            Audit Health
+            Audit Categories
           </Link>
         </nav>
-        <EmptyState
-          icon={FileSearch}
-          message={`No ${sectionName} issues found`}
-          description="No issues were detected in the latest crawl. Run a new crawl to check again."
-          action={{ label: 'Start a Crawl', to: '/crawl' }}
-        />
+        {covered ? (
+          <EmptyState
+            icon={FileSearch}
+            message={`No ${sectionName} issues found`}
+            description="No issues were detected in the latest crawl. Run a new crawl to check again."
+            action={{ label: 'Start a Crawl', to: '/crawl' }}
+          />
+        ) : (
+          <EmptyState
+            icon={FileSearch}
+            message={`No data collected for ${sectionName} yet`}
+            description="This category will be populated automatically once the crawler supports it."
+          />
+        )}
       </div>
     );
   }
@@ -525,6 +530,8 @@ export function AuditCategory() {
                 setUrlMap(prev => ({ ...prev, [group.issue_type]: undefined }));
                 loadUrls(group.issue_type, 0);
               }}
+              siteId={activeSite?.id}
+              sectionName={sectionName}
             />
           ))}
         </div>

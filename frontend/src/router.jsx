@@ -46,8 +46,9 @@ import { DeveloperView } from './pages/DeveloperView.jsx';
 import { Tasks }         from './pages/Tasks.jsx';
 import { TaskDetail }    from './pages/TaskDetail.jsx';
 
-import { AuditCategory } from './pages/AuditCategory.jsx';
-import { IssueDetail }   from './pages/IssueDetail.jsx';
+import { AuditCategory }   from './pages/AuditCategory.jsx';
+import { AuditCategories } from './pages/AuditCategories.jsx';
+import { IssueDetail }     from './pages/IssueDetail.jsx';
 
 /* Authenticated shell wrapper */
 function AuthedShell() {
@@ -115,6 +116,7 @@ export const router = createBrowserRouter([
 
           /* Audit */
           { path: '/audit',                element: <AuditHealth /> },
+          { path: '/audit/categories',     element: <AuditCategories /> },
           { path: '/audit/issue/:resultId', element: <IssueDetail /> },
           { path: '/audit/cwv',            element: <CoreWebVitals /> },
           { path: '/audit/compare',        element: <CompareView /> },

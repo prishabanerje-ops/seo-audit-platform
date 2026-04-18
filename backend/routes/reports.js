@@ -91,7 +91,7 @@ router.get('/:siteId/category', (req, res) => {
   }
 
   if (!jobId) {
-    return res.json({ jobId: null, section, groups: [] });
+    return res.json({ jobId: null, section, groups: [], covered: false });
   }
 
   const groups = db.prepare(`
@@ -104,7 +104,14 @@ router.get('/:siteId/category', (req, res) => {
       count DESC
   `).all(jobId, section);
 
-  res.json({ jobId, section, groups });
+  // covered = true if this section has ever produced audit_results for this job.
+  const covered = groups.length > 0
+    ? true
+    : !!db.prepare(
+        'SELECT 1 FROM audit_results WHERE crawl_job_id = ? AND section = ? LIMIT 1'
+      ).get(jobId, section);
+
+  res.json({ jobId, section, groups, covered });
   } catch (err) {
     console.error('[reports] GET /:siteId/category error:', err);
     res.status(500).json({ error: 'Failed to load category data' });
@@ -435,6 +442,77 @@ router.get('/:siteId/developer-summary', (req, res) => {
   } catch (err) {
     console.error('[reports] GET /:siteId/developer-summary error:', err);
     res.status(500).json({ error: 'Failed to load developer summary' });
+  }
+});
+
+// ─── GET /api/reports/:siteId/issues/export ───────────────────────────────────
+router.get('/:siteId/issues/export', (req, res) => {
+  try {
+    const { siteId } = req.params;
+    const { section, issue_type } = req.query;
+    const { company_id, role } = req.user;
+
+    if (!section)    return res.status(400).json({ error: 'section param is required' });
+    if (!issue_type) return res.status(400).json({ error: 'issue_type param is required' });
+
+    const site = db.prepare('SELECT id, company_id FROM sites WHERE id = ?').get(siteId);
+    if (!site) return res.status(404).json({ error: 'Site not found' });
+    if (role !== 'superadmin' && site.company_id !== company_id) {
+      return res.status(403).json({ error: 'Access denied' });
+    }
+
+    const latestJob = db.prepare(`
+      SELECT id FROM crawl_jobs
+      WHERE site_id = ? AND status = 'completed'
+      ORDER BY started_at DESC LIMIT 1
+    `).get(siteId);
+
+    if (!latestJob) {
+      return res.status(404).json({ error: 'No completed crawl found for this site' });
+    }
+
+    const rows = db.prepare(`
+      SELECT url, data
+      FROM audit_results
+      WHERE crawl_job_id = ? AND section = ? AND issue_type = ?
+      ORDER BY url ASC
+    `).all(latestJob.id, section, issue_type);
+
+    const slugify = (str) =>
+      str.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+    const filename = `${slugify(section)}-${slugify(issue_type)}.csv`;
+
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+
+    if (rows.length === 0) {
+      return res.send('url\n');
+    }
+
+    const parsed = rows.map(row => {
+      const data = row.data ? (() => { try { return JSON.parse(row.data); } catch { return {}; } })() : {};
+      return { url: row.url, ...data };
+    });
+
+    const dataKeys = [...new Set(parsed.flatMap(r => Object.keys(r).filter(k => k !== 'url')))].sort();
+    const columns  = ['url', ...dataKeys];
+
+    const escape = (val) => {
+      const s = String(val ?? '');
+      return (s.includes(',') || s.includes('"') || s.includes('\n'))
+        ? `"${s.replace(/"/g, '""')}"`
+        : s;
+    };
+
+    const lines = [
+      columns.join(','),
+      ...parsed.map(row => columns.map(col => escape(row[col])).join(',')),
+    ];
+
+    res.send(lines.join('\n'));
+  } catch (err) {
+    console.error('[reports] GET /:siteId/issues/export error:', err);
+    res.status(500).json({ error: 'Failed to generate export' });
   }
 });
 
