@@ -625,6 +625,125 @@ function checkContent(rows, jobId, siteId) {
   return findings;
 }
 
+function checkJavaScriptRendering(rows, jobId, siteId) {
+  const findings = [];
+
+  for (const row of rows) {
+    const url = str(row['Address']); if (!url) continue;
+
+    if (row.criticalContentJsOnly === true) {
+      findings.push({
+        crawlJobId: jobId, siteId,
+        section: 'JavaScript Rendering', url,
+        severity: 'critical', issueType: 'Critical Content Only in JS',
+        data: JSON.stringify({
+          preRenderWordCount:  row.preRenderWordCount,
+          postRenderWordCount: row.postRenderWordCount,
+        }),
+      });
+    }
+
+    if (row.titleChangedAfterRender === true) {
+      findings.push({
+        crawlJobId: jobId, siteId,
+        section: 'JavaScript Rendering', url,
+        severity: 'warning', issueType: 'Title Changed After JS Render',
+        data: JSON.stringify({ preRenderTitle: row.preRenderTitle, postRenderTitle: row.postRenderTitle }),
+      });
+    }
+
+    if (row.schemaOnlyAfterRender === true) {
+      findings.push({
+        crawlJobId: jobId, siteId,
+        section: 'JavaScript Rendering', url,
+        severity: 'warning', issueType: 'Schema Only Available After JS Render',
+        data: JSON.stringify({}),
+      });
+    }
+
+    const wordDiff = typeof row.wordCountChange === 'number' ? row.wordCountChange : toInt(row.wordCountChange);
+    if (!isNaN(wordDiff) && wordDiff > 500) {
+      findings.push({
+        crawlJobId: jobId, siteId,
+        section: 'JavaScript Rendering', url,
+        severity: 'warning', issueType: 'Large Content Change After JS Render (>500 Words)',
+        data: JSON.stringify({ wordCountChange: wordDiff }),
+      });
+    }
+
+    if (row.hasHashRouting === true) {
+      findings.push({
+        crawlJobId: jobId, siteId,
+        section: 'JavaScript Rendering', url,
+        severity: 'info', issueType: 'Hash-Based Routing Detected',
+        data: JSON.stringify({}),
+      });
+    }
+
+    if (row.hasInfiniteScroll === true) {
+      findings.push({
+        crawlJobId: jobId, siteId,
+        section: 'JavaScript Rendering', url,
+        severity: 'info', issueType: 'Infinite Scroll Detected (No Pagination)',
+        data: JSON.stringify({}),
+      });
+    }
+  }
+
+  return findings;
+}
+
+function checkInternationalSeo(hreflangRows, internalRows, jobId, siteId) {
+  const findings = [];
+
+  // Build indexable URL set from internal_all for fast lookup
+  const indexableUrls = new Set();
+  for (const row of internalRows) {
+    if (isIndexable(row)) {
+      const url = str(row['Address']); if (url) indexableUrls.add(url);
+    }
+  }
+
+  // Track which URLs already have a finding for missing lang (avoid dupes)
+  const reported = new Set();
+
+  for (const row of hreflangRows) {
+    const url = str(row['Address']); if (!url) continue;
+    if (!indexableUrls.has(url)) continue;
+
+    const hasHreflang = row.hasHreflang === true;
+    const hasXDefault = row.hasXDefault === true;
+    const htmlLang    = str(row.htmlLang || row['htmlLang'] || '');
+
+    if (hasHreflang && !hasXDefault && !reported.has(url + ':xdefault')) {
+      reported.add(url + ':xdefault');
+      findings.push({
+        crawlJobId: jobId, siteId,
+        section: 'International SEO', url,
+        severity: 'warning', issueType: 'Hreflang Missing x-default',
+        data: JSON.stringify({}),
+      });
+    }
+
+    if (!htmlLang && !reported.has(url + ':lang')) {
+      reported.add(url + ':lang');
+      findings.push({
+        crawlJobId: jobId, siteId,
+        section: 'International SEO', url,
+        severity: 'info', issueType: 'Missing HTML Lang Attribute',
+        data: JSON.stringify({}),
+      });
+    }
+  }
+
+  // Pages not in hreflang_all at all also lack htmlLang — but we only flag that
+  // if they're indexable; covered above via internalRows loop for hreflang pages.
+  // For pages with no hreflang data at all, check htmlLang via internal_all is
+  // not possible (that field isn't in internal_all). Skip — covered by hreflang_all.
+
+  return findings;
+}
+
 function checkRobotsIndexability(robots, siteOrigin, jobId, siteId) {
   const findings = [];
   if (!robots) return findings;
@@ -782,7 +901,9 @@ export function parseAndStoreFromDatasets(datasets, jobId, siteId, companyId = n
   run('URL Structure',   () => checkUrlStructure(datasets.internal_all || [], jobId, siteId));
   run('Internal Linking', () => checkInternalLinking(datasets.internal_all || [], jobId, siteId));
   run('Images',           () => checkImages(datasets.images_all || [], jobId, siteId));
-  run('Content',          () => checkContent(datasets.internal_all || [], jobId, siteId));
+  run('Content',             () => checkContent(datasets.internal_all || [], jobId, siteId));
+  run('JS Rendering',        () => checkJavaScriptRendering(datasets.jsrender_all || [], jobId, siteId));
+  run('International SEO',   () => checkInternationalSeo(datasets.hreflang_all || [], datasets.internal_all || [], jobId, siteId));
   run('Structured Data', () => checkStructuredData(datasets.structured_data_all || [], jobId, siteId));
   run('Schema Extended', () => checkSchemaExtended(datasets.structured_data_all || [], datasets.internal_all || [], jobId, siteId));
   run('SD Validation',   () => checkStructuredDataValidation(
