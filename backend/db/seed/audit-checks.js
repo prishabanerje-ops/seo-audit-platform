@@ -1,9 +1,10 @@
 /**
- * Full 291-check audit registry.
- * Auto-generated from "AI Soft - Rule - Sheet4.csv".
+ * Full 354-check audit registry.
+ * Original 291 checks auto-generated from "AI Soft - Rule - Sheet4.csv".
+ * Phase 2 additions (292–354) implement 13 new audit categories.
  *
  * Each entry maps to one row in the audit_checks table.
- * check_number is sequential 1–291 across 19 categories.
+ * check_number is sequential 1–354 across 32 categories.
  */
 
 // Tool mapping derived from the "Tool" column in AI Soft - Rule - Sheet4.csv.
@@ -300,6 +301,95 @@ const TOOL_MAP = {
   289: { tool_current: 'Playwright Crawler',        tool_future: 'Rule Engine' },
   290: { tool_current: 'Playwright Crawler',        tool_future: 'Monitoring Engine' },
   291: { tool_current: 'Manual Review',             tool_future: 'Governance Workflow' },
+
+  // Phase 2 — Robots & Indexability (292–296)
+  292: { tool_current: 'Playwright Crawler',        tool_future: 'Rule Engine' },
+  293: { tool_current: 'Playwright Crawler',        tool_future: 'Rule Engine' },
+  294: { tool_current: 'Playwright Crawler',        tool_future: 'Rule Engine' },
+  295: { tool_current: 'Playwright Crawler',        tool_future: 'Rule Engine' },
+  296: { tool_current: 'Playwright Crawler',        tool_future: 'Rule Engine' },
+
+  // Phase 2 — Sitemaps (297–300)
+  297: { tool_current: 'Playwright Crawler',        tool_future: 'Rule Engine' },
+  298: { tool_current: 'Playwright Crawler',        tool_future: 'Rule Engine' },
+  299: { tool_current: 'Playwright Crawler',        tool_future: 'Rule Engine' },
+  300: { tool_current: 'Playwright Crawler',        tool_future: 'Rule Engine' },
+
+  // Phase 2 — Internal Linking (301–303)
+  301: { tool_current: 'Playwright Crawler',        tool_future: 'Rule Engine' },
+  302: { tool_current: 'Playwright Crawler',        tool_future: 'Rule Engine' },
+  303: { tool_current: 'Playwright Crawler',        tool_future: 'Rule Engine' },
+
+  // Phase 2 — Images (304–305)
+  304: { tool_current: 'Playwright Crawler',        tool_future: 'Rule Engine' },
+  305: { tool_current: 'Playwright Crawler',        tool_future: 'Rule Engine' },
+
+  // Phase 2 — Content (306–308)
+  306: { tool_current: 'Playwright Crawler',        tool_future: 'Content Quality Analyzer' },
+  307: { tool_current: 'Playwright Crawler',        tool_future: 'Content Quality Analyzer' },
+  308: { tool_current: 'Playwright Crawler',        tool_future: 'Content Quality Analyzer' },
+
+  // Phase 2 — Schema Extended (309–310)
+  309: { tool_current: 'Playwright Crawler',        tool_future: 'Schema Validator' },
+  310: { tool_current: 'Playwright Crawler',        tool_future: 'Schema Validator' },
+
+  // Phase 2 — JavaScript Rendering (311–316)
+  311: { tool_current: 'Playwright Crawler',        tool_future: 'Rule Engine' },
+  312: { tool_current: 'Playwright Crawler',        tool_future: 'Rule Engine' },
+  313: { tool_current: 'Playwright Crawler',        tool_future: 'Rule Engine' },
+  314: { tool_current: 'Playwright Crawler',        tool_future: 'Rule Engine' },
+  315: { tool_current: 'Playwright Crawler',        tool_future: 'Rule Engine' },
+  316: { tool_current: 'Playwright Crawler',        tool_future: 'Rule Engine' },
+
+  // Phase 2 — International SEO (317–318)
+  317: { tool_current: 'Playwright Crawler',        tool_future: 'Rule Engine' },
+  318: { tool_current: 'Playwright Crawler',        tool_future: 'Rule Engine' },
+
+  // Phase 2 — Mobile SEO (319–321)
+  319: { tool_current: 'Playwright Crawler',        tool_future: 'Rule Engine' },
+  320: { tool_current: 'Playwright Crawler',        tool_future: 'Rule Engine' },
+  321: { tool_current: 'Playwright Crawler',        tool_future: 'Rule Engine' },
+
+  // Phase 2 — Security & Monitoring (322–329)
+  322: { tool_current: 'Playwright Crawler',        tool_future: 'Monitoring Engine' },
+  323: { tool_current: 'Playwright Crawler',        tool_future: 'Monitoring Engine' },
+  324: { tool_current: 'Playwright Crawler',        tool_future: 'Monitoring Engine' },
+  325: { tool_current: 'Playwright Crawler',        tool_future: 'Monitoring Engine' },
+  326: { tool_current: 'Playwright Crawler',        tool_future: 'Monitoring Engine' },
+  327: { tool_current: 'Playwright Crawler',        tool_future: 'Monitoring Engine' },
+  328: { tool_current: 'Playwright Crawler',        tool_future: 'Monitoring Engine' },
+  329: { tool_current: 'Playwright Crawler',        tool_future: 'Monitoring Engine' },
+
+  // Phase 2 — LLM / AI Crawlers (330–331)
+  330: { tool_current: 'Playwright Crawler',        tool_future: 'Rule Engine' },
+  331: { tool_current: 'Playwright Crawler',        tool_future: 'Rule Engine' },
+
+  // Phase 2 — Rankings & Traffic (332–334)
+  332: { tool_current: 'GSC Integration',           tool_future: 'GSC Integration' },
+  333: { tool_current: 'GSC Integration',           tool_future: 'GSC Integration' },
+  334: { tool_current: 'GSC Integration',           tool_future: 'GSC Integration' },
+
+  // Phase 2 — Speed & Performance (335–354)
+  335: { tool_current: 'PSI API',                   tool_future: 'PSI API' },
+  336: { tool_current: 'PSI API',                   tool_future: 'PSI API' },
+  337: { tool_current: 'PSI API',                   tool_future: 'PSI API' },
+  338: { tool_current: 'PSI API',                   tool_future: 'PSI API' },
+  339: { tool_current: 'PSI API',                   tool_future: 'PSI API' },
+  340: { tool_current: 'PSI API',                   tool_future: 'PSI API' },
+  341: { tool_current: 'PSI API',                   tool_future: 'PSI API' },
+  342: { tool_current: 'PSI API',                   tool_future: 'PSI API' },
+  343: { tool_current: 'PSI API',                   tool_future: 'PSI API' },
+  344: { tool_current: 'PSI API',                   tool_future: 'PSI API' },
+  345: { tool_current: 'PSI API',                   tool_future: 'PSI API' },
+  346: { tool_current: 'PSI API',                   tool_future: 'PSI API' },
+  347: { tool_current: 'PSI API',                   tool_future: 'PSI API' },
+  348: { tool_current: 'PSI API',                   tool_future: 'PSI API' },
+  349: { tool_current: 'PSI API',                   tool_future: 'PSI API' },
+  350: { tool_current: 'PSI API',                   tool_future: 'PSI API' },
+  351: { tool_current: 'PSI API',                   tool_future: 'PSI API' },
+  352: { tool_current: 'PSI API',                   tool_future: 'PSI API' },
+  353: { tool_current: 'PSI API',                   tool_future: 'PSI API' },
+  354: { tool_current: 'PSI API',                   tool_future: 'PSI API' },
 };
 
 export const AUDIT_CHECKS = [
@@ -3795,12 +3885,103 @@ export const AUDIT_CHECKS = [
     logic_summary: '',
     seo_impact: '',
   },
+
+  // ── Phase 2 additions (checks 292–354) ──────────────────────────────────────
+
+  // Robots & Indexability
+  { check_number: 292, name: 'Missing robots.txt', category: 'Robots & Indexability', subsection: 'Robots.txt', description: 'robots.txt could not be fetched — crawlers operate without access rules.', implementation_rule: 'if robots_txt_status != 200 → warn', severity_default: 'warning', automation_type: 'automated', logic_summary: '', seo_impact: '' },
+  { check_number: 293, name: 'Disallow all in robots.txt', category: 'Robots & Indexability', subsection: 'Robots.txt', description: 'Wildcard Disallow: / blocks all crawlers from the entire site.', implementation_rule: 'if disallow_rule agent=* path=/ → critical', severity_default: 'critical', automation_type: 'automated', logic_summary: '', seo_impact: '' },
+  { check_number: 294, name: 'Googlebot blocked in robots.txt', category: 'Robots & Indexability', subsection: 'Robots.txt', description: 'Googlebot is explicitly blocked with Disallow: /.', implementation_rule: 'if disallow_rule agent=Googlebot path=/ → critical', severity_default: 'critical', automation_type: 'automated', logic_summary: '', seo_impact: '' },
+  { check_number: 295, name: 'Malformed robots.txt rules', category: 'Robots & Indexability', subsection: 'Robots.txt', description: 'robots.txt contains lines that do not conform to the standard directive format.', implementation_rule: 'if malformed_lines_count > 0 → warn', severity_default: 'warning', automation_type: 'automated', logic_summary: '', seo_impact: '' },
+  { check_number: 296, name: 'Sitemap not declared in robots.txt', category: 'Robots & Indexability', subsection: 'Robots.txt', description: 'No Sitemap: directive found in robots.txt — crawlers cannot auto-discover the sitemap.', implementation_rule: 'if sitemap_declared = false → info', severity_default: 'info', automation_type: 'automated', logic_summary: '', seo_impact: '' },
+
+  // Sitemaps
+  { check_number: 297, name: 'Missing sitemap.xml', category: 'Sitemaps', subsection: 'Sitemap Presence', description: 'No sitemap could be fetched at the expected location or via robots.txt.', implementation_rule: 'if sitemap_exists = false → critical', severity_default: 'critical', automation_type: 'automated', logic_summary: '', seo_impact: '' },
+  { check_number: 298, name: 'Sitemap exceeds 50,000 URL limit', category: 'Sitemaps', subsection: 'Sitemap Quality', description: 'Sitemap contains more than 50,000 URLs which exceeds the Google limit for a single sitemap file.', implementation_rule: 'if total_url_count > 50000 → warn', severity_default: 'warning', automation_type: 'automated', logic_summary: '', seo_impact: '' },
+  { check_number: 299, name: 'Sitemap parse errors', category: 'Sitemaps', subsection: 'Sitemap Quality', description: 'The sitemap XML could not be fully parsed — some URLs may be missed by crawlers.', implementation_rule: 'if parse_errors.length > 0 → warn', severity_default: 'warning', automation_type: 'automated', logic_summary: '', seo_impact: '' },
+  { check_number: 300, name: 'Sitemap contains invalid URLs', category: 'Sitemaps', subsection: 'Sitemap Quality', description: 'One or more <loc> entries are malformed or point to a different domain.', implementation_rule: 'if invalid_urls.length > 0 → warn', severity_default: 'warning', automation_type: 'automated', logic_summary: '', seo_impact: '' },
+
+  // Internal Linking
+  { check_number: 301, name: 'Orphan page — zero inlinks', category: 'Internal Linking', subsection: 'Link Equity', description: 'Indexable page has no internal links pointing to it — invisible to crawlers following links.', implementation_rule: 'if unique_inlinks = 0 AND indexable → warn', severity_default: 'warning', automation_type: 'automated', logic_summary: '', seo_impact: '' },
+  { check_number: 302, name: 'Page has only one inlink', category: 'Internal Linking', subsection: 'Link Equity', description: 'Indexable page has a single internal inlink which limits crawlability and PageRank flow.', implementation_rule: 'if unique_inlinks = 1 AND indexable → info', severity_default: 'info', automation_type: 'automated', logic_summary: '', seo_impact: '' },
+  { check_number: 303, name: 'Too many outlinks (>100)', category: 'Internal Linking', subsection: 'Link Equity', description: 'Page has over 100 internal outlinks which dilutes PageRank and may look spammy.', implementation_rule: 'if unique_outlinks > 100 → warn', severity_default: 'warning', automation_type: 'automated', logic_summary: '', seo_impact: '' },
+
+  // Images
+  { check_number: 304, name: 'Images missing alt text', category: 'Images', subsection: 'Accessibility & SEO', description: 'One or more images on the page have no alt attribute — reduces accessibility and image SEO.', implementation_rule: 'if missing_alt_count > 0 → warn', severity_default: 'warning', automation_type: 'automated', logic_summary: '', seo_impact: '' },
+  { check_number: 305, name: 'Image alt text too long', category: 'Images', subsection: 'Accessibility & SEO', description: 'One or more images have alt text exceeding the recommended 125 character limit.', implementation_rule: 'if alt_too_long_count > 0 → info', severity_default: 'info', automation_type: 'automated', logic_summary: '', seo_impact: '' },
+
+  // Content
+  { check_number: 306, name: 'Page has no content (<50 words)', category: 'Content', subsection: 'Content Quality', description: 'Indexable page has fewer than 50 words — effectively empty and likely to be considered thin content.', implementation_rule: 'if word_count < 50 AND indexable → critical', severity_default: 'critical', automation_type: 'automated', logic_summary: '', seo_impact: '' },
+  { check_number: 307, name: 'Thin content page (<300 words)', category: 'Content', subsection: 'Content Quality', description: 'Indexable page has between 50 and 300 words which may be too thin to rank well.', implementation_rule: 'if word_count < 300 AND word_count >= 50 AND indexable → warn', severity_default: 'warning', automation_type: 'automated', logic_summary: '', seo_impact: '' },
+  { check_number: 308, name: 'Low text-to-HTML ratio (<10%)', category: 'Content', subsection: 'Content Quality', description: 'Page has very little visible text relative to its HTML size — often indicates code bloat or hidden content.', implementation_rule: 'if text_ratio < 10 AND indexable → info', severity_default: 'info', automation_type: 'automated', logic_summary: '', seo_impact: '' },
+
+  // Schema / Structured Data (extended)
+  { check_number: 309, name: 'No schema markup on page', category: 'Schema / Structured Data', subsection: 'Coverage', description: 'Indexable page has no JSON-LD or structured data markup — misses rich result eligibility.', implementation_rule: 'if schema_count = 0 AND indexable → info', severity_default: 'info', automation_type: 'automated', logic_summary: '', seo_impact: '' },
+  { check_number: 310, name: 'Unrecognised schema type', category: 'Schema / Structured Data', subsection: 'Validity', description: 'Schema @type value is not in the list of Google-supported rich result types.', implementation_rule: 'if schema_type NOT IN known_types → info', severity_default: 'info', automation_type: 'automated', logic_summary: '', seo_impact: '' },
+
+  // JavaScript Rendering
+  { check_number: 311, name: 'Critical content only available after JS render', category: 'JavaScript Rendering', subsection: 'Renderability', description: 'H1 or main content area is absent in raw HTML but present after JS execution — invisible to non-JS crawlers.', implementation_rule: 'if critical_content_js_only = true → critical', severity_default: 'critical', automation_type: 'automated', logic_summary: '', seo_impact: '' },
+  { check_number: 312, name: 'Title changes after JS render', category: 'JavaScript Rendering', subsection: 'Renderability', description: 'Page title is different before and after JavaScript execution — may cause GSC/crawler title inconsistency.', implementation_rule: 'if title_changed_after_render = true → warn', severity_default: 'warning', automation_type: 'automated', logic_summary: '', seo_impact: '' },
+  { check_number: 313, name: 'Structured data only available after JS render', category: 'JavaScript Rendering', subsection: 'Renderability', description: 'JSON-LD schema is injected by JavaScript and absent in raw HTML — may not be indexed.', implementation_rule: 'if schema_only_after_render = true → warn', severity_default: 'warning', automation_type: 'automated', logic_summary: '', seo_impact: '' },
+  { check_number: 314, name: 'Large content change after JS render (>500 words)', category: 'JavaScript Rendering', subsection: 'Renderability', description: 'More than 500 words of content are added by JavaScript — significant SEO risk if crawler does not execute JS.', implementation_rule: 'if word_count_change > 500 → warn', severity_default: 'warning', automation_type: 'automated', logic_summary: '', seo_impact: '' },
+  { check_number: 315, name: 'Hash-based routing detected', category: 'JavaScript Rendering', subsection: 'SPA Detection', description: 'Page contains many hash fragment links suggesting a SPA with hash routing — content may not be indexable as separate pages.', implementation_rule: 'if hash_routing = true → info', severity_default: 'info', automation_type: 'automated', logic_summary: '', seo_impact: '' },
+  { check_number: 316, name: 'Infinite scroll detected (no pagination)', category: 'JavaScript Rendering', subsection: 'SPA Detection', description: 'Page has no pagination links but many list items suggesting infinite scroll — content beyond the fold may not be indexed.', implementation_rule: 'if infinite_scroll = true → info', severity_default: 'info', automation_type: 'automated', logic_summary: '', seo_impact: '' },
+
+  // International SEO
+  { check_number: 317, name: 'Hreflang missing x-default tag', category: 'International SEO', subsection: 'Hreflang', description: 'Page has hreflang alternate tags but no x-default fallback for users whose language is not targeted.', implementation_rule: 'if has_hreflang = true AND has_x_default = false → warn', severity_default: 'warning', automation_type: 'automated', logic_summary: '', seo_impact: '' },
+  { check_number: 318, name: 'Missing HTML lang attribute', category: 'International SEO', subsection: 'Language Declaration', description: 'The <html> element has no lang attribute — browsers and screen readers cannot determine the page language.', implementation_rule: 'if html_lang = empty → info', severity_default: 'info', automation_type: 'automated', logic_summary: '', seo_impact: '' },
+
+  // Mobile SEO
+  { check_number: 319, name: 'Missing viewport meta tag', category: 'Mobile SEO', subsection: 'Mobile Optimisation', description: 'Page has no <meta name="viewport"> — will not render correctly on mobile devices.', implementation_rule: 'if has_viewport = false → critical', severity_default: 'critical', automation_type: 'automated', logic_summary: '', seo_impact: '' },
+  { check_number: 320, name: 'Too many render-blocking resources (>3)', category: 'Mobile SEO', subsection: 'Performance', description: 'More than 3 synchronous CSS/JS resources in <head> block first paint on mobile.', implementation_rule: 'if render_blocking_count > 3 → warn', severity_default: 'warning', automation_type: 'automated', logic_summary: '', seo_impact: '' },
+  { check_number: 321, name: 'Excessive third-party scripts (>5)', category: 'Mobile SEO', subsection: 'Performance', description: 'Page loads more than 5 third-party script domains which can significantly delay mobile page load.', implementation_rule: 'if third_party_script_count > 5 → warn', severity_default: 'warning', automation_type: 'automated', logic_summary: '', seo_impact: '' },
+
+  // Security & Monitoring
+  { check_number: 322, name: 'Page not served over HTTPS', category: 'Security & Monitoring', subsection: 'HTTPS', description: 'Page is served over HTTP — browsers show insecure warning and Google uses HTTPS as a ranking signal.', implementation_rule: 'if is_https = false → critical', severity_default: 'critical', automation_type: 'automated', logic_summary: '', seo_impact: '' },
+  { check_number: 323, name: 'Missing HSTS header', category: 'Security & Monitoring', subsection: 'Security Headers', description: 'Strict-Transport-Security header absent on HTTPS page — allows downgrade attacks.', implementation_rule: 'if is_https = true AND has_hsts = false → warn', severity_default: 'warning', automation_type: 'automated', logic_summary: '', seo_impact: '' },
+  { check_number: 324, name: 'Missing X-Content-Type-Options header', category: 'Security & Monitoring', subsection: 'Security Headers', description: 'X-Content-Type-Options: nosniff header absent — browsers may MIME-sniff responses.', implementation_rule: 'if has_x_content_type_options = false → info', severity_default: 'info', automation_type: 'automated', logic_summary: '', seo_impact: '' },
+  { check_number: 325, name: 'Missing X-Frame-Options header', category: 'Security & Monitoring', subsection: 'Security Headers', description: 'X-Frame-Options header absent — page may be embeddable in iframes (clickjacking risk).', implementation_rule: 'if has_x_frame_options = false → info', severity_default: 'info', automation_type: 'automated', logic_summary: '', seo_impact: '' },
+  { check_number: 326, name: 'Missing Content Security Policy header', category: 'Security & Monitoring', subsection: 'Security Headers', description: 'Content-Security-Policy header absent — no protection against XSS injection attacks.', implementation_rule: 'if has_csp = false → info', severity_default: 'info', automation_type: 'automated', logic_summary: '', seo_impact: '' },
+  { check_number: 327, name: 'No analytics tag detected', category: 'Security & Monitoring', subsection: 'Analytics', description: 'Page has no detectable GA4 or GTM tag — traffic and conversion data will not be collected.', implementation_rule: 'if analytics_detected = false → warn', severity_default: 'warning', automation_type: 'automated', logic_summary: '', seo_impact: '' },
+  { check_number: 328, name: 'GA4 double firing detected', category: 'Security & Monitoring', subsection: 'Analytics', description: 'Multiple distinct GA4 measurement IDs found on page — data will be duplicated in Google Analytics.', implementation_rule: 'if ga4_double_firing = true → warn', severity_default: 'warning', automation_type: 'automated', logic_summary: '', seo_impact: '' },
+  { check_number: 329, name: 'Slow server response time (>500ms)', category: 'Security & Monitoring', subsection: 'Performance', description: 'Server response time exceeded 500ms — slows crawling and negatively affects Core Web Vitals.', implementation_rule: 'if server_response_time > 500 → warn', severity_default: 'warning', automation_type: 'automated', logic_summary: '', seo_impact: '' },
+
+  // LLM / AI Crawlers
+  { check_number: 330, name: 'No llms.txt found', category: 'LLM / AI Crawlers', subsection: 'AI Crawler Access', description: 'Site has no llms.txt file — AI crawlers have no explicit access policy to follow.', implementation_rule: 'if llms_txt_exists = false → info', severity_default: 'info', automation_type: 'automated', logic_summary: '', seo_impact: '' },
+  { check_number: 331, name: 'llms.txt blocks AI crawlers', category: 'LLM / AI Crawlers', subsection: 'AI Crawler Access', description: 'llms.txt contains Disallow: / for known AI user-agents — LLM training and AI search visibility blocked.', implementation_rule: 'if llms_txt blocks known AI agents → warn', severity_default: 'warning', automation_type: 'automated', logic_summary: '', seo_impact: '' },
+
+  // Rankings & Traffic
+  { check_number: 332, name: 'High impressions, low CTR', category: 'Rankings & Traffic', subsection: 'Click-Through Rate', description: 'Page has 100+ impressions but <3% CTR — title/description likely needs optimisation to attract clicks.', implementation_rule: 'if impressions >= 100 AND ctr < 0.03 → warn', severity_default: 'warning', automation_type: 'automated', logic_summary: '', seo_impact: '' },
+  { check_number: 333, name: 'Low search position (page 2+)', category: 'Rankings & Traffic', subsection: 'Rankings', description: 'Page averages position 10+ in search results with 50+ impressions — not reaching page 1.', implementation_rule: 'if position > 10 AND impressions >= 50 → info', severity_default: 'info', automation_type: 'automated', logic_summary: '', seo_impact: '' },
+  { check_number: 334, name: 'Zero clicks despite impressions', category: 'Rankings & Traffic', subsection: 'Click-Through Rate', description: 'Page has 50+ impressions but zero clicks — appearing in search but not being selected.', implementation_rule: 'if clicks = 0 AND impressions >= 50 → info', severity_default: 'info', automation_type: 'automated', logic_summary: '', seo_impact: '' },
+
+  // Speed & Performance
+  { check_number: 335, name: 'Poor performance score — mobile (<50)', category: 'Speed & Performance', subsection: 'Lighthouse Score', description: 'Mobile Lighthouse performance score is below 50 — significant user experience and ranking impact.', implementation_rule: 'if mobile_score <= 49 → critical', severity_default: 'critical', automation_type: 'automated', logic_summary: '', seo_impact: '' },
+  { check_number: 336, name: 'Low performance score — mobile (50–89)', category: 'Speed & Performance', subsection: 'Lighthouse Score', description: 'Mobile Lighthouse performance score is between 50 and 89 — needs improvement.', implementation_rule: 'if mobile_score 50-89 → warn', severity_default: 'warning', automation_type: 'automated', logic_summary: '', seo_impact: '' },
+  { check_number: 337, name: 'Poor LCP — mobile (>4s)', category: 'Speed & Performance', subsection: 'Core Web Vitals', description: 'Largest Contentful Paint exceeds 4 seconds on mobile — Google poor threshold.', implementation_rule: 'if mobile_lcp > 4000 → critical', severity_default: 'critical', automation_type: 'automated', logic_summary: '', seo_impact: '' },
+  { check_number: 338, name: 'LCP needs improvement — mobile (2.5–4s)', category: 'Speed & Performance', subsection: 'Core Web Vitals', description: 'Largest Contentful Paint is between 2.5s and 4s on mobile — needs improvement.', implementation_rule: 'if mobile_lcp 2500-4000 → warn', severity_default: 'warning', automation_type: 'automated', logic_summary: '', seo_impact: '' },
+  { check_number: 339, name: 'Poor CLS — mobile (>0.25)', category: 'Speed & Performance', subsection: 'Core Web Vitals', description: 'Cumulative Layout Shift exceeds 0.25 on mobile — Google poor threshold; severe visual instability.', implementation_rule: 'if mobile_cls > 0.25 → critical', severity_default: 'critical', automation_type: 'automated', logic_summary: '', seo_impact: '' },
+  { check_number: 340, name: 'CLS needs improvement — mobile (0.1–0.25)', category: 'Speed & Performance', subsection: 'Core Web Vitals', description: 'Cumulative Layout Shift is between 0.1 and 0.25 on mobile — needs improvement.', implementation_rule: 'if mobile_cls 0.1-0.25 → warn', severity_default: 'warning', automation_type: 'automated', logic_summary: '', seo_impact: '' },
+  { check_number: 341, name: 'Slow FCP — mobile (>3s)', category: 'Speed & Performance', subsection: 'Core Web Vitals', description: 'First Contentful Paint exceeds 3 seconds on mobile — users see blank screen for too long.', implementation_rule: 'if mobile_fcp > 3000 → warn', severity_default: 'warning', automation_type: 'automated', logic_summary: '', seo_impact: '' },
+  { check_number: 342, name: 'FCP needs improvement — mobile (1.8–3s)', category: 'Speed & Performance', subsection: 'Core Web Vitals', description: 'First Contentful Paint is between 1.8s and 3s on mobile — needs improvement.', implementation_rule: 'if mobile_fcp 1800-3000 → info', severity_default: 'info', automation_type: 'automated', logic_summary: '', seo_impact: '' },
+  { check_number: 343, name: 'Slow TTFB — mobile (>1.8s)', category: 'Speed & Performance', subsection: 'Core Web Vitals', description: 'Time to First Byte exceeds 1.8 seconds on mobile — slow server response.', implementation_rule: 'if mobile_ttfb > 1800 → critical', severity_default: 'critical', automation_type: 'automated', logic_summary: '', seo_impact: '' },
+  { check_number: 344, name: 'TTFB needs improvement — mobile (800ms–1.8s)', category: 'Speed & Performance', subsection: 'Core Web Vitals', description: 'Time to First Byte is between 800ms and 1.8s on mobile — needs improvement.', implementation_rule: 'if mobile_ttfb 800-1800 → warn', severity_default: 'warning', automation_type: 'automated', logic_summary: '', seo_impact: '' },
+  { check_number: 345, name: 'Poor performance score — desktop (<50)', category: 'Speed & Performance', subsection: 'Lighthouse Score', description: 'Desktop Lighthouse performance score is below 50 — significant performance issues.', implementation_rule: 'if desktop_score <= 49 → critical', severity_default: 'critical', automation_type: 'automated', logic_summary: '', seo_impact: '' },
+  { check_number: 346, name: 'Low performance score — desktop (50–89)', category: 'Speed & Performance', subsection: 'Lighthouse Score', description: 'Desktop Lighthouse performance score is between 50 and 89 — needs improvement.', implementation_rule: 'if desktop_score 50-89 → warn', severity_default: 'warning', automation_type: 'automated', logic_summary: '', seo_impact: '' },
+  { check_number: 347, name: 'Poor LCP — desktop (>4s)', category: 'Speed & Performance', subsection: 'Core Web Vitals', description: 'Largest Contentful Paint exceeds 4 seconds on desktop.', implementation_rule: 'if desktop_lcp > 4000 → critical', severity_default: 'critical', automation_type: 'automated', logic_summary: '', seo_impact: '' },
+  { check_number: 348, name: 'LCP needs improvement — desktop (2.5–4s)', category: 'Speed & Performance', subsection: 'Core Web Vitals', description: 'Largest Contentful Paint is between 2.5s and 4s on desktop.', implementation_rule: 'if desktop_lcp 2500-4000 → warn', severity_default: 'warning', automation_type: 'automated', logic_summary: '', seo_impact: '' },
+  { check_number: 349, name: 'Poor CLS — desktop (>0.25)', category: 'Speed & Performance', subsection: 'Core Web Vitals', description: 'Cumulative Layout Shift exceeds 0.25 on desktop.', implementation_rule: 'if desktop_cls > 0.25 → critical', severity_default: 'critical', automation_type: 'automated', logic_summary: '', seo_impact: '' },
+  { check_number: 350, name: 'CLS needs improvement — desktop (0.1–0.25)', category: 'Speed & Performance', subsection: 'Core Web Vitals', description: 'Cumulative Layout Shift is between 0.1 and 0.25 on desktop.', implementation_rule: 'if desktop_cls 0.1-0.25 → warn', severity_default: 'warning', automation_type: 'automated', logic_summary: '', seo_impact: '' },
+  { check_number: 351, name: 'Slow FCP — desktop (>3s)', category: 'Speed & Performance', subsection: 'Core Web Vitals', description: 'First Contentful Paint exceeds 3 seconds on desktop.', implementation_rule: 'if desktop_fcp > 3000 → warn', severity_default: 'warning', automation_type: 'automated', logic_summary: '', seo_impact: '' },
+  { check_number: 352, name: 'FCP needs improvement — desktop (1.8–3s)', category: 'Speed & Performance', subsection: 'Core Web Vitals', description: 'First Contentful Paint is between 1.8s and 3s on desktop.', implementation_rule: 'if desktop_fcp 1800-3000 → info', severity_default: 'info', automation_type: 'automated', logic_summary: '', seo_impact: '' },
+  { check_number: 353, name: 'Slow TTFB — desktop (>1.8s)', category: 'Speed & Performance', subsection: 'Core Web Vitals', description: 'Time to First Byte exceeds 1.8 seconds on desktop.', implementation_rule: 'if desktop_ttfb > 1800 → critical', severity_default: 'critical', automation_type: 'automated', logic_summary: '', seo_impact: '' },
+  { check_number: 354, name: 'TTFB needs improvement — desktop (800ms–1.8s)', category: 'Speed & Performance', subsection: 'Core Web Vitals', description: 'Time to First Byte is between 800ms and 1.8s on desktop.', implementation_rule: 'if desktop_ttfb 800-1800 → warn', severity_default: 'warning', automation_type: 'automated', logic_summary: '', seo_impact: '' },
 ];
 
 /**
- * Seeds audit_checks with the full 291-check registry.
- * Force-replaces all existing rows so upgrades from 204 → 291 work correctly.
- * Idempotent: returns 0 if DB already has exactly 291 checks.
+ * Seeds audit_checks with the full 354-check registry.
+ * Force-replaces all existing rows so upgrades from any prior count work correctly.
+ * Idempotent: returns 0 if DB already has exactly 354 checks.
  *
  * @param {import('better-sqlite3').Database} db
  * @returns {number} rows inserted (0 if already up to date)

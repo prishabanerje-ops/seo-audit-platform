@@ -1,6 +1,6 @@
 /**
  * Audit checks seed tests.
- * Verifies the seed produces exactly 291 rows with correct schema.
+ * Verifies the seed produces exactly AUDIT_CHECKS.length rows with correct schema.
  */
 import { describe, it, expect, beforeAll } from 'vitest';
 import BetterSqlite3 from 'better-sqlite3';
@@ -33,18 +33,18 @@ beforeAll(() => {
 });
 
 describe('AUDIT_CHECKS array', () => {
-  it('exports exactly 291 checks', () => {
-    expect(AUDIT_CHECKS).toHaveLength(291);
+  it('exports exactly 354 checks', () => {
+    expect(AUDIT_CHECKS).toHaveLength(354);
   });
 
   it('has no duplicate check_numbers', () => {
     const nums = AUDIT_CHECKS.map(c => c.check_number);
-    expect(new Set(nums).size).toBe(291);
+    expect(new Set(nums).size).toBe(AUDIT_CHECKS.length);
   });
 
   it('has no duplicate names', () => {
     const names = AUDIT_CHECKS.map(c => c.name);
-    expect(new Set(names).size).toBe(291);
+    expect(new Set(names).size).toBe(AUDIT_CHECKS.length);
   });
 
   it('every check has required fields', () => {
@@ -72,27 +72,30 @@ describe('AUDIT_CHECKS array', () => {
     }
   });
 
-  it('covers all 19 expected categories', () => {
+  it('covers all 23 expected categories', () => {
     const expected = [
+      // Original 19
       'Response Codes', 'Canonical', 'Robots / Indexability', 'Sitemap',
       'URL Structure', 'Title Tags', 'Meta Description', 'Headings',
       'Internal Linking', 'Images', 'Schema / Structured Data', 'Content',
       'Speed & Performance', 'Mobile SEO', 'JavaScript Rendering',
       'International SEO', 'Rankings & Traffic Drops',
       'Monitoring & Operations', 'LLM / AI Crawlers',
+      // Phase 2 additions
+      'Robots & Indexability', 'Sitemaps', 'Security & Monitoring', 'Rankings & Traffic',
     ];
     const actual = new Set(AUDIT_CHECKS.map(c => c.category));
     for (const cat of expected) {
       expect(actual.has(cat), `missing category: ${cat}`).toBe(true);
     }
-    expect(actual.size).toBe(19);
+    expect(actual.size).toBe(23);
   });
 });
 
 describe('seedAuditChecks()', () => {
-  it('inserts exactly 291 rows into the DB', () => {
+  it('inserts exactly 354 rows into the DB', () => {
     const { cnt } = db.prepare('SELECT COUNT(*) AS cnt FROM audit_checks').get();
-    expect(cnt).toBe(291);
+    expect(cnt).toBe(354);
   });
 
   it('stores subsection on every row', () => {
@@ -113,6 +116,6 @@ describe('seedAuditChecks()', () => {
     const second = seedAuditChecks(db);
     expect(second).toBe(0);
     const { cnt } = db.prepare('SELECT COUNT(*) AS cnt FROM audit_checks').get();
-    expect(cnt).toBe(291);
+    expect(cnt).toBe(354);
   });
 });
