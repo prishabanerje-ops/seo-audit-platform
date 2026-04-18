@@ -537,6 +537,94 @@ function checkImages(rows, jobId, siteId) {
   return findings;
 }
 
+// Rich result types Google supports (used to flag unrecognised @type values)
+const KNOWN_SCHEMA_TYPES = new Set([
+  'Article', 'NewsArticle', 'BlogPosting', 'BreadcrumbList', 'Course',
+  'Dataset', 'Event', 'FAQPage', 'HowTo', 'ImageObject', 'JobPosting',
+  'LocalBusiness', 'Movie', 'Organization', 'Person', 'Product', 'QAPage',
+  'Recipe', 'Review', 'SoftwareApplication', 'VideoObject', 'WebPage',
+  'WebSite', 'SiteNavigationElement', 'ItemList', 'ListItem', 'MedicalCondition',
+]);
+
+function checkSchemaExtended(schemaRows, internalRows, jobId, siteId) {
+  const findings = [];
+
+  // Build set of URLs that have at least one schema block
+  const urlsWithSchema = new Set();
+  for (const row of schemaRows) {
+    const url = str(row['Address']); if (!url) continue;
+    urlsWithSchema.add(url);
+  }
+
+  // Flag indexable pages with no schema at all
+  for (const row of internalRows) {
+    if (!isIndexable(row)) continue;
+    const url = str(row['Address']); if (!url) continue;
+    if (!urlsWithSchema.has(url)) {
+      findings.push({
+        crawlJobId: jobId, siteId,
+        section: 'Schema / Structured Data', url,
+        severity: 'info', issueType: 'No Schema Markup on Page',
+        data: JSON.stringify({}),
+      });
+    }
+  }
+
+  // Flag unrecognised @type values
+  for (const row of schemaRows) {
+    const url  = str(row['Address']); if (!url) continue;
+    const type = str(row['Type']);    if (!type) continue;
+    if (!KNOWN_SCHEMA_TYPES.has(type)) {
+      findings.push({
+        crawlJobId: jobId, siteId,
+        section: 'Schema / Structured Data', url,
+        severity: 'info', issueType: 'Unrecognised Schema Type',
+        data: JSON.stringify({ type }),
+      });
+    }
+  }
+
+  return findings;
+}
+
+function checkContent(rows, jobId, siteId) {
+  const findings = [];
+
+  for (const row of rows) {
+    if (!isIndexable(row)) continue;
+    const url       = str(row['Address']); if (!url) continue;
+    const wordCount = toInt(row['Word Count']);
+    const textRatio = toInt(row['Text Ratio']);
+
+    if (!isNaN(wordCount) && wordCount < 50) {
+      findings.push({
+        crawlJobId: jobId, siteId,
+        section: 'Content', url,
+        severity: 'critical', issueType: 'Page Has No Content (<50 Words)',
+        data: JSON.stringify({ wordCount }),
+      });
+    } else if (!isNaN(wordCount) && wordCount < 300) {
+      findings.push({
+        crawlJobId: jobId, siteId,
+        section: 'Content', url,
+        severity: 'warning', issueType: 'Thin Content (<300 Words)',
+        data: JSON.stringify({ wordCount }),
+      });
+    }
+
+    if (!isNaN(textRatio) && textRatio < 10) {
+      findings.push({
+        crawlJobId: jobId, siteId,
+        section: 'Content', url,
+        severity: 'info', issueType: 'Low Text Ratio (<10%)',
+        data: JSON.stringify({ textRatio }),
+      });
+    }
+  }
+
+  return findings;
+}
+
 function checkRobotsIndexability(robots, siteOrigin, jobId, siteId) {
   const findings = [];
   if (!robots) return findings;
@@ -694,7 +782,9 @@ export function parseAndStoreFromDatasets(datasets, jobId, siteId, companyId = n
   run('URL Structure',   () => checkUrlStructure(datasets.internal_all || [], jobId, siteId));
   run('Internal Linking', () => checkInternalLinking(datasets.internal_all || [], jobId, siteId));
   run('Images',           () => checkImages(datasets.images_all || [], jobId, siteId));
+  run('Content',          () => checkContent(datasets.internal_all || [], jobId, siteId));
   run('Structured Data', () => checkStructuredData(datasets.structured_data_all || [], jobId, siteId));
+  run('Schema Extended', () => checkSchemaExtended(datasets.structured_data_all || [], datasets.internal_all || [], jobId, siteId));
   run('SD Validation',   () => checkStructuredDataValidation(
     datasets.structured_data_validation_errors,
     datasets.structured_data_validation_warnings,
