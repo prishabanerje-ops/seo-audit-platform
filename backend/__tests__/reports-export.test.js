@@ -52,3 +52,35 @@ describe('GET /api/reports/:siteId/category — covered field', () => {
     expect(res.body.groups).toEqual([]);
   });
 });
+
+// ── /issues/export ────────────────────────────────────────────────────────────
+describe('GET /api/reports/:siteId/issues/export', () => {
+  it('returns 400 when section param is missing', async () => {
+    const res = await request(app)
+      .get('/api/reports/site-x/issues/export?issue_type=Missing+Title')
+      .set('Cookie', cookie);
+    expect(res.status).toBe(400);
+    expect(res.body.error).toMatch(/section/i);
+  });
+
+  it('returns 400 when issue_type param is missing', async () => {
+    const res = await request(app)
+      .get('/api/reports/site-x/issues/export?section=Title+Tags')
+      .set('Cookie', cookie);
+    expect(res.status).toBe(400);
+    expect(res.body.error).toMatch(/issue_type/i);
+  });
+
+  it('returns 404 for unknown site', async () => {
+    const res = await request(app)
+      .get('/api/reports/no-such-site/issues/export?section=Title+Tags&issue_type=Missing+Title+Tag')
+      .set('Cookie', cookie);
+    expect(res.status).toBe(404);
+  });
+
+  it('returns 401 when no auth cookie is provided', async () => {
+    const res = await request(app)
+      .get('/api/reports/site-x/issues/export?section=Title+Tags&issue_type=Missing+Title+Tag');
+    expect(res.status).toBe(401);
+  });
+});
