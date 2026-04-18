@@ -209,8 +209,8 @@ function SpiderTab({ c, p }) {
         <SliderWithValue value={c.max_depth ?? 5} onChange={v => p({ max_depth: v })} min={1} max={25} />
       </FieldRow>
 
-      <FieldRow label="Max URLs" description="Limit on total resources crawled (HTML + images + CSS). 0 = unlimited. For large sites leave at 0 or set 50,000+.">
-        <NumberInput value={c.max_urls ?? 0} onChange={v => p({ max_urls: v })} min={0} max={1000000} step={100} />
+      <FieldRow label="Max URLs" description="Stop after crawling this many pages. 0 = no limit (crawls the whole site).">
+        <NumberInput value={c.max_urls ?? 0} onChange={v => p({ max_urls: v })} min={0} max={1000000} step={1} />
       </FieldRow>
 
       <SectionHeading>What to Crawl</SectionHeading>
@@ -601,7 +601,7 @@ function ApisTab() {
       <p className="text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
         API integrations (Google Search Console, Google Analytics 4, PageSpeed Insights,
         Majestic, Ahrefs, Moz) are connected at the platform level via{' '}
-        <strong style={{ color: 'var(--text-primary)' }}>Settings → Integrations</strong>.
+        <strong style={{ color: 'var(--text-primary)' }}>Integration Hub</strong>.
       </p>
 
       <p className="text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>

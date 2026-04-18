@@ -124,7 +124,7 @@ function Step1({ label, setLabel, url, setUrl, color, setColor, errors, setError
 function Step2({ gsc, setGsc, ga4, setGa4, sheetsTab, setSheetsTab, sheetsSpreadsheet, setSheetsSpreadsheet }) {
   return (
     <Card>
-      <CardHeading sub="Optional — you can add these later in Settings → Integrations.">
+      <CardHeading sub="Optional — you can add these later in Integration Hub.">
         Property IDs
       </CardHeading>
       <div className="space-y-4">
@@ -219,7 +219,7 @@ function Step4({ siteUrl }) {
         ))}
       </div>
       <p className="text-xs mt-4" style={{ color: 'var(--text-muted)' }}>
-        You can connect all integrations at any time via <strong>Settings → Integrations</strong>.
+        You can connect all integrations at any time via <strong>Integration Hub</strong>.
       </p>
     </Card>
   );
