@@ -459,6 +459,84 @@ function checkStructuredDataValidation(errorRows, warningRows, jobId, siteId) {
   return findings;
 }
 
+function checkInternalLinking(rows, jobId, siteId) {
+  const findings = [];
+
+  // Orphan pages: indexable pages with 0 unique inlinks (not the start URL)
+  // Low inlinks: indexable pages with only 1 unique inlink
+  for (const row of rows) {
+    if (!isIndexable(row)) continue;
+    const url      = str(row['Address']); if (!url) continue;
+    const inlinks  = toInt(row['Unique Inlinks']);
+    const outlinks = toInt(row['Unique Outlinks']);
+
+    if (!isNaN(inlinks) && inlinks === 0) {
+      findings.push({
+        crawlJobId: jobId, siteId,
+        section: 'Internal Linking', url,
+        severity: 'warning', issueType: 'Orphan Page (0 Inlinks)',
+        data: JSON.stringify({ inlinks }),
+      });
+    } else if (!isNaN(inlinks) && inlinks === 1) {
+      findings.push({
+        crawlJobId: jobId, siteId,
+        section: 'Internal Linking', url,
+        severity: 'info', issueType: 'Low Inlinks (1)',
+        data: JSON.stringify({ inlinks }),
+      });
+    }
+
+    if (!isNaN(outlinks) && outlinks > 100) {
+      findings.push({
+        crawlJobId: jobId, siteId,
+        section: 'Internal Linking', url,
+        severity: 'warning', issueType: 'Too Many Outlinks (>100)',
+        data: JSON.stringify({ outlinks }),
+      });
+    }
+  }
+
+  return findings;
+}
+
+function checkImages(rows, jobId, siteId) {
+  // rows = images_all — one row per image, Address = page URL
+  const findings   = [];
+  const missingAlt = new Map(); // url → count
+  const altTooLong = new Map();
+
+  for (const row of rows) {
+    const url = str(row['Address']); if (!url) continue;
+
+    if (str(row['Missing Alt Text']) === 'True') {
+      missingAlt.set(url, (missingAlt.get(url) || 0) + 1);
+    }
+    if (str(row['Alt Text Too Long']) === 'True') {
+      altTooLong.set(url, (altTooLong.get(url) || 0) + 1);
+    }
+  }
+
+  for (const [url, count] of missingAlt) {
+    findings.push({
+      crawlJobId: jobId, siteId,
+      section: 'Images', url,
+      severity: 'warning', issueType: 'Images Missing Alt Text',
+      data: JSON.stringify({ count }),
+    });
+  }
+
+  for (const [url, count] of altTooLong) {
+    findings.push({
+      crawlJobId: jobId, siteId,
+      section: 'Images', url,
+      severity: 'info', issueType: 'Alt Text Too Long',
+      data: JSON.stringify({ count }),
+    });
+  }
+
+  return findings;
+}
+
 function checkRobotsIndexability(robots, siteOrigin, jobId, siteId) {
   const findings = [];
   if (!robots) return findings;
@@ -614,6 +692,8 @@ export function parseAndStoreFromDatasets(datasets, jobId, siteId, companyId = n
   run('H2/H3 (missing)', () => checkH2s(datasets.h2_all || [], jobId, siteId, urlsWithH1));
   run('Canonicals',      () => checkCanonicals(datasets.canonicals_all || [], jobId, siteId));
   run('URL Structure',   () => checkUrlStructure(datasets.internal_all || [], jobId, siteId));
+  run('Internal Linking', () => checkInternalLinking(datasets.internal_all || [], jobId, siteId));
+  run('Images',           () => checkImages(datasets.images_all || [], jobId, siteId));
   run('Structured Data', () => checkStructuredData(datasets.structured_data_all || [], jobId, siteId));
   run('SD Validation',   () => checkStructuredDataValidation(
     datasets.structured_data_validation_errors,
