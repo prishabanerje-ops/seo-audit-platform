@@ -151,7 +151,7 @@ export async function startCrawl(job, io) {
 
     console.log(`[crawl-runner] Job ${job.id}: starting ${crawlMode} crawl of ${startUrl}`);
 
-    const pages = await crawl({
+    const { pages, siteData } = await crawl({
       startUrl,
       seedUrls,
       followLinks,
@@ -218,7 +218,7 @@ export async function startCrawl(job, io) {
     // Parse in memory — no CSV files written to disk
     emit('Analysing results\u2026');
     const datasets = toSfFormat(pages);
-    const count = parseAndStoreFromDatasets(datasets, job.id, job.site_id, job.company_id || null);
+    const count = parseAndStoreFromDatasets(datasets, job.id, job.site_id, job.company_id || null, siteData);
 
     console.log(`[crawl-runner] Parsed ${count} findings for job ${job.id}`);
     io.to(`job:${job.id}`).emit('crawl:parsed', { jobId: job.id, findings: count });

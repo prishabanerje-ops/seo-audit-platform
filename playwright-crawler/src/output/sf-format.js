@@ -293,6 +293,10 @@ export function toSfFormat(pages) {
     structured_data_validation_errors:   [],
     structured_data_validation_warnings: [],
     javascript_all:                      [],
+    hreflang_all:                        [],
+    mobile_all:                          [],
+    monitoring_all:                      [],
+    jsrender_all:                        [],
   };
 
   for (const page of pages) {
@@ -308,6 +312,10 @@ export function toSfFormat(pages) {
     datasets.structured_data_validation_errors.push(...toStructuredDataErrorRows(page));
     datasets.structured_data_validation_warnings.push(...toStructuredDataWarningRows(page));
     datasets.javascript_all.push(toJavascriptRow(page));
+    if (page._hreflang)   datasets.hreflang_all.push({ Address: page.url, ...page._hreflang });
+    if (page._mobile)     datasets.mobile_all.push({ Address: page.url, ...page._mobile });
+    if (page._monitoring) datasets.monitoring_all.push({ Address: page.url, ...page._monitoring });
+    if (page._jsrender)   datasets.jsrender_all.push({ Address: page.url, ...page._jsrender });
   }
 
   logger.info(`SF format ready: ${Object.entries(datasets).map(([k,v]) => `${k}=${v.length}`).join(', ')}`);

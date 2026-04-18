@@ -30,7 +30,7 @@ if (process.argv[1] && process.argv[1].endsWith('index.js')) {
 
   console.log(`\nCrawling: ${startUrl}  (max ${maxUrls} pages)\n`);
 
-  const pages = await crawl({
+  const { pages } = await crawl({
     startUrl,
     maxUrls,
     maxConcurrency: 5,

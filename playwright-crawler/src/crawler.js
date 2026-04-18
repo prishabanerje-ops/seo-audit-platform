@@ -17,14 +17,20 @@ import { CheerioCrawler, PlaywrightCrawler, Configuration } from 'crawlee';
 import { createLogger }    from './utils/logger.js';
 import { resolveUrl, isInScope, UrlSet } from './utils/url.js';
 import { extractResponse, deriveIndexability } from './extractors/response.js';
-import { extractMeta }      from './extractors/meta.js';
-import { extractHeadings }  from './extractors/headings.js';
-import { extractCanonical } from './extractors/canonical.js';
-import { extractLinks }     from './extractors/links.js';
-import { extractImages }    from './extractors/images.js';
-import { extractContent }   from './extractors/content.js';
-import { extractSchema }    from './extractors/schema.js';
-import { extractResources } from './extractors/resources.js';
+import { extractMeta }        from './extractors/meta.js';
+import { extractHeadings }    from './extractors/headings.js';
+import { extractCanonical }   from './extractors/canonical.js';
+import { extractLinks }       from './extractors/links.js';
+import { extractImages }      from './extractors/images.js';
+import { extractContent }     from './extractors/content.js';
+import { extractSchema }      from './extractors/schema.js';
+import { extractResources }   from './extractors/resources.js';
+import { extractHreflang }    from './extractors/hreflang.js';
+import { extractMobile }      from './extractors/mobile.js';
+import { extractMonitoring }  from './extractors/monitoring.js';
+import { extractJsRender }    from './extractors/jsrender.js';
+import { extractRobots }      from './extractors/robots.js';
+import { extractSitemap }     from './extractors/sitemap.js';
 
 const logger = createLogger('crawler');
 
@@ -108,14 +114,17 @@ function buildRecord(ctx, startUrl, mode) {
   const rawHtml      = typeof ctx.body === 'string' ? ctx.body : '';
   const crawlDepth   = request.userData?.depth ?? 0;
 
-  const metaData      = extractMeta($, url);
-  const headingsData  = extractHeadings($, url);
-  const canonicalData = extractCanonical($, url, headers);
-  const linksData     = extractLinks($, url, startUrl);
-  const imagesData    = extractImages($, url);
-  const contentData   = extractContent($, url, rawHtml, ctx._renderedHtml || '');
-  const schemaData    = extractSchema($, url);
-  const resourceData  = extractResources($, url);
+  const metaData       = extractMeta($, url);
+  const headingsData   = extractHeadings($, url);
+  const canonicalData  = extractCanonical($, url, headers);
+  const linksData      = extractLinks($, url, startUrl);
+  const imagesData     = extractImages($, url);
+  const contentData    = extractContent($, url, rawHtml, ctx._renderedHtml || '');
+  const schemaData     = extractSchema($, url);
+  const resourceData   = extractResources($, url);
+  const hreflangData   = extractHreflang($, url);
+  const mobileData     = extractMobile($, url);
+  const monitoringData = extractMonitoring(headers, responseTime, $, url);
 
   const { indexability, indexabilityStatus } = deriveIndexability(
     statusCode,
@@ -135,6 +144,9 @@ function buildRecord(ctx, startUrl, mode) {
     ...contentData,
     ...schemaData,
     ...resourceData,
+    ...hreflangData,
+    ...mobileData,
+    ...monitoringData,
     'Indexability':        indexability,
     'Indexability Status': indexabilityStatus,
     'Crawl Depth':         String(crawlDepth),
@@ -193,7 +205,7 @@ function failedRecord(request, startUrl, mode, errorMessage) {
  * @param {string[]} [options.seedUrls=[]]          — additional start URLs queued alongside startUrl (list/sitemap modes)
  * @param {boolean}  [options.followLinks=true]     — when false, disables all link discovery (list/sitemap modes)
  *
- * @returns {Promise<object[]>}
+ * @returns {Promise<{ pages: object[], siteData: { robots: object|null, sitemap: object|null } }>}
  */
 export async function crawl(options = {}) {
   const {
@@ -218,7 +230,7 @@ export async function crawl(options = {}) {
     followLinks      = true,
   } = options;
 
-  if (signal?.aborted) return [];
+  if (signal?.aborted) return { pages: [], siteData: { robots: null, sitemap: null } };
   if (!startUrl) throw new Error('crawl(): startUrl is required');
 
   logger.info(`Starting crawl: ${startUrl}`);
@@ -238,6 +250,12 @@ export async function crawl(options = {}) {
   // ── Storage ───────────────────────────────────────────────────────────────
   const storageDir  = `/tmp/playwright-crawler-${Date.now()}-${Math.random().toString(36).slice(2)}`;
   const crawlConfig = new Configuration({ storageClientOptions: { localDataDirectory: storageDir } });
+
+  // ── Site-level extractors (run once before crawl) ────────────────────────
+  const [robotsData, sitemapData] = await Promise.all([
+    extractRobots(startUrl).catch(err => { logger.warn(`robots extraction failed: ${err.message}`); return null; }),
+    extractSitemap(startUrl).catch(err => { logger.warn(`sitemap extraction failed: ${err.message}`); return null; }),
+  ]);
 
   const results = [];
   const seen    = new UrlSet();
@@ -383,11 +401,15 @@ export async function crawl(options = {}) {
         request.userData.responseTime = Date.now() - (request.userData?.startTime ?? Date.now());
 
         const renderedHtml = await page.content();
+        const rawBodyBuf   = await response?.body().catch(() => null);
+        const rawHtml      = rawBodyBuf ? rawBodyBuf.toString('utf8') : '';
         const { load }     = await import('cheerio');
         const $            = load(renderedHtml);
 
-        const record       = buildRecord({ request, response, $, body: renderedHtml }, startUrl, 'playwright');
+        const record         = buildRecord({ request, response, $, body: rawHtml }, startUrl, 'playwright');
         record._renderedHtml = renderedHtml;
+        const jsRenderData   = extractJsRender(rawHtml, renderedHtml, request.loadedUrl || request.url);
+        Object.assign(record, jsRenderData);
 
         results.push(record);
         if (onProgress) onProgress(results.length, seen.size, url, record);
@@ -432,5 +454,5 @@ export async function crawl(options = {}) {
   }
 
   logger.info(`Crawl finished. ${results.length} total pages crawled.`);
-  return results;
+  return { pages: results, siteData: { robots: robotsData, sitemap: sitemapData } };
 }
