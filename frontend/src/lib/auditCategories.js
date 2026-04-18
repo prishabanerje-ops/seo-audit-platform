@@ -49,7 +49,7 @@ export const SECTION_TO_SLUG = {
   'Mobile SEO':               'mobile',
   'JavaScript Rendering':     'custom',
   'International SEO':        'hreflang',
-  'Rankings & Traffic Drops': 'custom',
+  // 'Rankings & Traffic Drops' and 'LLM / AI Crawlers' intentionally omitted —
+  // no dedicated route exists yet; they render as non-clickable in AuditCategories.
   'Monitoring & Operations':  'security',
-  'LLM / AI Crawlers':        'custom',
 };
