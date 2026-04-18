@@ -474,7 +474,7 @@ function checkInternalLinking(rows, jobId, siteId) {
       findings.push({
         crawlJobId: jobId, siteId,
         section: 'Internal Linking', url,
-        severity: 'warning', issueType: 'Orphan Page (0 Inlinks)',
+        severity: 'warning', issueType: 'No orphan pages (Internal Linking)',
         data: JSON.stringify({ inlinks }),
       });
     } else if (!isNaN(inlinks) && inlinks === 1) {
@@ -490,7 +490,7 @@ function checkInternalLinking(rows, jobId, siteId) {
       findings.push({
         crawlJobId: jobId, siteId,
         section: 'Internal Linking', url,
-        severity: 'warning', issueType: 'Too Many Outlinks (>100)',
+        severity: 'warning', issueType: 'Too many internal links on one page flagged',
         data: JSON.stringify({ outlinks }),
       });
     }
@@ -520,7 +520,7 @@ function checkImages(rows, jobId, siteId) {
     findings.push({
       crawlJobId: jobId, siteId,
       section: 'Images', url,
-      severity: 'warning', issueType: 'Images Missing Alt Text',
+      severity: 'warning', issueType: 'All images have alt text',
       data: JSON.stringify({ count }),
     });
   }
@@ -635,7 +635,7 @@ function checkJavaScriptRendering(rows, jobId, siteId) {
       findings.push({
         crawlJobId: jobId, siteId,
         section: 'JavaScript Rendering', url,
-        severity: 'critical', issueType: 'Critical Content Only in JS',
+        severity: 'critical', issueType: 'Critical SEO content not JS-only',
         data: JSON.stringify({
           preRenderWordCount:  row.preRenderWordCount,
           postRenderWordCount: row.postRenderWordCount,
@@ -684,7 +684,7 @@ function checkJavaScriptRendering(rows, jobId, siteId) {
       findings.push({
         crawlJobId: jobId, siteId,
         section: 'JavaScript Rendering', url,
-        severity: 'info', issueType: 'Infinite Scroll Detected (No Pagination)',
+        severity: 'info', issueType: 'Infinite scroll content accessible to crawlers',
         data: JSON.stringify({}),
       });
     }
@@ -720,7 +720,7 @@ function checkInternationalSeo(hreflangRows, internalRows, jobId, siteId) {
       findings.push({
         crawlJobId: jobId, siteId,
         section: 'International SEO', url,
-        severity: 'warning', issueType: 'Hreflang Missing x-default',
+        severity: 'warning', issueType: 'x-default hreflang set for default page',
         data: JSON.stringify({}),
       });
     }
@@ -754,7 +754,7 @@ function checkMobileSeo(rows, jobId, siteId) {
       findings.push({
         crawlJobId: jobId, siteId,
         section: 'Mobile SEO', url,
-        severity: 'critical', issueType: 'Missing Viewport Meta Tag',
+        severity: 'critical', issueType: 'Mobile viewport meta tag correctly configured',
         data: JSON.stringify({}),
       });
     }
@@ -840,7 +840,7 @@ function checkMonitoring(rows, jobId, siteId) {
       findings.push({
         crawlJobId: jobId, siteId,
         section: 'Security & Monitoring', url,
-        severity: 'warning', issueType: 'No Analytics Tag Detected',
+        severity: 'warning', issueType: 'GA4 properly installed',
         data: JSON.stringify({}),
       });
     }
@@ -849,7 +849,7 @@ function checkMonitoring(rows, jobId, siteId) {
       findings.push({
         crawlJobId: jobId, siteId,
         section: 'Security & Monitoring', url,
-        severity: 'warning', issueType: 'GA4 Double Firing Detected',
+        severity: 'warning', issueType: 'GA4 not double-firing',
         data: JSON.stringify({ analyticsType: row.analyticsType }),
       });
     }
@@ -933,7 +933,7 @@ function checkRobotsIndexability(robots, siteOrigin, jobId, siteId) {
     findings.push({
       crawlJobId: jobId, siteId,
       section: 'Robots & Indexability', url: robotsUrl,
-      severity: 'warning', issueType: 'Missing Robots.txt',
+      severity: 'warning', issueType: 'robots.txt file exists and is accessible',
       data: JSON.stringify({ statusCode: robots.robotsTxtStatusCode }),
     });
     return findings;
@@ -973,7 +973,7 @@ function checkRobotsIndexability(robots, siteOrigin, jobId, siteId) {
     findings.push({
       crawlJobId: jobId, siteId,
       section: 'Robots & Indexability', url: robotsUrl,
-      severity: 'info', issueType: 'Sitemap Not Declared in Robots.txt',
+      severity: 'info', issueType: 'Sitemap URL declared in robots.txt',
       data: JSON.stringify({}),
     });
   }
@@ -991,7 +991,7 @@ function checkSitemap(sitemap, siteOrigin, jobId, siteId) {
     findings.push({
       crawlJobId: jobId, siteId,
       section: 'Sitemaps', url: sitemapUrl,
-      severity: 'critical', issueType: 'Missing Sitemap.xml',
+      severity: 'critical', issueType: 'XML sitemap exists and is accessible',
       data: JSON.stringify({}),
     });
     return findings;
@@ -1001,7 +1001,7 @@ function checkSitemap(sitemap, siteOrigin, jobId, siteId) {
     findings.push({
       crawlJobId: jobId, siteId,
       section: 'Sitemaps', url: sitemapUrl,
-      severity: 'warning', issueType: 'Sitemap Too Large (>50k URLs)',
+      severity: 'warning', issueType: 'Each sitemap file has max 50,000 URLs',
       data: JSON.stringify({ totalUrlCount: sitemap.totalUrlCount }),
     });
   }
@@ -1010,7 +1010,7 @@ function checkSitemap(sitemap, siteOrigin, jobId, siteId) {
     findings.push({
       crawlJobId: jobId, siteId,
       section: 'Sitemaps', url: sitemapUrl,
-      severity: 'warning', issueType: 'Sitemap Parse Errors',
+      severity: 'warning', issueType: 'Sitemap is valid XML format',
       data: JSON.stringify({ errors: sitemap.parseErrors.slice(0, 5) }),
     });
   }

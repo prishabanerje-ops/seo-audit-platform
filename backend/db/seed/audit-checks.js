@@ -1,10 +1,8 @@
 /**
- * Full 354-check audit registry.
- * Original 291 checks auto-generated from "AI Soft - Rule - Sheet4.csv".
- * Phase 2 additions (292–354) implement 13 new audit categories.
- *
- * Each entry maps to one row in the audit_checks table.
- * check_number is sequential 1–354 across 32 categories.
+ * Full 340-check audit registry.
+ * Original 291 checks from "AI Soft - Rule - Sheet4.csv".
+ * Phase 2 adds 49 non-overlapping checks; 14 duplicates of original checks
+ * were removed — those parser findings use the original check name as issue_type.
  */
 
 // Tool mapping derived from the "Tool" column in AI Soft - Rule - Sheet4.csv.
@@ -3889,25 +3887,17 @@ export const AUDIT_CHECKS = [
   // ── Phase 2 additions (checks 292–354) ──────────────────────────────────────
 
   // Robots & Indexability
-  { check_number: 292, name: 'Missing robots.txt', category: 'Robots & Indexability', subsection: 'Robots.txt', description: 'robots.txt could not be fetched — crawlers operate without access rules.', implementation_rule: 'if robots_txt_status != 200 → warn', severity_default: 'warning', automation_type: 'automated', logic_summary: '', seo_impact: '' },
   { check_number: 293, name: 'Disallow all in robots.txt', category: 'Robots & Indexability', subsection: 'Robots.txt', description: 'Wildcard Disallow: / blocks all crawlers from the entire site.', implementation_rule: 'if disallow_rule agent=* path=/ → critical', severity_default: 'critical', automation_type: 'automated', logic_summary: '', seo_impact: '' },
   { check_number: 294, name: 'Googlebot blocked in robots.txt', category: 'Robots & Indexability', subsection: 'Robots.txt', description: 'Googlebot is explicitly blocked with Disallow: /.', implementation_rule: 'if disallow_rule agent=Googlebot path=/ → critical', severity_default: 'critical', automation_type: 'automated', logic_summary: '', seo_impact: '' },
   { check_number: 295, name: 'Malformed robots.txt rules', category: 'Robots & Indexability', subsection: 'Robots.txt', description: 'robots.txt contains lines that do not conform to the standard directive format.', implementation_rule: 'if malformed_lines_count > 0 → warn', severity_default: 'warning', automation_type: 'automated', logic_summary: '', seo_impact: '' },
-  { check_number: 296, name: 'Sitemap not declared in robots.txt', category: 'Robots & Indexability', subsection: 'Robots.txt', description: 'No Sitemap: directive found in robots.txt — crawlers cannot auto-discover the sitemap.', implementation_rule: 'if sitemap_declared = false → info', severity_default: 'info', automation_type: 'automated', logic_summary: '', seo_impact: '' },
 
   // Sitemaps
-  { check_number: 297, name: 'Missing sitemap.xml', category: 'Sitemaps', subsection: 'Sitemap Presence', description: 'No sitemap could be fetched at the expected location or via robots.txt.', implementation_rule: 'if sitemap_exists = false → critical', severity_default: 'critical', automation_type: 'automated', logic_summary: '', seo_impact: '' },
-  { check_number: 298, name: 'Sitemap exceeds 50,000 URL limit', category: 'Sitemaps', subsection: 'Sitemap Quality', description: 'Sitemap contains more than 50,000 URLs which exceeds the Google limit for a single sitemap file.', implementation_rule: 'if total_url_count > 50000 → warn', severity_default: 'warning', automation_type: 'automated', logic_summary: '', seo_impact: '' },
-  { check_number: 299, name: 'Sitemap parse errors', category: 'Sitemaps', subsection: 'Sitemap Quality', description: 'The sitemap XML could not be fully parsed — some URLs may be missed by crawlers.', implementation_rule: 'if parse_errors.length > 0 → warn', severity_default: 'warning', automation_type: 'automated', logic_summary: '', seo_impact: '' },
   { check_number: 300, name: 'Sitemap contains invalid URLs', category: 'Sitemaps', subsection: 'Sitemap Quality', description: 'One or more <loc> entries are malformed or point to a different domain.', implementation_rule: 'if invalid_urls.length > 0 → warn', severity_default: 'warning', automation_type: 'automated', logic_summary: '', seo_impact: '' },
 
   // Internal Linking
-  { check_number: 301, name: 'Orphan page — zero inlinks', category: 'Internal Linking', subsection: 'Link Equity', description: 'Indexable page has no internal links pointing to it — invisible to crawlers following links.', implementation_rule: 'if unique_inlinks = 0 AND indexable → warn', severity_default: 'warning', automation_type: 'automated', logic_summary: '', seo_impact: '' },
   { check_number: 302, name: 'Page has only one inlink', category: 'Internal Linking', subsection: 'Link Equity', description: 'Indexable page has a single internal inlink which limits crawlability and PageRank flow.', implementation_rule: 'if unique_inlinks = 1 AND indexable → info', severity_default: 'info', automation_type: 'automated', logic_summary: '', seo_impact: '' },
-  { check_number: 303, name: 'Too many outlinks (>100)', category: 'Internal Linking', subsection: 'Link Equity', description: 'Page has over 100 internal outlinks which dilutes PageRank and may look spammy.', implementation_rule: 'if unique_outlinks > 100 → warn', severity_default: 'warning', automation_type: 'automated', logic_summary: '', seo_impact: '' },
 
   // Images
-  { check_number: 304, name: 'Images missing alt text', category: 'Images', subsection: 'Accessibility & SEO', description: 'One or more images on the page have no alt attribute — reduces accessibility and image SEO.', implementation_rule: 'if missing_alt_count > 0 → warn', severity_default: 'warning', automation_type: 'automated', logic_summary: '', seo_impact: '' },
   { check_number: 305, name: 'Image alt text too long', category: 'Images', subsection: 'Accessibility & SEO', description: 'One or more images have alt text exceeding the recommended 125 character limit.', implementation_rule: 'if alt_too_long_count > 0 → info', severity_default: 'info', automation_type: 'automated', logic_summary: '', seo_impact: '' },
 
   // Content
@@ -3920,19 +3910,15 @@ export const AUDIT_CHECKS = [
   { check_number: 310, name: 'Unrecognised schema type', category: 'Schema / Structured Data', subsection: 'Validity', description: 'Schema @type value is not in the list of Google-supported rich result types.', implementation_rule: 'if schema_type NOT IN known_types → info', severity_default: 'info', automation_type: 'automated', logic_summary: '', seo_impact: '' },
 
   // JavaScript Rendering
-  { check_number: 311, name: 'Critical content only available after JS render', category: 'JavaScript Rendering', subsection: 'Renderability', description: 'H1 or main content area is absent in raw HTML but present after JS execution — invisible to non-JS crawlers.', implementation_rule: 'if critical_content_js_only = true → critical', severity_default: 'critical', automation_type: 'automated', logic_summary: '', seo_impact: '' },
   { check_number: 312, name: 'Title changes after JS render', category: 'JavaScript Rendering', subsection: 'Renderability', description: 'Page title is different before and after JavaScript execution — may cause GSC/crawler title inconsistency.', implementation_rule: 'if title_changed_after_render = true → warn', severity_default: 'warning', automation_type: 'automated', logic_summary: '', seo_impact: '' },
   { check_number: 313, name: 'Structured data only available after JS render', category: 'JavaScript Rendering', subsection: 'Renderability', description: 'JSON-LD schema is injected by JavaScript and absent in raw HTML — may not be indexed.', implementation_rule: 'if schema_only_after_render = true → warn', severity_default: 'warning', automation_type: 'automated', logic_summary: '', seo_impact: '' },
   { check_number: 314, name: 'Large content change after JS render (>500 words)', category: 'JavaScript Rendering', subsection: 'Renderability', description: 'More than 500 words of content are added by JavaScript — significant SEO risk if crawler does not execute JS.', implementation_rule: 'if word_count_change > 500 → warn', severity_default: 'warning', automation_type: 'automated', logic_summary: '', seo_impact: '' },
   { check_number: 315, name: 'Hash-based routing detected', category: 'JavaScript Rendering', subsection: 'SPA Detection', description: 'Page contains many hash fragment links suggesting a SPA with hash routing — content may not be indexable as separate pages.', implementation_rule: 'if hash_routing = true → info', severity_default: 'info', automation_type: 'automated', logic_summary: '', seo_impact: '' },
-  { check_number: 316, name: 'Infinite scroll detected (no pagination)', category: 'JavaScript Rendering', subsection: 'SPA Detection', description: 'Page has no pagination links but many list items suggesting infinite scroll — content beyond the fold may not be indexed.', implementation_rule: 'if infinite_scroll = true → info', severity_default: 'info', automation_type: 'automated', logic_summary: '', seo_impact: '' },
 
   // International SEO
-  { check_number: 317, name: 'Hreflang missing x-default tag', category: 'International SEO', subsection: 'Hreflang', description: 'Page has hreflang alternate tags but no x-default fallback for users whose language is not targeted.', implementation_rule: 'if has_hreflang = true AND has_x_default = false → warn', severity_default: 'warning', automation_type: 'automated', logic_summary: '', seo_impact: '' },
   { check_number: 318, name: 'Missing HTML lang attribute', category: 'International SEO', subsection: 'Language Declaration', description: 'The <html> element has no lang attribute — browsers and screen readers cannot determine the page language.', implementation_rule: 'if html_lang = empty → info', severity_default: 'info', automation_type: 'automated', logic_summary: '', seo_impact: '' },
 
   // Mobile SEO
-  { check_number: 319, name: 'Missing viewport meta tag', category: 'Mobile SEO', subsection: 'Mobile Optimisation', description: 'Page has no <meta name="viewport"> — will not render correctly on mobile devices.', implementation_rule: 'if has_viewport = false → critical', severity_default: 'critical', automation_type: 'automated', logic_summary: '', seo_impact: '' },
   { check_number: 320, name: 'Too many render-blocking resources (>3)', category: 'Mobile SEO', subsection: 'Performance', description: 'More than 3 synchronous CSS/JS resources in <head> block first paint on mobile.', implementation_rule: 'if render_blocking_count > 3 → warn', severity_default: 'warning', automation_type: 'automated', logic_summary: '', seo_impact: '' },
   { check_number: 321, name: 'Excessive third-party scripts (>5)', category: 'Mobile SEO', subsection: 'Performance', description: 'Page loads more than 5 third-party script domains which can significantly delay mobile page load.', implementation_rule: 'if third_party_script_count > 5 → warn', severity_default: 'warning', automation_type: 'automated', logic_summary: '', seo_impact: '' },
 
@@ -3942,8 +3928,6 @@ export const AUDIT_CHECKS = [
   { check_number: 324, name: 'Missing X-Content-Type-Options header', category: 'Security & Monitoring', subsection: 'Security Headers', description: 'X-Content-Type-Options: nosniff header absent — browsers may MIME-sniff responses.', implementation_rule: 'if has_x_content_type_options = false → info', severity_default: 'info', automation_type: 'automated', logic_summary: '', seo_impact: '' },
   { check_number: 325, name: 'Missing X-Frame-Options header', category: 'Security & Monitoring', subsection: 'Security Headers', description: 'X-Frame-Options header absent — page may be embeddable in iframes (clickjacking risk).', implementation_rule: 'if has_x_frame_options = false → info', severity_default: 'info', automation_type: 'automated', logic_summary: '', seo_impact: '' },
   { check_number: 326, name: 'Missing Content Security Policy header', category: 'Security & Monitoring', subsection: 'Security Headers', description: 'Content-Security-Policy header absent — no protection against XSS injection attacks.', implementation_rule: 'if has_csp = false → info', severity_default: 'info', automation_type: 'automated', logic_summary: '', seo_impact: '' },
-  { check_number: 327, name: 'No analytics tag detected', category: 'Security & Monitoring', subsection: 'Analytics', description: 'Page has no detectable GA4 or GTM tag — traffic and conversion data will not be collected.', implementation_rule: 'if analytics_detected = false → warn', severity_default: 'warning', automation_type: 'automated', logic_summary: '', seo_impact: '' },
-  { check_number: 328, name: 'GA4 double firing detected', category: 'Security & Monitoring', subsection: 'Analytics', description: 'Multiple distinct GA4 measurement IDs found on page — data will be duplicated in Google Analytics.', implementation_rule: 'if ga4_double_firing = true → warn', severity_default: 'warning', automation_type: 'automated', logic_summary: '', seo_impact: '' },
   { check_number: 329, name: 'Slow server response time (>500ms)', category: 'Security & Monitoring', subsection: 'Performance', description: 'Server response time exceeded 500ms — slows crawling and negatively affects Core Web Vitals.', implementation_rule: 'if server_response_time > 500 → warn', severity_default: 'warning', automation_type: 'automated', logic_summary: '', seo_impact: '' },
 
   // LLM / AI Crawlers
