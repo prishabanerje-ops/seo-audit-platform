@@ -144,6 +144,11 @@ export const router = createBrowserRouter([
           { path: '/audit/international',       element: <AuditCategory /> },
           { path: '/audit/content',             element: <AuditCategory /> },
           { path: '/audit/custom',              element: <AuditCategory /> },
+          { path: '/audit/robots-indexability', element: <AuditCategory /> },
+          { path: '/audit/sitemaps',            element: <AuditCategory /> },
+          { path: '/audit/security-monitoring', element: <AuditCategory /> },
+          { path: '/audit/rankings',            element: <AuditCategory /> },
+          { path: '/audit/llm-ai',              element: <AuditCategory /> },
           { path: '/audit/custom-extraction',   element: <AuditCustomExtraction /> },
           { path: '/audit/log-file',            element: <AuditLogFile /> },
 

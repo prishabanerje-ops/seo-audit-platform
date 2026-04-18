@@ -1,5 +1,5 @@
 /**
- * AuditCategory — generic drill-down page for all 20 audit category routes.
+ * AuditCategory — generic drill-down page for all audit category routes.
  *
  * Route pattern: /audit/:slug  (static paths like /audit/title-tags)
  * Slug is extracted from location.pathname — NOT from useParams().
@@ -9,17 +9,20 @@
  * - Lazy-loads URL rows per group when the accordion is first expanded
  * - Supports "Load more" pagination within each expanded group
  * - Each URL row navigates to the issue detail page with context params
+ * - /audit/rankings: shows GSC-connect prompt when no data found
+ * - /audit/page-speed: shows on-demand "Run Speed Audit" button with socket progress
  */
 
-import { useState, useEffect, useCallback } from 'react';
-import { useLocation, useNavigate, Link }   from 'react-router';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { useLocation, useNavigate, Link }            from 'react-router';
 import {
   ChevronDown, ChevronRight, AlertTriangle,
-  Info, FileSearch, ArrowLeft, Loader2,
+  Info, FileSearch, ArrowLeft, Loader2, Zap, BarChart2,
 } from 'lucide-react';
-import api               from '../api/index.js';
-import { useSites }      from '../context/SitesContext.jsx';
-import { EmptyState }    from '../components/EmptyState.jsx';
+import { io }              from 'socket.io-client';
+import api                 from '../api/index.js';
+import { useSites }        from '../context/SitesContext.jsx';
+import { EmptyState }      from '../components/EmptyState.jsx';
 import { LoadingSkeleton } from '../components/LoadingSkeleton.jsx';
 import { SLUG_TO_SECTION } from '../lib/auditCategories.js';
 
@@ -217,6 +220,43 @@ function GroupAccordion({ group, urlEntry, onExpand, onLoadMore, onUrlClick, onR
   );
 }
 
+// ── Speed audit button + progress bar ─────────────────────────────────────────
+function SpeedAuditButton({ running, progress, error, onRun }) {
+  return (
+    <div className="flex flex-col items-center gap-3 w-full max-w-sm">
+      {error && (
+        <p className="text-xs text-center" style={{ color: 'var(--severity-critical)' }}>{error}</p>
+      )}
+      {running && progress && (
+        <div className="w-full space-y-1">
+          <div className="flex justify-between text-xs" style={{ color: 'var(--text-muted)' }}>
+            <span className="truncate max-w-[260px]">{progress.url || 'Starting…'} ({progress.strategy})</span>
+            <span>{progress.done}/{progress.total}</span>
+          </div>
+          <div className="w-full rounded-full h-1.5" style={{ backgroundColor: 'var(--border-default)' }}>
+            <div
+              className="h-1.5 rounded-full transition-all"
+              style={{
+                width: progress.total > 0 ? `${Math.round((progress.done / progress.total) * 100)}%` : '0%',
+                backgroundColor: 'var(--brand)',
+              }}
+            />
+          </div>
+        </div>
+      )}
+      <button
+        onClick={onRun}
+        disabled={running}
+        className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-opacity disabled:opacity-50"
+        style={{ backgroundColor: 'var(--brand)', color: '#fff' }}
+      >
+        {running ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
+        {running ? 'Auditing pages…' : 'Run Speed Audit'}
+      </button>
+    </div>
+  );
+}
+
 // ── Main page ──────────────────────────────────────────────────────────────────
 export function AuditCategory() {
   const location           = useLocation();
@@ -238,6 +278,12 @@ export function AuditCategory() {
 
   // urlMap: { [issue_type]: { results, total, loading, offset } }
   const [urlMap, setUrlMap] = useState({});
+
+  // Speed audit state (only relevant on /audit/page-speed)
+  const [speedRunning,  setSpeedRunning]  = useState(false);
+  const [speedProgress, setSpeedProgress] = useState(null); // { done, total, url, strategy }
+  const [speedError,    setSpeedError]    = useState(null);
+  const socketRef = useRef(null);
 
   // ── Fetch group summary ──────────────────────────────────────────────────────
   const loadGroups = useCallback(async () => {
@@ -331,6 +377,48 @@ export function AuditCategory() {
     loadUrls(issueType, current.offset);
   }, [urlMap, loadUrls]);
 
+  // ── Speed audit trigger (page-speed only) ────────────────────────────────────
+  const runSpeedAudit = useCallback(async () => {
+    if (!activeSite || speedRunning) return;
+    setSpeedRunning(true);
+    setSpeedProgress(null);
+    setSpeedError(null);
+
+    // Subscribe to socket room for this site
+    const socket = io({ path: '/socket.io' });
+    socketRef.current = socket;
+    socket.emit('join:site', activeSite.id);
+
+    socket.on('speed:start',    ({ total })           => setSpeedProgress({ done: 0, total, url: '', strategy: '' }));
+    socket.on('speed:progress', ({ done, total, url, strategy }) => setSpeedProgress({ done, total, url, strategy }));
+    socket.on('speed:complete', ()                    => {
+      socket.disconnect();
+      socketRef.current = null;
+      setSpeedRunning(false);
+      loadGroups(); // refresh findings
+    });
+    socket.on('speed:error',    ({ error })           => {
+      socket.disconnect();
+      socketRef.current = null;
+      setSpeedRunning(false);
+      setSpeedError(error || 'Speed audit failed');
+    });
+
+    try {
+      await api.post(`/reports/${activeSite.id}/speed-audit`);
+    } catch (err) {
+      socket.disconnect();
+      socketRef.current = null;
+      setSpeedRunning(false);
+      setSpeedError(err?.response?.data?.error || 'Failed to start speed audit');
+    }
+  }, [activeSite, speedRunning, loadGroups]);
+
+  // Cleanup socket on unmount
+  useEffect(() => {
+    return () => { socketRef.current?.disconnect(); };
+  }, []);
+
   // ── URL row click ─────────────────────────────────────────────────────────────
   const handleUrlClick = useCallback((row, index, group) => {
     const params = new URLSearchParams({
@@ -419,7 +507,33 @@ export function AuditCategory() {
             Audit Categories
           </Link>
         </nav>
-        {covered ? (
+
+        {/* Rankings: requires GSC connection */}
+        {slug === 'rankings' ? (
+          <EmptyState
+            icon={BarChart2}
+            message="Connect Google Search Console"
+            description="Rankings & Traffic data is sourced from Google Search Console. Connect GSC in Integrations and run a crawl to see rankings issues."
+            action={{ label: 'Go to Integrations', to: '/integrations' }}
+          />
+        ) : slug === 'page-speed' ? (
+          /* Speed: on-demand trigger */
+          <div>
+            <EmptyState
+              icon={Zap}
+              message="No speed audit results yet"
+              description="Run an on-demand PageSpeed Insights audit to check Core Web Vitals and performance scores for up to 20 pages."
+            />
+            <div className="flex justify-center mt-4">
+              <SpeedAuditButton
+                running={speedRunning}
+                progress={speedProgress}
+                error={speedError}
+                onRun={runSpeedAudit}
+              />
+            </div>
+          </div>
+        ) : covered ? (
           <EmptyState
             icon={FileSearch}
             message={`No ${sectionName} issues found`}
@@ -469,7 +583,7 @@ export function AuditCategory() {
           </p>
         </div>
 
-        {/* Summary pills */}
+        {/* Summary pills + optional speed audit button */}
         <div className="flex items-center gap-2 mt-1 shrink-0">
           {criticalCount > 0 && (
             <span
@@ -488,6 +602,14 @@ export function AuditCategory() {
               <Info className="w-3 h-3" />
               {warningCount.toLocaleString()} warnings
             </span>
+          )}
+          {slug === 'page-speed' && (
+            <SpeedAuditButton
+              running={speedRunning}
+              progress={speedProgress}
+              error={speedError}
+              onRun={runSpeedAudit}
+            />
           )}
         </div>
       </div>

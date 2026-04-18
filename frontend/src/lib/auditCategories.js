@@ -6,26 +6,32 @@
  * for backwards-compat with existing routes in router.jsx.
  */
 export const SLUG_TO_SECTION = {
-  'response-codes':  'Response Codes',
-  'redirects':       'Response Codes',
-  'canonicals':      'Canonical',
-  'robots':          'Robots / Indexability',
-  'indexability':    'Robots / Indexability',
-  'sitemap':         'Sitemap',
-  'crawl-depth':     'URL Structure',
-  'title-tags':      'Title Tags',
-  'meta-desc':       'Meta Description',
-  'headings':        'Headings',
-  'links':           'Internal Linking',
-  'images':          'Images',
-  'structured-data': 'Schema / Structured Data',
-  'content':         'Content',
-  'page-speed':      'Speed & Performance',
-  'mobile':          'Mobile SEO',
-  'custom':          'JavaScript Rendering',
-  'hreflang':        'International SEO',
-  'international':   'International SEO',
-  'security':        'Monitoring & Operations',
+  'response-codes':     'Response Codes',
+  'redirects':          'Response Codes',
+  'canonicals':         'Canonical',
+  'robots':             'Robots / Indexability',
+  'indexability':       'Robots / Indexability',
+  'sitemap':            'Sitemap',
+  'crawl-depth':        'URL Structure',
+  'title-tags':         'Title Tags',
+  'meta-desc':          'Meta Description',
+  'headings':           'Headings',
+  'links':              'Internal Linking',
+  'images':             'Images',
+  'structured-data':    'Schema / Structured Data',
+  'content':            'Content',
+  'page-speed':         'Speed & Performance',
+  'mobile':             'Mobile SEO',
+  'custom':             'JavaScript Rendering',
+  'hreflang':           'International SEO',
+  'international':      'International SEO',
+  'security':           'Monitoring & Operations',
+  // Phase 2 additions
+  'robots-indexability': 'Robots & Indexability',
+  'sitemaps':            'Sitemaps',
+  'security-monitoring': 'Security & Monitoring',
+  'rankings':            'Rankings & Traffic',
+  'llm-ai':              'LLM / AI Crawlers',
 };
 
 /**
@@ -49,7 +55,11 @@ export const SECTION_TO_SLUG = {
   'Mobile SEO':               'mobile',
   'JavaScript Rendering':     'custom',
   'International SEO':        'hreflang',
-  // 'Rankings & Traffic Drops' and 'LLM / AI Crawlers' intentionally omitted —
-  // no dedicated route exists yet; they render as non-clickable in AuditCategories.
   'Monitoring & Operations':  'security',
+  // Phase 2 additions
+  'Robots & Indexability':    'robots-indexability',
+  'Sitemaps':                 'sitemaps',
+  'Security & Monitoring':    'security-monitoring',
+  'Rankings & Traffic':       'rankings',
+  'LLM / AI Crawlers':        'llm-ai',
 };
