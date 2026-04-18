@@ -25,8 +25,9 @@ import { Users }         from './pages/Users.jsx';
 
 import { Exports }      from './pages/Exports.jsx';
 import { CompareView }  from './pages/CompareView.jsx';
+import { Integrations } from './pages/Integrations.jsx';
 import {
-  Integrations, SystemHealth,
+  SystemHealth,
   ErrorLog,
   AuditCustomExtraction, AuditLogFile,
 } from './pages/stubs.jsx';
