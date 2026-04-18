@@ -40,7 +40,7 @@ function StatusMsg({ msg }) {
   if (!msg) return null;
   const isErr = msg.startsWith('Error');
   return (
-    <p className="text-xs" style={{ color: isErr ? 'var(--severity-critical)' : 'var(--severity-pass)' }}>
+    <p className="text-xs" style={{ color: isErr ? 'var(--severity-critical-text)' : 'var(--severity-pass)' }}>
       {msg}
     </p>
   );
@@ -128,7 +128,7 @@ function GlobalSection() {
       className="rounded-xl p-5 max-w-lg mt-5"
       style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}
     >
-      <SectionHeading title="Global (Superadmin)" description="Instance-wide settings applied to all companies." />
+      <SectionHeading title="Global" description="Instance-wide settings applied to all companies." />
       <div className="space-y-4">
         <Field label="Anthropic API Key">
           <Input type="password" value={key} onChange={setKey} placeholder="sk-ant-..." />
