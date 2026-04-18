@@ -18,40 +18,41 @@ const JOB_A   = 'job-compare-a';
 const JOB_B   = 'job-compare-b';
 
 beforeAll(() => {
-  db.prepare(`INSERT OR IGNORE INTO sites (id, label, url, company_id) VALUES (?, ?, ?, ?)`)
+  // Clean up any stale data from a previous crashed run
+  db.prepare(`DELETE FROM audit_results WHERE crawl_job_id IN (?, ?)`).run(JOB_A, JOB_B);
+  db.prepare(`DELETE FROM crawl_jobs WHERE id IN (?, ?)`).run(JOB_A, JOB_B);
+  db.prepare(`DELETE FROM sites WHERE id = ?`).run(SITE_ID);
+
+  db.prepare(`INSERT INTO sites (id, label, url, company_id) VALUES (?, ?, ?, ?)`)
     .run(SITE_ID, 'Compare Test Site', 'https://example.com', COMPANY);
 
-  db.prepare(`INSERT OR IGNORE INTO crawl_jobs
+  db.prepare(`INSERT INTO crawl_jobs
     (id, site_id, status, started_at, total_urls, health_score, company_id)
     VALUES (?, ?, 'completed', '2026-04-01T10:00:00Z', 100, 70, ?)`)
     .run(JOB_A, SITE_ID, COMPANY);
 
-  db.prepare(`INSERT OR IGNORE INTO crawl_jobs
+  db.prepare(`INSERT INTO crawl_jobs
     (id, site_id, status, started_at, total_urls, health_score, company_id)
     VALUES (?, ?, 'completed', '2026-04-15T10:00:00Z', 120, 80, ?)`)
     .run(JOB_B, SITE_ID, COMPANY);
 
-  // Job A: 45 "Missing title tag" (critical) — all same URL for simplicity
-  for (let i = 0; i < 45; i++) {
-    db.prepare(`INSERT OR IGNORE INTO audit_results
-      (id, crawl_job_id, site_id, section, url, severity, issue_type, company_id)
-      VALUES (?, ?, ?, 'Title Tags', 'https://example.com/a' || ?, 'critical', 'Missing title tag', ?)`)
-      .run(`ar-a-title-${i}`, JOB_A, SITE_ID, i, COMPANY);
-  }
+  // Job A: 45 "Missing title tag" (critical)
+  const stmtA = db.prepare(`INSERT INTO audit_results
+    (crawl_job_id, site_id, section, url, severity, issue_type, company_id)
+    VALUES (?, ?, 'Title Tags', 'https://example.com/a' || ?, 'critical', 'Missing title tag', ?)`);
+  for (let i = 0; i < 45; i++) stmtA.run(JOB_A, SITE_ID, i, COMPANY);
+
   // Job B: 23 "Missing title tag" (critical)
-  for (let i = 0; i < 23; i++) {
-    db.prepare(`INSERT OR IGNORE INTO audit_results
-      (id, crawl_job_id, site_id, section, url, severity, issue_type, company_id)
-      VALUES (?, ?, ?, 'Title Tags', 'https://example.com/b' || ?, 'critical', 'Missing title tag', ?)`)
-      .run(`ar-b-title-${i}`, JOB_B, SITE_ID, i, COMPANY);
-  }
+  const stmtB = db.prepare(`INSERT INTO audit_results
+    (crawl_job_id, site_id, section, url, severity, issue_type, company_id)
+    VALUES (?, ?, 'Title Tags', 'https://example.com/b' || ?, 'critical', 'Missing title tag', ?)`);
+  for (let i = 0; i < 23; i++) stmtB.run(JOB_B, SITE_ID, i, COMPANY);
+
   // Job B only: 5 "4xx response code" (warning) — NEW issue
-  for (let i = 0; i < 5; i++) {
-    db.prepare(`INSERT OR IGNORE INTO audit_results
-      (id, crawl_job_id, site_id, section, url, severity, issue_type, company_id)
-      VALUES (?, ?, ?, 'Response Codes', 'https://example.com/c' || ?, 'warning', '4xx response code', ?)`)
-      .run(`ar-b-4xx-${i}`, JOB_B, SITE_ID, i, COMPANY);
-  }
+  const stmtC = db.prepare(`INSERT INTO audit_results
+    (crawl_job_id, site_id, section, url, severity, issue_type, company_id)
+    VALUES (?, ?, 'Response Codes', 'https://example.com/c' || ?, 'warning', '4xx response code', ?)`);
+  for (let i = 0; i < 5; i++) stmtC.run(JOB_B, SITE_ID, i, COMPANY);
 });
 
 afterAll(() => {
