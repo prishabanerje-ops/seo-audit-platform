@@ -83,7 +83,7 @@ function Input({ value, onChange, type = 'text', placeholder = '' }) {
 
 function SmallBtn({ onClick, disabled, loading, children, variant = 'primary' }) {
   const styles = {
-    primary:     { backgroundColor: 'var(--brand)', color: '#fff', border: 'none' },
+    primary:     { backgroundColor: 'var(--brand)', color: 'var(--brand-fg, #fff)', border: 'none' },
     destructive: { backgroundColor: 'var(--severity-critical-bg)', color: 'var(--severity-critical-text)', border: '1px solid var(--severity-critical-border)' },
     secondary:   { backgroundColor: 'var(--bg-raised)', color: 'var(--text-primary)', border: '1px solid var(--border-default)' },
   };
@@ -427,7 +427,7 @@ export function Integrations() {
 
   // Detect OAuth callback redirects (?gsc_connected=1, ?ga4_error=..., etc.)
   useEffect(() => {
-    const callbackParams = ['gsc_connected', 'ga4_connected', 'gsc_error', 'ga4_error'];
+    const callbackParams = ['gsc_connected', 'ga4_connected', 'gsc_error', 'ga4_error', 'ads_connected', 'ads_error'];
     if (callbackParams.some(p => searchParams.get(p))) {
       setSearchParams({});
       loadStatus();
