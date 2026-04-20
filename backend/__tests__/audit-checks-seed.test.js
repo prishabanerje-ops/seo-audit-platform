@@ -33,8 +33,8 @@ beforeAll(() => {
 });
 
 describe('AUDIT_CHECKS array', () => {
-  it('exports exactly 340 checks', () => {
-    expect(AUDIT_CHECKS).toHaveLength(340);
+  it('exports exactly 354 checks', () => {
+    expect(AUDIT_CHECKS).toHaveLength(354);
   });
 
   it('has no duplicate check_numbers', () => {
@@ -90,9 +90,9 @@ describe('AUDIT_CHECKS array', () => {
 });
 
 describe('seedAuditChecks()', () => {
-  it('inserts exactly 340 rows into the DB', () => {
+  it('inserts exactly 354 rows into the DB', () => {
     const { cnt } = db.prepare('SELECT COUNT(*) AS cnt FROM audit_checks').get();
-    expect(cnt).toBe(340);
+    expect(cnt).toBe(354);
   });
 
   it('stores subsection on every row', () => {
@@ -113,6 +113,6 @@ describe('seedAuditChecks()', () => {
     const second = seedAuditChecks(db);
     expect(second).toBe(0);
     const { cnt } = db.prepare('SELECT COUNT(*) AS cnt FROM audit_checks').get();
-    expect(cnt).toBe(340);
+    expect(cnt).toBe(354);
   });
 });
