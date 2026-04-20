@@ -4,7 +4,7 @@
 >
 > **Do not guess. Do not infer missing product behavior unless explicitly confirmed.**
 >
-> **Last updated:** April 2026 — Phase 7 complete. Integration Hub (`/integrations`, 27 integrations, tab-strip, inline expand panels), Compare Crawls (`/audit/compare`, delta summary + diff table), AuditCategories picker (`/audit/categories`), per-issue CSV export (`GET /api/reports/:siteId/issues/export`), Settings refactored to SMTP + Global only (integration tabs moved to Integration Hub), OAuth callbacks redirected to `/integrations`, `covered` boolean added to category API response. Phase 10 planned: Feature A — Skills Library (platform-wide AI instruction layer) and Feature B — Content Pipeline (8-step multi-model content generation).
+> **Last updated:** April 2026 — Phase 7 complete. Integration Hub (`/integrations`, 27 integrations, tab-strip, inline expand panels), Compare Crawls (`/audit/compare`, delta summary + diff table), AuditCategories picker (`/audit/categories`), per-issue CSV export (`GET /api/reports/:siteId/issues/export`), Settings refactored to SMTP + Global only (integration tabs moved to Integration Hub), OAuth callbacks redirected to `/integrations`, `covered` boolean added to category API response. Phase 10 planned: Feature A — Skills Library (platform-wide AI instruction layer) and Feature B — Content Pipeline (8-step multi-model content generation). **Audit Phase 2 rebuild** (migration 018): full check registry replaced — 354 old checks → 321 new checks across 23 categories; `issue_name` column added to `audit_checks`; `auditCategories.js` updated to new taxonomy. See `docs/audit-phase2-prd.md` for full implementation spec.
 
 ---
 
@@ -29,7 +29,7 @@
 
 ## 1. Product Overview
 
-A self-hosted, web-based technical SEO audit platform running at a single URL. It crawls websites via a built-in Playwright/Crawlee crawler, runs 291 custom SEO checks across 19 categories against crawl output, surfaces AI-powered fix recommendations via Anthropic Claude, and integrates with Google Search Console, Google Analytics 4, Linear, Slack, SMTP, and Google Sheets.
+A self-hosted, web-based technical SEO audit platform running at a single URL. It crawls websites via a built-in Playwright/Crawlee crawler, runs 321 custom SEO checks across 23 categories against crawl output, surfaces AI-powered fix recommendations via Anthropic Claude, and integrates with Google Search Console, Google Analytics 4, Linear, Slack, SMTP, and Google Sheets.
 
 **Intended users:** A small internal team (2–5 people). Not a SaaS product. Runs on one machine, serves a private team.
 
@@ -355,9 +355,10 @@ Visible only to superadmin. Accessible via Phase 2 Audit Log page under the Admi
 | Column | Type | Notes |
 |---|---|---|
 | `id` | INTEGER PK | Auto-increment |
-| `check_number` | INTEGER UNIQUE | 1–291 |
-| `name` | TEXT | Unique check name (from CSV Issue column) |
-| `category` | TEXT | Top-level section, Title Case (19 categories) |
+| `check_number` | INTEGER UNIQUE | 1–321 |
+| `name` | TEXT | Rule statement ("Title Tag Present") |
+| `issue_name` | TEXT | Problem statement shown on findings ("Missing Title Tag") |
+| `category` | TEXT | Top-level section, Title Case (23 categories) |
 | `subsection` | TEXT | Second-level grouping (e.g. "HTTP Status Codes") |
 | `description` | TEXT | Human-readable explanation |
 | `implementation_rule` | TEXT | Pseudocode detection logic from CSV |
@@ -366,9 +367,10 @@ Visible only to superadmin. Accessible via Phase 2 Audit Log page under the Admi
 | `severity_default` | TEXT | `'critical'` \| `'warning'` \| `'info'` |
 | `created_at` | TIMESTAMP | Auto |
 
-**19 categories (291 checks total):**
-Response Codes · Canonical · Robots / Indexability · Sitemap · URL Structure ·
-Title Tags · Meta Description · Headings · Internal Linking · Images ·
+**23 categories (321 checks total):**
+Response Codes & Redirects · Canonicalisation · Robots & Crawl Directives · XML Sitemaps · Crawlability & Indexability · URL Structure · JavaScript Rendering · Mobile & Usability · Security & HTTPS · Core Web Vitals ·
+Title Tags · Meta Descriptions · Headings · Content Quality · Images · Schema & Structured Data · Internal Linking · International SEO ·
+Rankings & Traffic · Backlinks & Authority · E-E-A-T Signals · AI Overviews & AIO Optimization · GEO & LLM Crawlers · Local SEO & GEO ·
 Schema / Structured Data · Content · Speed & Performance · Mobile SEO ·
 JavaScript Rendering · International SEO · Rankings & Traffic Drops ·
 Monitoring & Operations · LLM / AI Crawlers
@@ -1089,7 +1091,7 @@ All routes require authentication.
 
 **AI suggest stream path detail:**
 1. Fetch `audit_results` row by `result_id`. 404 if missing, 403 if wrong company.
-2. Fetch matching `audit_checks` row (by `name = issue_type`). Proceeds even if null.
+2. Fetch matching `audit_checks` row (by `name = issue_type OR issue_name = issue_type`). Proceeds even if null.
 3. Resolve Anthropic API key: `process.env.ANTHROPIC_API_KEY` → fallback `settings` table key `anthropic_api_key`.
 4. No key: `503 { error: 'AI recommendations require an Anthropic API key. Configure it in Settings.' }`
 5. Model: `claude-sonnet-4-6`, max 1024 tokens. Streaming via `client.messages.stream()`.
@@ -1295,7 +1297,7 @@ Sidebar (220px expanded / 56px collapsed) + Header (56px) + scrollable main cont
 
 #### `/login` — Login
 - Split layout: 55% brand panel (hidden on mobile), 45% form
-- Brand panel: logo mark, tagline, 3 feature bullets (291 checks, AI-powered fixes, self-hosted)
+- Brand panel: logo mark, tagline, 3 feature bullets (321 checks, AI-powered fixes, self-hosted)
 - Form: email, password (with show/hide toggle), error display, submit with loading state
 - On submit: `POST /api/auth/login` → sets user → navigates to `location.state.from || '/admin'`
 
@@ -1642,7 +1644,7 @@ Auto-generated on first run via `setup.sh`: `JWT_SECRET` (64 hex chars), `ENCRYP
 ├── README.md                             # Operational how-to guide
 │
 ├── scripts/
-│   └── seed-checks.js                    # Seeds 291 audit checks into DB
+│   └── seed-checks.js                    # Seeds 321 audit checks into DB
 │
 ├── backend/
 │   ├── package.json                      # type:module, dependencies
