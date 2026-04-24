@@ -7,8 +7,13 @@ import { randomUUID } from 'crypto';
 import Anthropic      from '@anthropic-ai/sdk';
 import db             from '../db/sqlite.js';
 import { aiLimiter }  from '../middleware/rateLimiter.js';
+import { requireRole } from '../middleware/auth.js';
 
 const router = Router();
+
+// Only users who can act on findings should call the AI endpoint.
+// Readonly users view but cannot trigger paid Anthropic calls.
+const AI_ROLES = ['admin', 'seo', 'superadmin'];
 
 // ─── GET /api/ai/suggest?result_id=:id ───────────────────────────────────────
 // Cache lookup — returns cached suggestion or { suggestion: null }
@@ -31,7 +36,7 @@ router.get('/suggest', (req, res) => {
 });
 
 // ─── POST /api/ai/suggest ─────────────────────────────────────────────────────
-router.post('/suggest', aiLimiter, async (req, res) => {
+router.post('/suggest', requireRole(...AI_ROLES), aiLimiter, async (req, res) => {
   const { result_id } = req.body;
   if (!result_id) return res.status(400).json({ error: 'result_id is required' });
 
@@ -159,7 +164,7 @@ router.post('/suggest', aiLimiter, async (req, res) => {
 });
 
 // ─── POST /api/ai/suggest/:id/feedback ───────────────────────────────────────
-router.post('/suggest/:id/feedback', (req, res) => {
+router.post('/suggest/:id/feedback', requireRole(...AI_ROLES), (req, res) => {
   const { id } = req.params;
   const { value } = req.body;
   const { company_id, role } = req.user;
