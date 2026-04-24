@@ -558,7 +558,8 @@ export function AdsDashboard() {
   useEffect(() => {
     const companyId = viewingCompanyId ?? user?.company_id;
     if (!companyId) return;
-    const socket = socketIo('http://localhost:3001', { withCredentials: true });
+    const socketUrl = import.meta.env.VITE_SOCKET_URL ?? window.location.origin;
+    const socket = socketIo(socketUrl, { withCredentials: true });
     socket.emit('join:company', companyId);
 
     socket.on('ads:sync:progress', ({ platform, status, data: platformData }) => {
