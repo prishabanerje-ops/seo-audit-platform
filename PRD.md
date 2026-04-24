@@ -704,7 +704,7 @@ Entry point. Startup order:
 12. Global error handler
 
 ### `backend/middleware/auth.js`
-`authMiddleware`: Applied globally. Routes opt out via `PUBLIC_PATHS` (matched by method + path prefix).
+`authMiddleware`: Applied globally. Routes opt out via `PUBLIC_PATHS` (matched by exact method + path — no prefix matching).
 
 **Public paths (no auth required):**
 - `POST /api/auth/login`
@@ -714,7 +714,10 @@ Entry point. Startup order:
 - `GET  /api/auth/setup-status`
 - `GET  /api/auth/invite/validate`
 - `POST /api/auth/invite/accept`
-- `GET  /api/gsc/auth`
+- `POST /api/auth/change-password`
+- `GET  /api/ads/callback/google`
+- `GET  /api/ads/callback/meta`
+- `GET  /api/ads/callback/linkedin`
 - `GET  /api/gsc/callback`
 - `GET  /api/ga4/callback`
 - `GET  /api/health`
@@ -722,7 +725,9 @@ Entry point. Startup order:
 
 On success: sets `req.user = { sub, email, name, role, company_id }`. `company_id` is `null` for superadmin. Non-blocking `last_active_at` update via `setImmediate`.
 
-`requireRole(...roles)`: Factory that returns a middleware checking `req.user.role` is in the allowed list. Returns 403 if not.
+`requireRole(...roles)`: Factory that returns a middleware checking `req.user.role` is in the allowed list. Returns 403 if not. Applied to, among others:
+- `/api/sites` POST/PATCH/DELETE → `admin`, `superadmin` (mutation guard)
+- `/api/ai/suggest` POST and `/api/ai/suggest/:id/feedback` POST → `admin`, `seo`, `superadmin` (readonly users cannot trigger paid AI calls)
 
 ### `backend/middleware/rateLimiter.js`
 | Limiter | Window | Max | Used on |
@@ -770,9 +775,7 @@ Manages crawl jobs. Routes to the built-in Playwright crawler when `USE_PLAYWRIG
 | `crawl:error` | `{ jobId, error }` | Crawl failed |
 | `crawl:updated` | `{ jobId, status, totalUrls?, findings? }` | Broadcast to all clients on status change |
 
-**Socket.io rooms:** Clients join `job:{jobId}` room to receive progress events for a specific job.
-
-**Upload directory:** `backend/uploads/` — CSV files uploaded via import are stored here (managed by multer).
+**Socket.io rooms:** Clients join `job:{jobId}` or `company:{companyId}` rooms to receive scoped events. Every Socket.io connection is authenticated by a handshake middleware that verifies the `auth_token` cookie JWT; anonymous connections are rejected. `join:job` is additionally authorised by looking up the job's `company_id` and rejecting if it does not match the caller's company (superadmin bypasses). `join:company` is rejected unless the supplied `companyId` matches the caller's (superadmin bypasses).
 
 ### `playwright-crawler/` — Built-in Crawler Package
 Standalone ESM Node.js package. Called by `crawl-runner.js` when `USE_PLAYWRIGHT_CRAWLER=true`.
@@ -1574,7 +1577,7 @@ Auto-generated on first run via `setup.sh`: `JWT_SECRET` (64 hex chars), `ENCRYP
 | `NODE_ENV` | No | `development` | `development` or `production` |
 | `PORT` | No | `3001` | Backend HTTP port |
 | `FRONTEND_URL` | **Prod required** | `http://localhost:5173` | Frontend origin for CORS + invite URLs |
-| `JWT_SECRET` | **Prod required** | `dev-secret-change-in-production` | Min 64 random chars. `openssl rand -hex 64` |
+| `JWT_SECRET` | **Prod required** | `dev-secret-change-in-production` | Min 64 random chars (`openssl rand -hex 64`). `validate-env.js` hard-fails in production when the secret is below 32 chars, warns loudly when 32–63. |
 | `ENCRYPTION_KEY` | **Prod required** | — | 32-byte hex for AES-256 settings. `openssl rand -hex 32` |
 | `USE_PLAYWRIGHT_CRAWLER` | No | `false` | Set to `true` to use the built-in Playwright/Crawlee crawler. |
 | `GOOGLE_CLIENT_ID` | No | — | Required for GSC + GA4 OAuth |
@@ -1592,6 +1595,12 @@ Auto-generated on first run via `setup.sh`: `JWT_SECRET` (64 hex chars), `ENCRYP
 | `DEEPSEEK_API_KEY` | No | — | DeepSeek API key. Used for Step 1 (Keyword Expansion) in content pipeline. Stubs gracefully if not set — auto-fallbacks to next model in priority list. |
 | `GEMINI_API_KEY` | No | — | Google Gemini API key. Used for Step 3 (Intent Classification). Stubs gracefully if not set. |
 | `OPENAI_API_KEY` | No | — | OpenAI API key. Used for Steps 4 and 7 (Content Brief, SEO Optimization). Stubs gracefully if not set. |
+
+**Frontend-only env vars (prefix `VITE_`):**
+
+| Variable | Required | Default | Description |
+|---|---|---|---|
+| `VITE_SOCKET_URL` | No | `window.location.origin` | Socket.io server URL. Leave unset when frontend and backend share an origin (dev via Vite's `/socket.io` proxy, production via the same host). Set explicitly only when the frontend is hosted on a different origin from the backend. |
 
 ---
 
