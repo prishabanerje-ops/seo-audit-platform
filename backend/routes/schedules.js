@@ -82,11 +82,15 @@ router.post('/', (req, res) => {
       return res.status(400).json({ error: 'company_id is required' });
     }
 
-    // Verify all site_ids belong to this company
-    for (const siteId of site_ids) {
-      const site = db.prepare(`SELECT id FROM sites WHERE id = ? AND company_id = ?`).get(siteId, cid);
-      if (!site) {
-        return res.status(400).json({ error: `Site ${siteId} not found or does not belong to this company` });
+    // Verify all site_ids belong to this company (single IN-list query, not N+1)
+    {
+      const placeholders = site_ids.map(() => '?').join(',');
+      const found = db.prepare(
+        `SELECT id FROM sites WHERE company_id = ? AND id IN (${placeholders})`
+      ).all(cid, ...site_ids).map(r => r.id);
+      const missing = site_ids.filter(id => !found.includes(id));
+      if (missing.length) {
+        return res.status(400).json({ error: `Site ${missing[0]} not found or does not belong to this company` });
       }
     }
 
@@ -145,11 +149,13 @@ router.patch('/:id', (req, res) => {
         return res.status(400).json({ error: 'site_ids must be a non-empty array' });
       }
       const cid = row.company_id;
-      for (const siteId of site_ids) {
-        const site = db.prepare(`SELECT id FROM sites WHERE id = ? AND company_id = ?`).get(siteId, cid);
-        if (!site) {
-          return res.status(400).json({ error: `Site ${siteId} not found or does not belong to this company` });
-        }
+      const placeholders = site_ids.map(() => '?').join(',');
+      const found = db.prepare(
+        `SELECT id FROM sites WHERE company_id = ? AND id IN (${placeholders})`
+      ).all(cid, ...site_ids).map(r => r.id);
+      const missing = site_ids.filter(id => !found.includes(id));
+      if (missing.length) {
+        return res.status(400).json({ error: `Site ${missing[0]} not found or does not belong to this company` });
       }
     }
 
