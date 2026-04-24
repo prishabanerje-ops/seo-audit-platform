@@ -3,6 +3,7 @@ import { z }      from 'zod';
 import db          from '../db/sqlite.js';
 import { validate } from '../middleware/validate.js';
 import { requireRole } from '../middleware/auth.js';
+import { errorLimiter } from '../middleware/rateLimiter.js';
 
 const router = Router();
 
@@ -14,8 +15,8 @@ const errorSchema = z.object({
   url:     z.string().max(500).optional(),
 });
 
-// POST /api/errors — frontend error reporting (public)
-router.post('/', validate(errorSchema), (req, res) => {
+// POST /api/errors — frontend error reporting (public, rate-limited)
+router.post('/', errorLimiter, validate(errorSchema), (req, res) => {
   const { level, source, message, stack, url } = req.body;
   const userId = req.user?.sub || null;
 
