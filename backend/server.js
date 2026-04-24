@@ -5,6 +5,7 @@ import { Server as SocketIo } from 'socket.io';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import helmet from 'helmet';
+import jwt from 'jsonwebtoken';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { existsSync } from 'fs';
@@ -89,15 +90,41 @@ const io = new SocketIo(httpServer, {
 // Attach io to app for use in routes
 app.set('io', io);
 
+// Socket.io auth handshake — every connection must carry a valid auth_token
+// cookie. Decoded payload is attached to socket.user for downstream room checks.
+io.use((socket, next) => {
+  try {
+    const cookieHeader = socket.request?.headers?.cookie || '';
+    const match = cookieHeader.match(/(?:^|;\s*)auth_token=([^;]+)/);
+    const token = match ? decodeURIComponent(match[1]) : null;
+    if (!token) return next(new Error('Authentication required'));
+    socket.user = jwt.verify(token, process.env.JWT_SECRET);
+    next();
+  } catch {
+    next(new Error('Invalid or expired token'));
+  }
+});
+
 io.on('connection', (socket) => {
+  const { role, company_id: userCompanyId } = socket.user;
+  const isSuperadmin = role === 'superadmin';
+
   socket.on('join:job', (jobId) => {
+    const job = db.prepare('SELECT company_id FROM crawl_jobs WHERE id = ?').get(jobId);
+    if (!job) return;
+    if (!isSuperadmin && job.company_id !== userCompanyId) return;
+
     socket.join(`job:${jobId}`);
     // Replay buffered URL events so late-joining clients see what was already crawled
     const buf = getJobUrlBuffer(jobId);
     if (buf.length > 0) socket.emit('crawl:urls:replay', buf);
   });
   socket.on('leave:job', (jobId) => socket.leave(`job:${jobId}`));
-  socket.on('join:company',  (companyId) => socket.join(`company:${companyId}`));
+
+  socket.on('join:company', (companyId) => {
+    if (!isSuperadmin && companyId !== userCompanyId) return;
+    socket.join(`company:${companyId}`);
+  });
   socket.on('leave:company', (companyId) => socket.leave(`company:${companyId}`));
 });
 
