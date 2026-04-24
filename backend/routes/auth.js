@@ -400,6 +400,13 @@ router.patch('/users/:id', requireRole('admin', 'superadmin'), validate(patchUse
     return res.status(403).json({ error: 'You cannot modify your own role' });
   }
 
+  // Guard: admins cannot promote other users to admin (mirrors the /invite
+  // rule at line 161 and blocks admin-proliferation via PATCH). Superadmin
+  // has no such restriction.
+  if (actorRole === 'admin' && req.body.role === 'admin') {
+    return res.status(403).json({ error: 'Admins cannot promote users to admin.' });
+  }
+
   const user = db.prepare('SELECT id, company_id FROM users WHERE id = ?').get(id);
   if (!user) return res.status(404).json({ error: 'User not found' });
 
