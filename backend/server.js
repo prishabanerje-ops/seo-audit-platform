@@ -17,6 +17,7 @@ validateEnv();
 // DB — auto-migrates in development
 import db from './db/sqlite.js';
 import { seedAuditChecks } from './db/seed/audit-checks.js';
+import { auditSeededPasswords } from './startup-audit.js';
 
 // Middleware
 import { authMiddleware } from './middleware/auth.js';
@@ -207,6 +208,11 @@ resetStuckJobs();
 // ─── Seed audit checks ───────────────────────────────────────────────────────
 const seeded = seedAuditChecks(db);
 if (seeded > 0) console.log(`[seed] Inserted ${seeded} audit checks`);
+
+// ─── Startup security audit ──────────────────────────────────────────────────
+// Warns (never fails) if seeded admin accounts still use the default
+// passwords baked into migration 006 / 008.
+auditSeededPasswords(db);
 
 // ─── Scheduled crawls ────────────────────────────────────────────────────────
 initScheduler(db, io);
