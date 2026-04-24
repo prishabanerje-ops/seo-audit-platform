@@ -1,0 +1,283 @@
+<style>
+  .hub-header { margin-bottom: 20px; }
+  .hub-header h2 { margin: 0 0 4px 0; }
+
+  .tab-strip {
+    display: flex; gap: 4px; margin-bottom: 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    padding-bottom: 0;
+  }
+  .tab {
+    padding: 7px 14px; border-radius: 6px 6px 0 0; font-size: 13px;
+    cursor: pointer; color: rgba(255,255,255,0.45); font-weight: 500;
+    border-bottom: 2px solid transparent; margin-bottom: -1px;
+    white-space: nowrap;
+  }
+  .tab.active { color: #a78bfa; border-bottom-color: #a78bfa; }
+  .tab:hover:not(.active) { color: rgba(255,255,255,0.7); }
+
+  .category-section { margin-bottom: 28px; }
+  .category-label {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.08em;
+    text-transform: uppercase; color: rgba(255,255,255,0.35);
+    margin-bottom: 10px; padding-bottom: 6px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 10px;
+  }
+  .int-card {
+    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 10px; padding: 14px; display: flex; flex-direction: column; gap: 8px;
+  }
+  .int-card.coming-soon { opacity: 0.45; }
+  .card-top { display: flex; align-items: center; justify-content: space-between; }
+  .card-logo {
+    width: 32px; height: 32px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; background: rgba(255,255,255,0.06);
+  }
+  .badge {
+    font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 20px;
+    letter-spacing: 0.04em;
+  }
+  .badge-connected { background: rgba(34,197,94,0.15); color: #4ade80; }
+  .badge-soon { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.35); }
+  .badge-error { background: rgba(239,68,68,0.15); color: #f87171; }
+  .card-name { font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.9); }
+  .card-desc { font-size: 11px; color: rgba(255,255,255,0.4); line-height: 1.4; }
+  .card-btn {
+    margin-top: auto; padding: 5px 10px; border-radius: 6px; font-size: 11px;
+    font-weight: 600; text-align: center; cursor: pointer;
+  }
+  .btn-connect { background: rgba(167,139,250,0.15); color: #a78bfa; border: 1px solid rgba(167,139,250,0.25); }
+  .btn-manage { background: rgba(34,197,94,0.1); color: #4ade80; border: 1px solid rgba(34,197,94,0.2); }
+  .btn-disabled { background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.06); cursor: default; }
+</style>
+
+<div class="hub-header">
+  <h2>Integration Hub</h2>
+  <p class="subtitle">Connect your tools. All credentials are stored per company and never shared.</p>
+</div>
+
+<div class="tab-strip">
+  <div class="tab active">All</div>
+  <div class="tab">SEO Data</div>
+  <div class="tab">Analytics</div>
+  <div class="tab">Advertising</div>
+  <div class="tab">CRM</div>
+  <div class="tab">Communication</div>
+  <div class="tab">Developer</div>
+</div>
+
+<!-- SEO Data -->
+<div class="category-section">
+  <div class="category-label">SEO Data</div>
+  <div class="cards-grid">
+    <div class="int-card">
+      <div class="card-top"><div class="card-logo">🔍</div><span class="badge badge-connected">Connected</span></div>
+      <div class="card-name">Google Search Console</div>
+      <div class="card-desc">Index coverage, clicks, impressions, and ranking data.</div>
+      <div class="card-btn btn-manage">Manage</div>
+    </div>
+    <div class="int-card">
+      <div class="card-top"><div class="card-logo">⚡</div><span class="badge badge-connected">Connected</span></div>
+      <div class="card-name">PageSpeed Insights</div>
+      <div class="card-desc">Core Web Vitals and performance scores via Google PSI API.</div>
+      <div class="card-btn btn-manage">Manage</div>
+    </div>
+    <div class="int-card coming-soon">
+      <div class="card-top"><div class="card-logo">📊</div><span class="badge badge-soon">Soon</span></div>
+      <div class="card-name">Ahrefs</div>
+      <div class="card-desc">Backlink profiles, keyword rankings, and domain authority.</div>
+      <div class="card-btn btn-disabled">Coming Soon</div>
+    </div>
+    <div class="int-card coming-soon">
+      <div class="card-top"><div class="card-logo">🌐</div><span class="badge badge-soon">Soon</span></div>
+      <div class="card-name">SEMrush</div>
+      <div class="card-desc">Competitor analysis, site audits, and keyword research.</div>
+      <div class="card-btn btn-disabled">Coming Soon</div>
+    </div>
+    <div class="int-card coming-soon">
+      <div class="card-top"><div class="card-logo">🔗</div><span class="badge badge-soon">Soon</span></div>
+      <div class="card-name">Moz</div>
+      <div class="card-desc">Domain Authority, spam score, and link metrics.</div>
+      <div class="card-btn btn-disabled">Coming Soon</div>
+    </div>
+  </div>
+</div>
+
+<!-- Analytics -->
+<div class="category-section">
+  <div class="category-label">Analytics</div>
+  <div class="cards-grid">
+    <div class="int-card">
+      <div class="card-top"><div class="card-logo">📈</div><span class="badge badge-connected">Connected</span></div>
+      <div class="card-name">Google Analytics 4</div>
+      <div class="card-desc">Sessions, conversions, traffic sources, and user behaviour.</div>
+      <div class="card-btn btn-manage">Manage</div>
+    </div>
+    <div class="int-card coming-soon">
+      <div class="card-top"><div class="card-logo">🎯</div><span class="badge badge-soon">Soon</span></div>
+      <div class="card-name">Mixpanel</div>
+      <div class="card-desc">Product analytics, funnels, and event-based tracking.</div>
+      <div class="card-btn btn-disabled">Coming Soon</div>
+    </div>
+    <div class="int-card coming-soon">
+      <div class="card-top"><div class="card-logo">📉</div><span class="badge badge-soon">Soon</span></div>
+      <div class="card-name">Amplitude</div>
+      <div class="card-desc">Behavioural analytics, retention, and cohort analysis.</div>
+      <div class="card-btn btn-disabled">Coming Soon</div>
+    </div>
+    <div class="int-card coming-soon">
+      <div class="card-top"><div class="card-logo">☁️</div><span class="badge badge-soon">Soon</span></div>
+      <div class="card-name">Adobe Analytics</div>
+      <div class="card-desc">Enterprise-grade digital analytics and segmentation.</div>
+      <div class="card-btn btn-disabled">Coming Soon</div>
+    </div>
+  </div>
+</div>
+
+<!-- Advertising -->
+<div class="category-section">
+  <div class="category-label">Advertising</div>
+  <div class="cards-grid">
+    <div class="int-card">
+      <div class="card-top"><div class="card-logo">🟢</div><span class="badge badge-connected">Connected</span></div>
+      <div class="card-name">Google Ads</div>
+      <div class="card-desc">Campaign performance, spend, impressions, and conversions.</div>
+      <div class="card-btn btn-manage">Manage</div>
+    </div>
+    <div class="int-card">
+      <div class="card-top"><div class="card-logo">🔵</div><span class="badge badge-connect" style="background:rgba(167,139,250,0.12);color:#a78bfa;font-size:10px;font-weight:600;padding:2px 7px;border-radius:20px;">Not Connected</span></div>
+      <div class="card-name">Meta Ads</div>
+      <div class="card-desc">Facebook and Instagram ad performance and audience data.</div>
+      <div class="card-btn btn-connect">Connect</div>
+    </div>
+    <div class="int-card">
+      <div class="card-top"><div class="card-logo">💼</div><span class="badge badge-connect" style="background:rgba(167,139,250,0.12);color:#a78bfa;font-size:10px;font-weight:600;padding:2px 7px;border-radius:20px;">Not Connected</span></div>
+      <div class="card-name">LinkedIn Ads</div>
+      <div class="card-desc">B2B ad performance, lead gen forms, and company targeting.</div>
+      <div class="card-btn btn-connect">Connect</div>
+    </div>
+    <div class="int-card coming-soon">
+      <div class="card-top"><div class="card-logo">🎵</div><span class="badge badge-soon">Soon</span></div>
+      <div class="card-name">TikTok Ads</div>
+      <div class="card-desc">Short-form video ad performance and audience insights.</div>
+      <div class="card-btn btn-disabled">Coming Soon</div>
+    </div>
+    <div class="int-card coming-soon">
+      <div class="card-top"><div class="card-logo">📌</div><span class="badge badge-soon">Soon</span></div>
+      <div class="card-name">Pinterest Ads</div>
+      <div class="card-desc">Visual discovery ad campaigns and Pin performance.</div>
+      <div class="card-btn btn-disabled">Coming Soon</div>
+    </div>
+    <div class="int-card coming-soon">
+      <div class="card-top"><div class="card-logo">👻</div><span class="badge badge-soon">Soon</span></div>
+      <div class="card-name">Snapchat Ads</div>
+      <div class="card-desc">Story and AR ad performance for younger demographics.</div>
+      <div class="card-btn btn-disabled">Coming Soon</div>
+    </div>
+  </div>
+</div>
+
+<!-- CRM -->
+<div class="category-section">
+  <div class="category-label">CRM</div>
+  <div class="cards-grid">
+    <div class="int-card coming-soon">
+      <div class="card-top"><div class="card-logo">🧡</div><span class="badge badge-soon">Soon</span></div>
+      <div class="card-name">HubSpot</div>
+      <div class="card-desc">Contacts, deals, and marketing campaign attribution.</div>
+      <div class="card-btn btn-disabled">Coming Soon</div>
+    </div>
+    <div class="int-card coming-soon">
+      <div class="card-top"><div class="card-logo">☁️</div><span class="badge badge-soon">Soon</span></div>
+      <div class="card-name">Salesforce</div>
+      <div class="card-desc">Enterprise CRM — leads, pipeline, and revenue attribution.</div>
+      <div class="card-btn btn-disabled">Coming Soon</div>
+    </div>
+    <div class="int-card coming-soon">
+      <div class="card-top"><div class="card-logo">🔶</div><span class="badge badge-soon">Soon</span></div>
+      <div class="card-name">Zoho CRM</div>
+      <div class="card-desc">Sales automation, contacts, and lead management.</div>
+      <div class="card-btn btn-disabled">Coming Soon</div>
+    </div>
+    <div class="int-card coming-soon">
+      <div class="card-top"><div class="card-logo">🟠</div><span class="badge badge-soon">Soon</span></div>
+      <div class="card-name">Pipedrive</div>
+      <div class="card-desc">Visual sales pipeline and activity-based selling.</div>
+      <div class="card-btn btn-disabled">Coming Soon</div>
+    </div>
+  </div>
+</div>
+
+<!-- Communication & Workflow -->
+<div class="category-section">
+  <div class="category-label">Communication & Workflow</div>
+  <div class="cards-grid">
+    <div class="int-card">
+      <div class="card-top"><div class="card-logo">💬</div><span class="badge badge-connected">Connected</span></div>
+      <div class="card-name">Slack</div>
+      <div class="card-desc">Crawl alerts, issue notifications, and weekly digests.</div>
+      <div class="card-btn btn-manage">Manage</div>
+    </div>
+    <div class="int-card">
+      <div class="card-top"><div class="card-logo">🔺</div><span class="badge badge-connect" style="background:rgba(167,139,250,0.12);color:#a78bfa;font-size:10px;font-weight:600;padding:2px 7px;border-radius:20px;">Not Connected</span></div>
+      <div class="card-name">Linear</div>
+      <div class="card-desc">Push SEO issues directly to Linear as tracked tickets.</div>
+      <div class="card-btn btn-connect">Connect</div>
+    </div>
+    <div class="int-card coming-soon">
+      <div class="card-top"><div class="card-logo">🟦</div><span class="badge badge-soon">Soon</span></div>
+      <div class="card-name">Jira</div>
+      <div class="card-desc">Create and track SEO issues in your Jira project board.</div>
+      <div class="card-btn btn-disabled">Coming Soon</div>
+    </div>
+    <div class="int-card coming-soon">
+      <div class="card-top"><div class="card-logo">🟣</div><span class="badge badge-soon">Soon</span></div>
+      <div class="card-name">Asana</div>
+      <div class="card-desc">Assign SEO tasks to team members as Asana tasks.</div>
+      <div class="card-btn btn-disabled">Coming Soon</div>
+    </div>
+    <div class="int-card coming-soon">
+      <div class="card-top"><div class="card-logo">🟫</div><span class="badge badge-soon">Soon</span></div>
+      <div class="card-name">Microsoft Teams</div>
+      <div class="card-desc">Crawl alerts and digest notifications via Teams channels.</div>
+      <div class="card-btn btn-disabled">Coming Soon</div>
+    </div>
+  </div>
+</div>
+
+<!-- Developer & Data -->
+<div class="category-section">
+  <div class="category-label">Developer & Data</div>
+  <div class="cards-grid">
+    <div class="int-card">
+      <div class="card-top"><div class="card-logo">📗</div><span class="badge badge-connect" style="background:rgba(167,139,250,0.12);color:#a78bfa;font-size:10px;font-weight:600;padding:2px 7px;border-radius:20px;">Not Connected</span></div>
+      <div class="card-name">Google Sheets</div>
+      <div class="card-desc">Export crawl reports and audit data to Sheets automatically.</div>
+      <div class="card-btn btn-connect">Connect</div>
+    </div>
+    <div class="int-card coming-soon">
+      <div class="card-top"><div class="card-logo">⚡</div><span class="badge badge-soon">Soon</span></div>
+      <div class="card-name">Zapier</div>
+      <div class="card-desc">Trigger workflows in 6,000+ apps from crawl events.</div>
+      <div class="card-btn btn-disabled">Coming Soon</div>
+    </div>
+    <div class="int-card coming-soon">
+      <div class="card-top"><div class="card-logo">🔀</div><span class="badge badge-soon">Soon</span></div>
+      <div class="card-name">Make (Integromat)</div>
+      <div class="card-desc">Visual automation workflows triggered by SEO events.</div>
+      <div class="card-btn btn-disabled">Coming Soon</div>
+    </div>
+    <div class="int-card coming-soon">
+      <div class="card-top"><div class="card-logo">🪝</div><span class="badge badge-soon">Soon</span></div>
+      <div class="card-name">Webhooks</div>
+      <div class="card-desc">Push crawl events and alerts to any custom endpoint.</div>
+      <div class="card-btn btn-disabled">Coming Soon</div>
+    </div>
+  </div>
+</div>

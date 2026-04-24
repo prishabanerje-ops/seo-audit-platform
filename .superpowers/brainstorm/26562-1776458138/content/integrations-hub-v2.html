@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Integration Hub</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #0f0f17;
+    color: #e2e2f0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    padding: 28px;
+    min-height: 100vh;
+  }
+  h1 { font-size: 20px; font-weight: 700; color: #f0f0ff; margin-bottom: 4px; }
+  .subtitle { font-size: 13px; color: #6b6b8a; margin-bottom: 20px; }
+
+  .tab-strip {
+    display: flex; gap: 2px; margin-bottom: 24px;
+    border-bottom: 1px solid #1e1e2e; padding-bottom: 0;
+    overflow-x: auto;
+  }
+  .tab {
+    padding: 8px 16px; font-size: 13px; font-weight: 500; cursor: pointer;
+    color: #6b6b8a; border-bottom: 2px solid transparent;
+    margin-bottom: -1px; white-space: nowrap; border-radius: 4px 4px 0 0;
+  }
+  .tab.active { color: #a78bfa; border-bottom-color: #a78bfa; }
+  .tab:hover:not(.active) { color: #c4b5fd; background: #1a1a2e; }
+
+  .section { margin-bottom: 28px; }
+  .section-label {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: #4a4a6a; margin-bottom: 10px;
+    padding-bottom: 8px; border-bottom: 1px solid #1a1a2e;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+    gap: 10px;
+  }
+  .card {
+    background: #13131f; border: 1px solid #1e1e30;
+    border-radius: 10px; padding: 14px;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .card.dimmed { opacity: 0.5; }
+  .card-top { display: flex; align-items: center; justify-content: space-between; }
+  .logo {
+    width: 34px; height: 34px; border-radius: 8px;
+    background: #1c1c2e; display: flex; align-items: center;
+    justify-content: center; font-size: 17px;
+  }
+  .badge {
+    font-size: 10px; font-weight: 600; padding: 2px 8px;
+    border-radius: 20px; letter-spacing: 0.03em;
+  }
+  .b-connected { background: #0d2e1a; color: #4ade80; }
+  .b-disconnected { background: #1c1228; color: #a78bfa; }
+  .b-soon { background: #16161e; color: #3d3d5c; border: 1px solid #232338; }
+  .card-name { font-size: 13px; font-weight: 600; color: #e0e0f8; }
+  .card-desc { font-size: 11px; color: #4a4a6a; line-height: 1.45; flex: 1; }
+  .btn {
+    padding: 6px 12px; border-radius: 6px; font-size: 11px;
+    font-weight: 600; text-align: center; cursor: pointer; margin-top: 4px;
+  }
+  .btn-connect { background: #1c1228; color: #a78bfa; border: 1px solid #2e1e4a; }
+  .btn-manage { background: #0d2010; color: #4ade80; border: 1px solid #0d3018; }
+  .btn-soon { background: #12121c; color: #2e2e4a; border: 1px solid #1a1a28; cursor: default; }
+</style>
+</head>
+<body>
+
+<h1>Integration Hub</h1>
+<p class="subtitle">Connect your tools. All credentials are stored per company and never shared.</p>
+
+<div class="tab-strip">
+  <div class="tab active">All</div>
+  <div class="tab">SEO Data</div>
+  <div class="tab">Analytics</div>
+  <div class="tab">Advertising</div>
+  <div class="tab">CRM</div>
+  <div class="tab">Communication</div>
+  <div class="tab">Developer</div>
+</div>
+
+<!-- SEO Data -->
+<div class="section">
+  <div class="section-label">SEO Data</div>
+  <div class="grid">
+    <div class="card">
+      <div class="card-top"><div class="logo">🔍</div><span class="badge b-connected">Connected</span></div>
+      <div class="card-name">Google Search Console</div>
+      <div class="card-desc">Index coverage, clicks, impressions, and ranking data.</div>
+      <div class="btn btn-manage">Manage</div>
+    </div>
+    <div class="card">
+      <div class="card-top"><div class="logo">⚡</div><span class="badge b-disconnected">Not Connected</span></div>
+      <div class="card-name">PageSpeed Insights</div>
+      <div class="card-desc">Core Web Vitals and performance scores via PSI API key.</div>
+      <div class="btn btn-connect">Connect</div>
+    </div>
+    <div class="card dimmed">
+      <div class="card-top"><div class="logo">📊</div><span class="badge b-soon">Soon</span></div>
+      <div class="card-name">Ahrefs</div>
+      <div class="card-desc">Backlink profiles, keyword rankings, and domain authority.</div>
+      <div class="btn btn-soon">Coming Soon</div>
+    </div>
+    <div class="card dimmed">
+      <div class="card-top"><div class="logo">🌐</div><span class="badge b-soon">Soon</span></div>
+      <div class="card-name">SEMrush</div>
+      <div class="card-desc">Competitor analysis, site audits, and keyword research.</div>
+      <div class="btn btn-soon">Coming Soon</div>
+    </div>
+    <div class="card dimmed">
+      <div class="card-top"><div class="logo">🔗</div><span class="badge b-soon">Soon</span></div>
+      <div class="card-name">Moz</div>
+      <div class="card-desc">Domain Authority, spam score, and link metrics.</div>
+      <div class="btn btn-soon">Coming Soon</div>
+    </div>
+  </div>
+</div>
+
+<!-- Analytics -->
+<div class="section">
+  <div class="section-label">Analytics</div>
+  <div class="grid">
+    <div class="card">
+      <div class="card-top"><div class="logo">📈</div><span class="badge b-connected">Connected</span></div>
+      <div class="card-name">Google Analytics 4</div>
+      <div class="card-desc">Sessions, conversions, traffic sources, and user behaviour.</div>
+      <div class="btn btn-manage">Manage</div>
+    </div>
+    <div class="card dimmed">
+      <div class="card-top"><div class="logo">🎯</div><span class="badge b-soon">Soon</span></div>
+      <div class="card-name">Mixpanel</div>
+      <div class="card-desc">Product analytics, funnels, and event-based tracking.</div>
+      <div class="btn btn-soon">Coming Soon</div>
+    </div>
+    <div class="card dimmed">
+      <div class="card-top"><div class="logo">📉</div><span class="badge b-soon">Soon</span></div>
+      <div class="card-name">Amplitude</div>
+      <div class="card-desc">Behavioural analytics, retention, and cohort analysis.</div>
+      <div class="btn btn-soon">Coming Soon</div>
+    </div>
+    <div class="card dimmed">
+      <div class="card-top"><div class="logo">☁️</div><span class="badge b-soon">Soon</span></div>
+      <div class="card-name">Adobe Analytics</div>
+      <div class="card-desc">Enterprise-grade digital analytics and segmentation.</div>
+      <div class="btn btn-soon">Coming Soon</div>
+    </div>
+  </div>
+</div>
+
+<!-- Advertising -->
+<div class="section">
+  <div class="section-label">Advertising</div>
+  <div class="grid">
+    <div class="card">
+      <div class="card-top"><div class="logo">🟢</div><span class="badge b-connected">Connected</span></div>
+      <div class="card-name">Google Ads</div>
+      <div class="card-desc">Campaign performance, spend, impressions, and conversions.</div>
+      <div class="btn btn-manage">Manage</div>
+    </div>
+    <div class="card">
+      <div class="card-top"><div class="logo">🔵</div><span class="badge b-disconnected">Not Connected</span></div>
+      <div class="card-name">Meta Ads</div>
+      <div class="card-desc">Facebook and Instagram ad performance and audience data.</div>
+      <div class="btn btn-connect">Connect</div>
+    </div>
+    <div class="card">
+      <div class="card-top"><div class="logo">💼</div><span class="badge b-disconnected">Not Connected</span></div>
+      <div class="card-name">LinkedIn Ads</div>
+      <div class="card-desc">B2B ad performance, lead gen forms, and company targeting.</div>
+      <div class="btn btn-connect">Connect</div>
+    </div>
+    <div class="card dimmed">
+      <div class="card-top"><div class="logo">🎵</div><span class="badge b-soon">Soon</span></div>
+      <div class="card-name">TikTok Ads</div>
+      <div class="card-desc">Short-form video ad performance and audience insights.</div>
+      <div class="btn btn-soon">Coming Soon</div>
+    </div>
+    <div class="card dimmed">
+      <div class="card-top"><div class="logo">📌</div><span class="badge b-soon">Soon</span></div>
+      <div class="card-name">Pinterest Ads</div>
+      <div class="card-desc">Visual discovery ad campaigns and Pin performance.</div>
+      <div class="btn btn-soon">Coming Soon</div>
+    </div>
+    <div class="card dimmed">
+      <div class="card-top"><div class="logo">👻</div><span class="badge b-soon">Soon</span></div>
+      <div class="card-name">Snapchat Ads</div>
+      <div class="card-desc">Story and AR ad campaigns for younger demographics.</div>
+      <div class="btn btn-soon">Coming Soon</div>
+    </div>
+  </div>
+</div>
+
+<!-- CRM -->
+<div class="section">
+  <div class="section-label">CRM</div>
+  <div class="grid">
+    <div class="card dimmed">
+      <div class="card-top"><div class="logo">🧡</div><span class="badge b-soon">Soon</span></div>
+      <div class="card-name">HubSpot</div>
+      <div class="card-desc">Contacts, deals, and marketing campaign attribution.</div>
+      <div class="btn btn-soon">Coming Soon</div>
+    </div>
+    <div class="card dimmed">
+      <div class="card-top"><div class="logo">☁️</div><span class="badge b-soon">Soon</span></div>
+      <div class="card-name">Salesforce</div>
+      <div class="card-desc">Enterprise CRM — leads, pipeline, and revenue attribution.</div>
+      <div class="btn btn-soon">Coming Soon</div>
+    </div>
+    <div class="card dimmed">
+      <div class="card-top"><div class="logo">🔶</div><span class="badge b-soon">Soon</span></div>
+      <div class="card-name">Zoho CRM</div>
+      <div class="card-desc">Sales automation, contacts, and lead management.</div>
+      <div class="btn btn-soon">Coming Soon</div>
+    </div>
+    <div class="card dimmed">
+      <div class="card-top"><div class="logo">🟠</div><span class="badge b-soon">Soon</span></div>
+      <div class="card-name">Pipedrive</div>
+      <div class="card-desc">Visual sales pipeline and activity-based selling.</div>
+      <div class="btn btn-soon">Coming Soon</div>
+    </div>
+  </div>
+</div>
+
+<!-- Communication -->
+<div class="section">
+  <div class="section-label">Communication & Workflow</div>
+  <div class="grid">
+    <div class="card">
+      <div class="card-top"><div class="logo">💬</div><span class="badge b-connected">Connected</span></div>
+      <div class="card-name">Slack</div>
+      <div class="card-desc">Crawl alerts, issue notifications, and weekly digests.</div>
+      <div class="btn btn-manage">Manage</div>
+    </div>
+    <div class="card">
+      <div class="card-top"><div class="logo">🔺</div><span class="badge b-disconnected">Not Connected</span></div>
+      <div class="card-name">Linear</div>
+      <div class="card-desc">Push SEO issues directly to Linear as tracked tickets.</div>
+      <div class="btn btn-connect">Connect</div>
+    </div>
+    <div class="card dimmed">
+      <div class="card-top"><div class="logo">🟦</div><span class="badge b-soon">Soon</span></div>
+      <div class="card-name">Jira</div>
+      <div class="card-desc">Create and track SEO issues in your Jira project board.</div>
+      <div class="btn btn-soon">Coming Soon</div>
+    </div>
+    <div class="card dimmed">
+      <div class="card-top"><div class="logo">🟣</div><span class="badge b-soon">Soon</span></div>
+      <div class="card-name">Asana</div>
+      <div class="card-desc">Assign SEO tasks to team members as Asana tasks.</div>
+      <div class="btn btn-soon">Coming Soon</div>
+    </div>
+    <div class="card dimmed">
+      <div class="card-top"><div class="logo">💙</div><span class="badge b-soon">Soon</span></div>
+      <div class="card-name">Microsoft Teams</div>
+      <div class="card-desc">Crawl alerts and digest notifications via Teams channels.</div>
+      <div class="btn btn-soon">Coming Soon</div>
+    </div>
+  </div>
+</div>
+
+<!-- Developer -->
+<div class="section">
+  <div class="section-label">Developer & Data</div>
+  <div class="grid">
+    <div class="card">
+      <div class="card-top"><div class="logo">📗</div><span class="badge b-disconnected">Not Connected</span></div>
+      <div class="card-name">Google Sheets</div>
+      <div class="card-desc">Export crawl reports and audit data to Sheets automatically.</div>
+      <div class="btn btn-connect">Connect</div>
+    </div>
+    <div class="card dimmed">
+      <div class="card-top"><div class="logo">⚡</div><span class="badge b-soon">Soon</span></div>
+      <div class="card-name">Zapier</div>
+      <div class="card-desc">Trigger workflows in 6,000+ apps from crawl events.</div>
+      <div class="btn btn-soon">Coming Soon</div>
+    </div>
+    <div class="card dimmed">
+      <div class="card-top"><div class="logo">🔀</div><span class="badge b-soon">Soon</span></div>
+      <div class="card-name">Make</div>
+      <div class="card-desc">Visual automation workflows triggered by SEO events.</div>
+      <div class="btn btn-soon">Coming Soon</div>
+    </div>
+    <div class="card dimmed">
+      <div class="card-top"><div class="logo">🪝</div><span class="badge b-soon">Soon</span></div>
+      <div class="card-name">Webhooks</div>
+      <div class="card-desc">Push crawl events and alerts to any custom endpoint.</div>
+      <div class="btn btn-soon">Coming Soon</div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

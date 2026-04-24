@@ -1,0 +1,119 @@
+<h2>AuditCategory page — what should improve?</h2>
+<p class="subtitle">Current state vs. three enhancement options. Click to select.</p>
+
+<!-- Current state -->
+<div class="section">
+  <span class="label">Current state — no filter, no sort, no export</span>
+  <div class="mockup" style="margin-top:8px;">
+    <div class="mockup-header">Response Codes · 3 issue types · 847 affected URLs <span style="margin-left:auto;padding:3px 10px;border-radius:12px;font-size:10px;background:#ef444420;color:#ef4444;">1 critical</span></div>
+    <div class="mockup-body" style="padding:0;">
+      <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em;">
+        <span style="flex:1;">Issue Type</span><span>Severity</span><span style="margin-left:12px;">Count</span>
+      </div>
+      <div style="padding:10px 12px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;gap:8px;">
+        <span style="font-size:11px;flex:1;color:#1e293b;font-weight:500;">▶ 4xx Client Errors</span>
+        <span style="font-size:10px;padding:2px 7px;border-radius:4px;background:#fef2f2;color:#ef4444;font-weight:600;">CRITICAL</span>
+        <span style="font-size:11px;color:#64748b;margin-left:8px;min-width:50px;text-align:right;">1 URL</span>
+      </div>
+      <div style="padding:10px 12px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;gap:8px;">
+        <span style="font-size:11px;flex:1;color:#1e293b;font-weight:500;">▶ 3xx Redirects</span>
+        <span style="font-size:10px;padding:2px 7px;border-radius:4px;background:#fffbeb;color:#f59e0b;font-weight:600;">WARNING</span>
+        <span style="font-size:11px;color:#64748b;margin-left:8px;min-width:50px;text-align:right;">423 URLs</span>
+      </div>
+      <div style="padding:10px 12px;display:flex;align-items:center;gap:8px;">
+        <span style="font-size:11px;flex:1;color:#1e293b;font-weight:500;">▶ Redirect Chains</span>
+        <span style="font-size:10px;padding:2px 7px;border-radius:4px;background:#fffbeb;color:#f59e0b;font-weight:600;">WARNING</span>
+        <span style="font-size:11px;color:#64748b;margin-left:8px;min-width:50px;text-align:right;">423 URLs</span>
+      </div>
+      <div style="padding:8px 12px 0;font-size:10px;color:#94a3b8;font-style:italic;border-top:1px solid #f1f5f9;">↳ Expanded URL list: /cars/bmw-3-series, /cars/honda-city... (no way to search or filter)</div>
+    </div>
+  </div>
+</div>
+
+<div class="options" style="margin-top:16px;">
+
+  <!-- Option A: Search/Filter -->
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Search + filter URLs</h3>
+      <div style="background:var(--bg-raised);border-radius:8px;padding:10px;margin:8px 0;font-size:11px;">
+        <div style="display:flex;gap:6px;align-items:center;margin-bottom:8px;">
+          <div style="flex:1;background:white;border:1px solid #e2e8f0;border-radius:6px;padding:5px 10px;font-size:11px;color:#94a3b8;">🔍 Filter URLs... e.g. /blog/ or 404</div>
+          <div style="padding:5px 10px;border-radius:6px;background:#f1f5f9;font-size:10px;color:#64748b;white-space:nowrap;">3xx <span style="color:#f59e0b;">●</span></div>
+          <div style="padding:5px 10px;border-radius:6px;background:#fef2f2;font-size:10px;color:#ef4444;white-space:nowrap;">4xx <span style="color:#ef4444;">●</span></div>
+        </div>
+        <div style="color:#64748b;padding:4px 8px;border-bottom:1px solid #f1f5f9;font-family:monospace;font-size:10px;">/cars/bmw-3-series · statusCode: 301</div>
+        <div style="color:#64748b;padding:4px 8px;border-bottom:1px solid #f1f5f9;font-family:monospace;font-size:10px;">/cars/honda-city · statusCode: 301</div>
+        <div style="color:#94a3b8;padding:4px 8px;font-size:10px;font-style:italic;">Showing 2 of 423 · type to narrow</div>
+      </div>
+      <p>Text input to filter URLs by pattern + severity pills to toggle issue type. Instant client-side filtering on the loaded batch.</p>
+    </div>
+  </div>
+
+  <!-- Option B: Sort -->
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Sort by URL or data field</h3>
+      <div style="background:var(--bg-raised);border-radius:8px;padding:10px;margin:8px 0;font-size:11px;">
+        <div style="display:flex;gap:6px;align-items:center;margin-bottom:8px;">
+          <span style="font-size:10px;color:#94a3b8;">Sort by:</span>
+          <div style="padding:4px 8px;border-radius:5px;background:#6366f1;color:white;font-size:10px;font-weight:600;">URL ↑</div>
+          <div style="padding:4px 8px;border-radius:5px;background:#f1f5f9;color:#64748b;font-size:10px;">Status Code</div>
+          <div style="padding:4px 8px;border-radius:5px;background:#f1f5f9;color:#64748b;font-size:10px;">Title Length</div>
+        </div>
+        <div style="color:#64748b;padding:4px 8px;border-bottom:1px solid #f1f5f9;font-family:monospace;font-size:10px;">/about · 301</div>
+        <div style="color:#64748b;padding:4px 8px;border-bottom:1px solid #f1f5f9;font-family:monospace;font-size:10px;">/cars · 301</div>
+        <div style="color:#64748b;padding:4px 8px;font-family:monospace;font-size:10px;">/cars/bmw · 404</div>
+      </div>
+      <p>Sortable column headers on the URL list. Sort by URL (A→Z), by detected data value (e.g. status code ascending to group 301 vs 302 vs 404), or by severity.</p>
+    </div>
+  </div>
+
+  <!-- Option C: Export -->
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Per-issue CSV export</h3>
+      <div style="background:var(--bg-raised);border-radius:8px;padding:10px;margin:8px 0;font-size:11px;">
+        <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #f1f5f9;">
+          <span style="flex:1;font-size:11px;color:#1e293b;font-weight:500;">▶ 3xx Redirects</span>
+          <span style="font-size:10px;padding:2px 7px;border-radius:4px;background:#fffbeb;color:#f59e0b;">WARNING</span>
+          <span style="font-size:10px;color:#64748b;">423 URLs</span>
+          <button style="padding:3px 8px;border-radius:5px;background:#f1f5f9;border:1px solid #e2e8f0;font-size:10px;color:#6366f1;cursor:pointer;">⬇ CSV</button>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;padding:6px 0;">
+          <span style="flex:1;font-size:11px;color:#1e293b;font-weight:500;">▶ Redirect Chains</span>
+          <span style="font-size:10px;padding:2px 7px;border-radius:4px;background:#fffbeb;color:#f59e0b;">WARNING</span>
+          <span style="font-size:10px;color:#64748b;">423 URLs</span>
+          <button style="padding:3px 8px;border-radius:5px;background:#f1f5f9;border:1px solid #e2e8f0;font-size:10px;color:#6366f1;cursor:pointer;">⬇ CSV</button>
+        </div>
+        <div style="font-size:10px;color:#94a3b8;margin-top:6px;font-style:italic;">Downloads: URL, status_code, redirect_url — no need to go to Exports page</div>
+      </div>
+      <p>A download button on each issue-type accordion header. One click exports all URLs + detected data for that specific issue type as CSV.</p>
+    </div>
+  </div>
+
+  <!-- Option D: All three -->
+  <div class="option" data-choice="d" onclick="toggleSelect(this)">
+    <div class="letter">D</div>
+    <div class="content">
+      <h3>All three — search + sort + export</h3>
+      <div style="background:var(--bg-raised);border-radius:8px;padding:10px;margin:8px 0;font-size:11px;">
+        <div style="display:flex;gap:6px;align-items:center;margin-bottom:8px;flex-wrap:wrap;">
+          <div style="flex:1;min-width:120px;background:white;border:1px solid #e2e8f0;border-radius:6px;padding:4px 8px;font-size:10px;color:#94a3b8;">🔍 Filter URLs...</div>
+          <div style="padding:4px 8px;border-radius:5px;background:#6366f1;color:white;font-size:10px;font-weight:600;">URL ↑</div>
+          <div style="padding:4px 8px;border-radius:5px;background:#f1f5f9;font-size:10px;color:#6366f1;">⬇ CSV</div>
+        </div>
+        <div style="color:#64748b;padding:3px 8px;font-family:monospace;font-size:10px;">/cars/bmw-3-series · 301</div>
+        <div style="color:#64748b;padding:3px 8px;font-family:monospace;font-size:10px;">/cars/honda-city · 301</div>
+        <div style="color:#94a3b8;padding:3px 8px;font-size:9px;font-style:italic;">Filter bar + sort + export all live together in the expanded accordion</div>
+      </div>
+      <p>All three controls inside the expanded issue-type accordion. Filter, sort, and export work together — filter first then export only the filtered set.</p>
+    </div>
+  </div>
+
+</div>
+
+<p class="subtitle" style="margin-top:12px;">My recommendation is <strong>D</strong> — all three together. They're small additions that compound: filter to find the pattern, sort to group by value, export to hand off to a developer. Each one alone is half the job.</p>

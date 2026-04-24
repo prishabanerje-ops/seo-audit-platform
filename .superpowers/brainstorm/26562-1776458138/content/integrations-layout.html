@@ -1,0 +1,64 @@
+<h2>How should the Integrations page be structured?</h2>
+<p class="subtitle">Pick the layout that feels right for navigating ~20 integrations across 6 categories</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Category sections — scrollable single page</h3>
+      <p>All integrations on one page, grouped under bold section headings (SEO Data, Analytics, Advertising, CRM, Communication, Developer). Each integration is a card with logo, name, status badge, and a Connect button. Scroll down to see all.</p>
+      <div style="margin-top:12px;padding:12px;background:var(--bg-raised,#1e1e2e);border-radius:8px;font-size:12px;font-family:monospace;color:var(--text-secondary,#aaa)">
+        ── SEO Data ─────────────<br/>
+        [Google Search Console ✓] [PageSpeed Insights ○] […]<br/><br/>
+        ── Analytics ────────────<br/>
+        [Google Analytics 4 ✓] [Mixpanel ○] [Amplitude ○]<br/><br/>
+        ── Advertising ──────────<br/>
+        [Google Ads ○] [Meta Ads ○] [LinkedIn Ads ○]<br/><br/>
+        ── Communication ────────<br/>
+        [Slack ✓] [Linear ○]
+      </div>
+      <div class="pros-cons" style="margin-top:12px">
+        <div class="pros"><h4>Pros</h4><ul><li>No navigation needed</li><li>Easy to scan all at once</li><li>Simple to build</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Gets long as integrations grow</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Left sidebar category filter + card grid</h3>
+      <p>Sidebar on the left lists categories (All, SEO Data, Analytics, Advertising, CRM, Communication, Developer). Clicking a category filters the card grid on the right. Active category highlighted.</p>
+      <div style="margin-top:12px;padding:12px;background:var(--bg-raised,#1e1e2e);border-radius:8px;font-size:12px;font-family:monospace;color:var(--text-secondary,#aaa)">
+        [All •]          | [GSC ✓] [PSI ○] [GA4 ✓]<br/>
+        [SEO Data]       | [Google Ads ○] [Meta ○]<br/>
+        [Analytics]      | [Slack ✓] [Linear ○]<br/>
+        [Advertising •]  |<br/>
+        [CRM]            |<br/>
+        [Communication]  |
+      </div>
+      <div class="pros-cons" style="margin-top:12px">
+        <div class="pros"><h4>Pros</h4><ul><li>Fast to filter by category</li><li>Scales well to 50+ integrations</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>More complex UI</li><li>Sidebar takes space</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Tab strip by category + card grid</h3>
+      <p>Horizontal tab strip at the top: All | SEO Data | Analytics | Advertising | CRM | Communication | Developer. Selected tab shows matching cards in a grid below.</p>
+      <div style="margin-top:12px;padding:12px;background:var(--bg-raised,#1e1e2e);border-radius:8px;font-size:12px;font-family:monospace;color:var(--text-secondary,#aaa)">
+        [All] [SEO Data] [Analytics] [Advertising ●] [CRM] [Comm.]<br/>
+        ─────────────────────────────────────────────────────<br/>
+        [Google Ads ○]   [Meta Ads ○]   [LinkedIn Ads ○]<br/>
+        [TikTok Ads ○]   [Pinterest ○]
+      </div>
+      <div class="pros-cons" style="margin-top:12px">
+        <div class="pros"><h4>Pros</h4><ul><li>Clean, compact header</li><li>Familiar UX pattern</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Tab strip wraps on small screens</li><li>Can't see categories at a glance</li></ul></div>
+      </div>
+    </div>
+  </div>
+</div>

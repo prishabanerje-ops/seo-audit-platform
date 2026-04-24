@@ -1,0 +1,147 @@
+<h2>New /audit/categories page — layout options</h2>
+<p class="subtitle">This replaces the hardcoded sidebar link to response-codes. Pick how all 20 categories are presented.</p>
+
+<div class="cards" style="grid-template-columns: repeat(3,1fr);">
+
+  <!-- Option A: Card Grid -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:12px;background:var(--bg-surface);">
+      <div style="font-size:9px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">Audit Categories</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;">
+        <div style="background:white;border:1px solid #fecaca;border-radius:6px;padding:7px 6px;">
+          <div style="font-size:8px;font-weight:700;color:#ef4444;">CRITICAL</div>
+          <div style="font-size:10px;font-weight:600;color:#1e293b;margin-top:2px;">Response Codes</div>
+          <div style="font-size:9px;color:#64748b;">1 issue</div>
+        </div>
+        <div style="background:white;border:1px solid #fde68a;border-radius:6px;padding:7px 6px;">
+          <div style="font-size:8px;font-weight:700;color:#f59e0b;">WARNING</div>
+          <div style="font-size:10px;font-weight:600;color:#1e293b;margin-top:2px;">Title Tags</div>
+          <div style="font-size:9px;color:#64748b;">24 issues</div>
+        </div>
+        <div style="background:white;border:1px solid #e2e8f0;border-radius:6px;padding:7px 6px;opacity:.5;">
+          <div style="font-size:8px;font-weight:700;color:#94a3b8;">NOT AUDITED</div>
+          <div style="font-size:10px;font-weight:600;color:#1e293b;margin-top:2px;">Images</div>
+          <div style="font-size:9px;color:#94a3b8;">— checks</div>
+        </div>
+        <div style="background:white;border:1px solid #e2e8f0;border-radius:6px;padding:7px 6px;">
+          <div style="font-size:8px;font-weight:700;color:#22c55e;">PASS</div>
+          <div style="font-size:10px;font-weight:600;color:#1e293b;margin-top:2px;">Canonicals</div>
+          <div style="font-size:9px;color:#64748b;">0 issues</div>
+        </div>
+        <div style="background:white;border:1px solid #fde68a;border-radius:6px;padding:7px 6px;">
+          <div style="font-size:8px;font-weight:700;color:#f59e0b;">WARNING</div>
+          <div style="font-size:10px;font-weight:600;color:#1e293b;margin-top:2px;">Meta Desc</div>
+          <div style="font-size:9px;color:#64748b;">12 issues</div>
+        </div>
+        <div style="background:white;border:1px solid #e2e8f0;border-radius:6px;padding:7px 6px;opacity:.5;">
+          <div style="font-size:8px;font-weight:700;color:#94a3b8;">NOT AUDITED</div>
+          <div style="font-size:10px;font-weight:600;color:#1e293b;margin-top:2px;">Speed</div>
+          <div style="font-size:9px;color:#94a3b8;">— checks</div>
+        </div>
+      </div>
+      <div style="font-size:9px;color:#94a3b8;margin-top:6px;text-align:center;">...14 more cards</div>
+    </div>
+    <div class="card-body">
+      <h3>A — Card grid</h3>
+      <p>20 cards in a responsive grid. Each card shows the category, worst severity badge, and issue count. Not-yet-audited categories shown greyed out. Click any card to drill in.</p>
+      <div class="pros-cons" style="margin-top:8px;">
+        <div class="pros"><h4>Pros</h4><ul><li>Scannable at a glance</li><li>Severity colors draw eye to problems</li><li>Clearly shows audited vs not</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Cards take more space than rows</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Option B: Table -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:12px;background:var(--bg-surface);">
+      <div style="font-size:9px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">Audit Categories</div>
+      <table style="width:100%;font-size:10px;border-collapse:collapse;">
+        <thead>
+          <tr style="background:#f8fafc;border-bottom:1px solid #e2e8f0;">
+            <th style="text-align:left;padding:4px 6px;color:#94a3b8;font-weight:600;">Category</th>
+            <th style="text-align:right;padding:4px 6px;color:#ef4444;font-weight:600;">Crit</th>
+            <th style="text-align:right;padding:4px 6px;color:#f59e0b;font-weight:600;">Warn</th>
+            <th style="text-align:right;padding:4px 6px;color:#6366f1;font-weight:600;">Info</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom:1px solid #f1f5f9;">
+            <td style="padding:4px 6px;color:#1e293b;font-weight:500;">Response Codes</td>
+            <td style="text-align:right;padding:4px 6px;color:#ef4444;font-weight:700;">1</td>
+            <td style="text-align:right;padding:4px 6px;color:#94a3b8;">—</td>
+            <td style="text-align:right;padding:4px 6px;color:#94a3b8;">—</td>
+          </tr>
+          <tr style="border-bottom:1px solid #f1f5f9;">
+            <td style="padding:4px 6px;color:#1e293b;font-weight:500;">Title Tags</td>
+            <td style="text-align:right;padding:4px 6px;color:#94a3b8;">—</td>
+            <td style="text-align:right;padding:4px 6px;color:#f59e0b;font-weight:700;">24</td>
+            <td style="text-align:right;padding:4px 6px;color:#94a3b8;">—</td>
+          </tr>
+          <tr style="border-bottom:1px solid #f1f5f9;opacity:.4;">
+            <td style="padding:4px 6px;color:#94a3b8;font-style:italic;">Images</td>
+            <td style="text-align:right;padding:4px 6px;color:#e2e8f0;">—</td>
+            <td style="text-align:right;padding:4px 6px;color:#e2e8f0;">—</td>
+            <td style="text-align:right;padding:4px 6px;color:#e2e8f0;">—</td>
+          </tr>
+          <tr style="border-bottom:1px solid #f1f5f9;">
+            <td style="padding:4px 6px;color:#1e293b;font-weight:500;">Canonicals</td>
+            <td style="text-align:right;padding:4px 6px;color:#94a3b8;">—</td>
+            <td style="text-align:right;padding:4px 6px;color:#94a3b8;">—</td>
+            <td style="text-align:right;padding:4px 6px;color:#94a3b8;">—</td>
+          </tr>
+          <tr>
+            <td style="padding:4px 6px;color:#94a3b8;font-size:9px;font-style:italic;" colspan="4">...16 more rows, click any to drill in →</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card-body">
+      <h3>B — Sortable table</h3>
+      <p>All 20 categories as table rows. Columns: Category, Critical, Warning, Info counts (sortable). Greyed rows = not yet audited. Click any row to go to that category's detail page.</p>
+      <div class="pros-cons" style="margin-top:8px;">
+        <div class="pros"><h4>Pros</h4><ul><li>Dense — see all 20 at once</li><li>Sortable by severity count</li><li>Consistent with AuditHealth accordion data</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Less visual than cards</li><li>Severity not obvious without scanning numbers</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Option C: Same as Audit Health accordion, standalone -->
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:12px;background:var(--bg-surface);">
+      <div style="font-size:9px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">Audit Categories</div>
+      <div style="display:flex;flex-direction:column;gap:2px;">
+        <div style="display:flex;align-items:center;gap:6px;padding:6px 8px;background:white;border:1px solid #e2e8f0;border-radius:6px;">
+          <span style="font-size:10px;flex:1;color:#1e293b;font-weight:500;">▶ Response Codes</span>
+          <span style="font-size:9px;padding:1px 5px;border-radius:3px;background:#fef2f2;color:#ef4444;">1 crit</span>
+          <span style="font-size:9px;color:#6366f1;">→</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;padding:6px 8px;background:white;border:1px solid #e2e8f0;border-radius:6px;">
+          <span style="font-size:10px;flex:1;color:#1e293b;font-weight:500;">▶ Title Tags</span>
+          <span style="font-size:9px;padding:1px 5px;border-radius:3px;background:#fffbeb;color:#f59e0b;">24 warn</span>
+          <span style="font-size:9px;color:#6366f1;">→</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;padding:6px 8px;background:white;border:1px solid #e2e8f0;border-radius:6px;opacity:.45;">
+          <span style="font-size:10px;flex:1;color:#94a3b8;font-style:italic;">Images</span>
+          <span style="font-size:9px;padding:1px 5px;border-radius:3px;background:#f1f5f9;color:#94a3b8;">not audited</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;padding:6px 8px;background:white;border:1px solid #e2e8f0;border-radius:6px;">
+          <span style="font-size:10px;flex:1;color:#1e293b;font-weight:500;">▶ Canonicals</span>
+          <span style="font-size:9px;padding:1px 5px;border-radius:3px;background:#f0fdf4;color:#22c55e;">✓ pass</span>
+          <span style="font-size:9px;color:#6366f1;">→</span>
+        </div>
+        <div style="font-size:9px;color:#94a3b8;padding:4px 8px;font-style:italic;">...16 more rows</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Flat list with quick-nav arrows</h3>
+      <p>Simple list of all 20 categories, single row per category, no accordion expand. Worst severity badge on the right, arrow to drill in. "Not audited" rows are greyed and not clickable. Sorted: critical first → warning → pass → not audited.</p>
+      <div class="pros-cons" style="margin-top:8px;">
+        <div class="pros"><h4>Pros</h4><ul><li>Fastest to scan</li><li>Sorted by urgency automatically</li><li>Simplest to build — no new patterns</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>No detail visible without clicking through</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<p class="subtitle" style="margin-top:12px;">My recommendation is <strong>C</strong> — flat list sorted by urgency. It's the fastest to scan, the simplest to build, and naturally highlights critical issues first. The card grid (A) looks nicer but adds little value over a well-sorted list.</p>

@@ -1,0 +1,127 @@
+<h2>How should the Audit section be structured?</h2>
+<p class="subtitle">Choose a navigation model — this shapes everything else in Phase 1</p>
+
+<div class="cards" style="grid-template-columns: repeat(3, 1fr);">
+
+  <!-- Option A -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:16px 12px;background:var(--bg-surface);">
+      <div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">SIDEBAR — PLATFORM</div>
+      <div style="display:flex;flex-direction:column;gap:2px;">
+        <div style="padding:6px 10px;border-radius:6px;background:var(--bg-raised);font-size:11px;color:var(--text-secondary);display:flex;align-items:center;gap:6px;">
+          <span style="width:8px;height:8px;border-radius:50%;background:#6366f1;display:inline-block;flex-shrink:0;"></span>Sites
+        </div>
+        <div style="padding:6px 10px;border-radius:6px;background:var(--bg-raised);font-size:11px;color:var(--text-secondary);display:flex;align-items:center;gap:6px;">
+          <span style="width:8px;height:8px;border-radius:50%;background:#6366f1;display:inline-block;flex-shrink:0;"></span>Crawls
+        </div>
+        <div style="height:1px;background:var(--border);margin:4px 0;"></div>
+        <div style="font-size:9px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;padding:2px 10px;">AUDIT</div>
+        <div style="padding:6px 10px;border-radius:6px;background:#6366f118;font-size:11px;color:#6366f1;font-weight:600;display:flex;align-items:center;gap:6px;">
+          <span>❤</span> Audit Health
+        </div>
+        <div style="padding:6px 10px;border-radius:6px;background:var(--bg-raised);font-size:11px;color:var(--text-secondary);display:flex;align-items:center;gap:6px;">
+          <span>📂</span> Categories
+          <span style="margin-left:auto;font-size:9px;color:#f59e0b;font-weight:700;">→ picker page</span>
+        </div>
+        <div style="padding:6px 10px;border-radius:6px;background:#22c55e18;font-size:11px;color:#22c55e;font-weight:600;display:flex;align-items:center;gap:6px;">
+          <span>⇄</span> Compare Crawls
+          <span style="margin-left:auto;font-size:9px;color:#22c55e;font-weight:700;">NEW</span>
+        </div>
+        <div style="padding:6px 10px;border-radius:6px;background:var(--bg-raised);font-size:11px;color:var(--text-secondary);display:flex;align-items:center;gap:6px;">
+          <span>⚡</span> Core Web Vitals
+        </div>
+        <div style="padding:6px 10px;border-radius:6px;background:var(--bg-raised);font-size:11px;color:var(--text-secondary);display:flex;align-items:center;gap:6px;">
+          <span>🔍</span> Custom Extraction
+        </div>
+        <div style="padding:6px 10px;border-radius:6px;background:var(--bg-raised);font-size:11px;color:var(--text-secondary);display:flex;align-items:center;gap:6px;">
+          <span>📄</span> Log File Intel.
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Minimal change</h3>
+      <p>Add Compare to sidebar. Fix "Audit Categories" to go to a new /audit/categories picker page (grid of all 20 categories with issue counts). Everything else stays.</p>
+      <div class="pros-cons" style="margin-top:8px;">
+        <div class="pros"><h4>Pros</h4><ul><li>Least disruption</li><li>Easy to ship</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Sidebar still has 6 audit items — cluttered</li><li>No grouping signal to user</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Option B -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:16px 12px;background:var(--bg-surface);">
+      <div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">SIDEBAR — PLATFORM</div>
+      <div style="display:flex;flex-direction:column;gap:2px;">
+        <div style="padding:6px 10px;border-radius:6px;background:var(--bg-raised);font-size:11px;color:var(--text-secondary);">Sites</div>
+        <div style="padding:6px 10px;border-radius:6px;background:var(--bg-raised);font-size:11px;color:var(--text-secondary);">Crawls</div>
+        <div style="height:1px;background:var(--border);margin:4px 0;"></div>
+        <div style="font-size:9px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;padding:2px 10px;">AUDIT</div>
+        <div style="padding:6px 10px;border-radius:6px;background:#6366f118;font-size:11px;color:#6366f1;font-weight:600;">❤ Health Overview</div>
+        <!-- Expandable -->
+        <div style="padding:5px 10px;border-radius:6px;background:var(--bg-raised);font-size:11px;color:var(--text-secondary);display:flex;align-items:center;gap:6px;">
+          <span>▾</span> Issues by Category
+        </div>
+        <div style="margin-left:16px;display:flex;flex-direction:column;gap:1px;">
+          <div style="padding:4px 8px;border-radius:4px;font-size:10px;color:var(--text-muted);">Response Codes <span style="color:#ef4444;">●</span></div>
+          <div style="padding:4px 8px;border-radius:4px;font-size:10px;color:var(--text-muted);">Title Tags <span style="color:#f59e0b;">●</span></div>
+          <div style="padding:4px 8px;border-radius:4px;font-size:10px;color:var(--text-muted);">Images <span style="color:#94a3b8;">○</span></div>
+          <div style="padding:4px 8px;border-radius:4px;font-size:10px;color:#64748b;font-style:italic;">… 17 more</div>
+        </div>
+        <div style="padding:6px 10px;border-radius:6px;background:var(--bg-raised);font-size:11px;color:var(--text-secondary);">⇄ Compare Crawls</div>
+        <div style="padding:6px 10px;border-radius:6px;background:var(--bg-raised);font-size:11px;color:var(--text-secondary);">⚡ Core Web Vitals</div>
+        <div style="padding:6px 10px;border-radius:6px;background:var(--bg-raised);font-size:11px;color:var(--text-secondary);">🔍 Custom Extraction</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Expandable category tree</h3>
+      <p>Sidebar shows "Issues by Category" as a collapsible tree. Active categories show severity dot. Unimplemented show hollow dot. Compare lives alongside it.</p>
+      <div class="pros-cons" style="margin-top:8px;">
+        <div class="pros"><h4>Pros</h4><ul><li>All 20 categories discoverable from sidebar</li><li>Severity dots show health at a glance</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Sidebar gets tall with 20 items expanded</li><li>More complex to implement</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Option C -->
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:16px 12px;background:var(--bg-surface);">
+      <div style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">SIDEBAR — PLATFORM</div>
+      <div style="display:flex;flex-direction:column;gap:2px;">
+        <div style="padding:6px 10px;border-radius:6px;background:var(--bg-raised);font-size:11px;color:var(--text-secondary);">Sites</div>
+        <div style="padding:6px 10px;border-radius:6px;background:var(--bg-raised);font-size:11px;color:var(--text-secondary);">Crawls</div>
+        <div style="height:1px;background:var(--border);margin:4px 0;"></div>
+        <div style="font-size:9px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;padding:2px 10px;">AUDIT</div>
+        <div style="padding:6px 10px;border-radius:6px;background:#6366f118;font-size:11px;color:#6366f1;font-weight:600;">⊞ Audit Dashboard</div>
+        <div style="margin-left:0;background:var(--bg-raised);border-radius:6px;padding:4px;display:flex;flex-direction:column;gap:1px;">
+          <div style="padding:4px 8px;border-radius:4px;font-size:10px;color:#6366f1;font-weight:600;background:#6366f110;">Overview</div>
+          <div style="padding:4px 8px;border-radius:4px;font-size:10px;color:var(--text-muted);">Categories</div>
+          <div style="padding:4px 8px;border-radius:4px;font-size:10px;color:var(--text-muted);">Compare</div>
+        </div>
+        <div style="padding:6px 10px;border-radius:6px;background:var(--bg-raised);font-size:11px;color:var(--text-secondary);">⚡ Core Web Vitals</div>
+        <div style="padding:6px 10px;border-radius:6px;background:var(--bg-raised);font-size:11px;color:var(--text-secondary);">🔍 Custom Extraction</div>
+        <div style="padding:6px 10px;border-radius:6px;background:var(--bg-raised);font-size:11px;color:var(--text-secondary);">📄 Log File Intel.</div>
+      </div>
+
+      <div style="margin-top:10px;background:var(--bg-raised);border-radius:8px;padding:8px 10px;">
+        <div style="font-size:9px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:6px;">AUDIT DASHBOARD — TABS</div>
+        <div style="display:flex;gap:2px;">
+          <div style="padding:4px 10px;border-radius:4px;background:#6366f1;color:white;font-size:10px;font-weight:600;">Overview</div>
+          <div style="padding:4px 10px;border-radius:4px;background:var(--bg-surface);color:var(--text-muted);font-size:10px;">Categories</div>
+          <div style="padding:4px 10px;border-radius:4px;background:var(--bg-surface);color:var(--text-muted);font-size:10px;">Compare</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Unified Audit Dashboard with tabs</h3>
+      <p>Collapse all audit views (Overview, Categories, Compare) into a single "Audit Dashboard" sidebar item with internal tabs. Sidebar stays clean. Compare is always visible.</p>
+      <div class="pros-cons" style="margin-top:8px;">
+        <div class="pros"><h4>Pros</h4><ul><li>Cleanest sidebar</li><li>Compare always discoverable</li><li>Scales well as more views are added</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Deep-links to categories break (bookmarks)</li><li>Biggest refactor of the three</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<p class="subtitle" style="margin-top:12px;">Click your preferred option above, or tell me in the terminal. My recommendation is <strong>A</strong> — lowest risk for Phase 1, Compare gets visible immediately, and we can evolve toward B in Phase 2 when more categories have real data.</p>

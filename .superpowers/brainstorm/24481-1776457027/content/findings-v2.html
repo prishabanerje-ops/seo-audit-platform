@@ -1,0 +1,96 @@
+<h2>What the research found — full picture</h2>
+<p class="subtitle">Before designing anything, here's the honest current state of the audit section</p>
+
+<div class="section">
+  <span class="label">Checks coverage</span>
+  <div style="display:flex;gap:16px;margin-top:12px;flex-wrap:wrap;">
+    <div style="flex:1;min-width:160px;background:var(--bg-raised);border:1px solid var(--border);border-radius:10px;padding:16px;">
+      <div style="font-size:36px;font-weight:800;color:#22c55e;">94</div>
+      <div style="font-size:12px;color:var(--text-secondary);margin-top:2px;">Checks working end-to-end</div>
+      <div style="margin-top:8px;height:5px;border-radius:3px;background:var(--border);overflow:hidden;">
+        <div style="width:32.3%;height:100%;background:#22c55e;border-radius:3px;"></div>
+      </div>
+      <div style="font-size:11px;color:var(--text-muted);margin-top:3px;">32% of 291 defined</div>
+    </div>
+    <div style="flex:1;min-width:160px;background:var(--bg-raised);border:1px solid var(--border);border-radius:10px;padding:16px;">
+      <div style="font-size:36px;font-weight:800;color:#f59e0b;">197</div>
+      <div style="font-size:12px;color:var(--text-secondary);margin-top:2px;">Registry stubs only — no data</div>
+      <div style="margin-top:8px;height:5px;border-radius:3px;background:var(--border);overflow:hidden;">
+        <div style="width:67.7%;height:100%;background:#f59e0b;border-radius:3px;"></div>
+      </div>
+      <div style="font-size:11px;color:var(--text-muted);margin-top:3px;">68% of 291 defined</div>
+    </div>
+    <div style="flex:1;min-width:160px;background:var(--bg-raised);border:1px solid var(--border);border-radius:10px;padding:16px;">
+      <div style="font-size:36px;font-weight:800;color:#ef4444;">13/20</div>
+      <div style="font-size:12px;color:var(--text-secondary);margin-top:2px;">Categories in UI with zero real data</div>
+      <div style="margin-top:8px;height:5px;border-radius:3px;background:var(--border);overflow:hidden;">
+        <div style="width:65%;height:100%;background:#ef4444;border-radius:3px;"></div>
+      </div>
+      <div style="font-size:11px;color:var(--text-muted);margin-top:3px;">appear to work but always empty</div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <span class="label">What has data vs what's an empty shell</span>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;">
+    <div style="background:#16a34a18;border:1px solid #16a34a44;border-radius:8px;padding:12px 14px;">
+      <div style="font-size:11px;font-weight:700;color:#22c55e;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">✓ 7 categories producing real data</div>
+      <div style="font-size:12px;color:var(--text-secondary);line-height:2;">
+        Response Codes &nbsp;<span style="color:#64748b;font-size:10px;">(5 issue types)</span><br>
+        Title Tags &nbsp;<span style="color:#64748b;font-size:10px;">(5 issue types)</span><br>
+        Meta Description &nbsp;<span style="color:#64748b;font-size:10px;">(4 issue types)</span><br>
+        Headings &nbsp;<span style="color:#64748b;font-size:10px;">(4 issue types)</span><br>
+        Canonical &nbsp;<span style="color:#64748b;font-size:10px;">(3 issue types)</span><br>
+        URL Structure &nbsp;<span style="color:#64748b;font-size:10px;">(5 issue types)</span><br>
+        Schema / Structured Data &nbsp;<span style="color:#64748b;font-size:10px;">(4 issue types)</span>
+      </div>
+    </div>
+    <div style="background:#ef444418;border:1px solid #ef444444;border-radius:8px;padding:12px 14px;">
+      <div style="font-size:11px;font-weight:700;color:#ef4444;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">✗ 13 categories always show "no issues found"</div>
+      <div style="font-size:12px;color:var(--text-secondary);line-height:1.9;">
+        Content <span style="color:#64748b;font-size:10px;">(42 checks defined)</span><br>
+        Speed &amp; Performance <span style="color:#64748b;font-size:10px;">(24)</span><br>
+        Monitoring &amp; Operations <span style="color:#64748b;font-size:10px;">(24)</span><br>
+        Internal Linking <span style="color:#64748b;font-size:10px;">(17)</span><br>
+        Images <span style="color:#64748b;font-size:10px;">(15)</span><br>
+        Robots / Indexability <span style="color:#64748b;font-size:10px;">(14)</span><br>
+        Mobile SEO <span style="color:#64748b;font-size:10px;">(13)</span><br>
+        Rankings &amp; Traffic Drops <span style="color:#64748b;font-size:10px;">(13)</span><br>
+        Sitemap, JS Rendering, LLM/AI, International SEO
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <span class="label">Navigation gaps & UX problems found</span>
+  <div style="display:flex;flex-direction:column;gap:6px;margin-top:12px;">
+    <div style="background:var(--bg-raised);border-left:3px solid #ef4444;border-radius:4px;padding:10px 14px;font-size:12px;color:var(--text-secondary);">
+      <strong style="color:var(--text-primary);">/audit/compare — completely orphaned</strong><br>
+      Fully built page (job pickers, delta cards, diff table, filters) but <em>zero entry points</em> from the sidebar, Crawls page, or Audit Health. Unreachable unless you know the URL.
+    </div>
+    <div style="background:var(--bg-raised);border-left:3px solid #ef4444;border-radius:4px;padding:10px 14px;font-size:12px;color:var(--text-secondary);">
+      <strong style="color:var(--text-primary);">Health score is misleading</strong><br>
+      Score is calculated only from the 7 working categories. Images, Speed, Mobile, Content, Internal Links are unchecked — score reads "95/100" even though ~65% of the site is not audited.
+    </div>
+    <div style="background:var(--bg-raised);border-left:3px solid #ef4444;border-radius:4px;padding:10px 14px;font-size:12px;color:var(--text-secondary);">
+      <strong style="color:var(--text-primary);">13 empty categories create false confidence</strong><br>
+      User navigates to Images → "No issues found." They think images are fine. They aren't — images have never been checked.
+    </div>
+    <div style="background:var(--bg-raised);border-left:3px solid #f59e0b;border-radius:4px;padding:10px 14px;font-size:12px;color:var(--text-secondary);">
+      <strong style="color:var(--text-primary);">AuditCategory has no sort/filter</strong><br>
+      1000+ URLs in a single list with no way to search, sort by URL, or filter by data field.
+    </div>
+    <div style="background:var(--bg-raised);border-left:3px solid #f59e0b;border-radius:4px;padding:10px 14px;font-size:12px;color:var(--text-secondary);">
+      <strong style="color:var(--text-primary);">IssueDetail prev/next silently broken</strong><br>
+      Fetches up to 200 siblings for pagination, but if that fetch fails there's no error — buttons just don't work.
+    </div>
+    <div style="background:var(--bg-raised);border-left:3px solid #64748b;border-radius:4px;padding:10px 14px;font-size:12px;color:var(--text-secondary);">
+      <strong style="color:var(--text-primary);">Sidebar "Audit Categories" links to /audit/response-codes directly</strong><br>
+      Not to a category picker — jumps straight into one category. Other 19 categories are only reachable by drilling through Audit Health accordion.
+    </div>
+  </div>
+</div>
+
+<p class="subtitle" style="margin-top:8px;font-style:italic;">First question in the terminal ↓</p>

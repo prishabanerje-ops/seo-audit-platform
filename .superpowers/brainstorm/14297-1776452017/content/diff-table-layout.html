@@ -1,0 +1,165 @@
+<h2>Diff Table — How should issue types be organised?</h2>
+<p class="subtitle">The table can have 100+ rows across 15 sections. Pick the layout that feels most useful.</p>
+
+<div class="options">
+
+  <!-- Option A -->
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Flat table — sorted by biggest change first</h3>
+      <p>All issue types in one table. Biggest regressions and biggest improvements float to the top automatically.</p>
+      <div class="mockup" style="margin-top:12px;font-size:11px">
+        <div class="mockup-header">Changes (showing 4 of 47 changed)</div>
+        <div class="mockup-body" style="padding:0">
+          <div style="display:grid;grid-template-columns:1fr 70px 60px 60px 60px;font-size:10px">
+            <div style="padding:5px 8px;background:var(--surface-3);color:var(--text-2);font-weight:600">Issue Type</div>
+            <div style="padding:5px 8px;background:var(--surface-3);color:var(--text-2);font-weight:600">Section</div>
+            <div style="padding:5px 8px;background:var(--surface-3);color:var(--text-2);font-weight:600;text-align:center">Before</div>
+            <div style="padding:5px 8px;background:var(--surface-3);color:var(--text-2);font-weight:600;text-align:center">After</div>
+            <div style="padding:5px 8px;background:var(--surface-3);color:var(--text-2);font-weight:600;text-align:center">Δ ↕</div>
+
+            <div style="padding:5px 8px;border-top:1px solid var(--border);color:var(--text-1)">Missing title tag</div>
+            <div style="padding:5px 8px;border-top:1px solid var(--border);color:var(--text-2);font-size:9px">Title Tags</div>
+            <div style="padding:5px 8px;border-top:1px solid var(--border);text-align:center;color:var(--text-2)">45</div>
+            <div style="padding:5px 8px;border-top:1px solid var(--border);text-align:center;color:var(--text-2)">23</div>
+            <div style="padding:5px 8px;border-top:1px solid var(--border);text-align:center;color:#16a34a;font-weight:700">↓22</div>
+
+            <div style="padding:5px 8px;border-top:1px solid var(--border);color:var(--text-1)">4xx response code</div>
+            <div style="padding:5px 8px;border-top:1px solid var(--border);color:var(--text-2);font-size:9px">Response Codes</div>
+            <div style="padding:5px 8px;border-top:1px solid var(--border);text-align:center;color:var(--text-2)">3</div>
+            <div style="padding:5px 8px;border-top:1px solid var(--border);text-align:center;color:var(--text-2)">19</div>
+            <div style="padding:5px 8px;border-top:1px solid var(--border);text-align:center;color:#ef4444;font-weight:700">↑16</div>
+
+            <div style="padding:5px 8px;border-top:1px solid var(--border);color:var(--text-1)">Duplicate meta desc</div>
+            <div style="padding:5px 8px;border-top:1px solid var(--border);color:var(--text-2);font-size:9px">Meta Description</div>
+            <div style="padding:5px 8px;border-top:1px solid var(--border);text-align:center;color:var(--text-2)">31</div>
+            <div style="padding:5px 8px;border-top:1px solid var(--border);text-align:center;color:var(--text-2)">19</div>
+            <div style="padding:5px 8px;border-top:1px solid var(--border);text-align:center;color:#16a34a;font-weight:700">↓12</div>
+
+            <div style="padding:5px 8px;border-top:1px solid var(--border);color:var(--text-1)">Missing alt text</div>
+            <div style="padding:5px 8px;border-top:1px solid var(--border);color:var(--text-2);font-size:9px">Images</div>
+            <div style="padding:5px 8px;border-top:1px solid var(--border);text-align:center;color:var(--text-2)">88</div>
+            <div style="padding:5px 8px;border-top:1px solid var(--border);text-align:center;color:var(--text-2)">96</div>
+            <div style="padding:5px 8px;border-top:1px solid var(--border);text-align:center;color:#ef4444;font-weight:700">↑8</div>
+          </div>
+          <div style="padding:6px 8px;color:var(--text-2);font-size:10px;border-top:1px solid var(--border)">
+            ☐ Show unchanged &nbsp;|&nbsp; Filter: <span style="color:var(--accent)">All sections ▾</span>
+          </div>
+        </div>
+      </div>
+      <div class="pros-cons" style="margin-top:8px">
+        <div class="pros"><h4>Pros</h4><ul><li>Biggest changes visible immediately</li><li>Cross-section regressions surfaced together</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Section context requires an extra column</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Option B -->
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Grouped by section — collapsible</h3>
+      <p>Each audit section is a collapsible row showing its aggregate delta. Expand to see individual issue types within it.</p>
+      <div class="mockup" style="margin-top:12px;font-size:11px">
+        <div class="mockup-header">Changes by Section</div>
+        <div class="mockup-body" style="padding:0">
+          <!-- section row - expanded -->
+          <div style="border-bottom:1px solid var(--border)">
+            <div style="padding:6px 8px;background:var(--surface-3);display:flex;justify-content:space-between;align-items:center;cursor:pointer">
+              <span style="font-weight:600;color:var(--text-1);font-size:11px">▾ Title Tags</span>
+              <div style="display:flex;gap:12px;font-size:10px">
+                <span style="color:var(--text-2)">Before: 68 &nbsp; After: 41</span>
+                <span style="color:#16a34a;font-weight:700">↓27 improved</span>
+              </div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 70px 70px 70px;font-size:10px">
+              <div style="padding:4px 16px;color:var(--text-1);border-top:1px solid var(--border)">Missing title tag</div>
+              <div style="padding:4px 8px;text-align:center;color:var(--text-2);border-top:1px solid var(--border)">45</div>
+              <div style="padding:4px 8px;text-align:center;color:var(--text-2);border-top:1px solid var(--border)">23</div>
+              <div style="padding:4px 8px;text-align:center;color:#16a34a;font-weight:700;border-top:1px solid var(--border)">↓22</div>
+              <div style="padding:4px 16px;color:var(--text-1);border-top:1px solid var(--border)">Duplicate title</div>
+              <div style="padding:4px 8px;text-align:center;color:var(--text-2);border-top:1px solid var(--border)">23</div>
+              <div style="padding:4px 8px;text-align:center;color:var(--text-2);border-top:1px solid var(--border)">18</div>
+              <div style="padding:4px 8px;text-align:center;color:#16a34a;font-weight:700;border-top:1px solid var(--border)">↓5</div>
+            </div>
+          </div>
+          <!-- section row - collapsed -->
+          <div style="border-bottom:1px solid var(--border)">
+            <div style="padding:6px 8px;background:var(--surface-3);display:flex;justify-content:space-between;align-items:center;cursor:pointer">
+              <span style="font-weight:600;color:var(--text-1);font-size:11px">▸ Response Codes</span>
+              <div style="display:flex;gap:12px;font-size:10px">
+                <span style="color:var(--text-2)">Before: 3 &nbsp; After: 19</span>
+                <span style="color:#ef4444;font-weight:700">↑16 regressed</span>
+              </div>
+            </div>
+          </div>
+          <!-- section row - collapsed, no change -->
+          <div style="border-bottom:1px solid var(--border);opacity:0.5">
+            <div style="padding:6px 8px;background:var(--surface-3);display:flex;justify-content:space-between;align-items:center">
+              <span style="font-weight:600;color:var(--text-1);font-size:11px">▸ Canonical</span>
+              <div style="font-size:10px;color:var(--text-2)">No change</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="pros-cons" style="margin-top:8px">
+        <div class="pros"><h4>Pros</h4><ul><li>Familiar — matches Audit Health layout</li><li>Easy to scan section-by-section</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Biggest changes not immediately visible</li><li>Requires expanding to see details</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Option C -->
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Flat table + section filter dropdown</h3>
+      <p>Flat table sorted by delta, but a section dropdown lets the user drill into one section. "Changed only" toggle hides unchanged rows.</p>
+      <div class="mockup" style="margin-top:12px;font-size:11px">
+        <div class="mockup-header">Changes</div>
+        <div class="mockup-body" style="padding:0">
+          <div style="padding:6px 8px;display:flex;gap:8px;align-items:center;border-bottom:1px solid var(--border)">
+            <span style="color:var(--text-2);font-size:10px">Section:</span>
+            <div style="background:var(--surface-3);border:1px solid var(--border);border-radius:4px;padding:3px 8px;color:var(--accent);font-size:10px">All sections ▾</div>
+            <span style="color:var(--text-2);font-size:10px">|</span>
+            <span style="color:var(--text-2);font-size:10px">Severity:</span>
+            <div style="background:var(--surface-3);border:1px solid var(--border);border-radius:4px;padding:3px 8px;color:var(--accent);font-size:10px">All ▾</div>
+            <span style="color:var(--text-2);font-size:10px">|</span>
+            <label style="display:flex;align-items:center;gap:4px;color:var(--text-2);font-size:10px;cursor:pointer"><input type="checkbox" checked> Changed only</label>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 70px 60px 60px 60px;font-size:10px">
+            <div style="padding:5px 8px;background:var(--surface-3);color:var(--text-2);font-weight:600">Issue Type</div>
+            <div style="padding:5px 8px;background:var(--surface-3);color:var(--text-2);font-weight:600">Section</div>
+            <div style="padding:5px 8px;background:var(--surface-3);color:var(--text-2);font-weight:600;text-align:center">Before</div>
+            <div style="padding:5px 8px;background:var(--surface-3);color:var(--text-2);font-weight:600;text-align:center">After</div>
+            <div style="padding:5px 8px;background:var(--surface-3);color:var(--text-2);font-weight:600;text-align:center">Δ ↕</div>
+
+            <div style="padding:5px 8px;border-top:1px solid var(--border);color:var(--text-1)">Missing title tag</div>
+            <div style="padding:5px 8px;border-top:1px solid var(--border);color:var(--text-2);font-size:9px">Title Tags</div>
+            <div style="padding:5px 8px;border-top:1px solid var(--border);text-align:center;color:var(--text-2)">45</div>
+            <div style="padding:5px 8px;border-top:1px solid var(--border);text-align:center;color:var(--text-2)">23</div>
+            <div style="padding:5px 8px;border-top:1px solid var(--border);text-align:center;color:#16a34a;font-weight:700">↓22</div>
+
+            <div style="padding:5px 8px;border-top:1px solid var(--border);color:var(--text-1)">4xx response code</div>
+            <div style="padding:5px 8px;border-top:1px solid var(--border);color:var(--text-2);font-size:9px">Response Codes</div>
+            <div style="padding:5px 8px;border-top:1px solid var(--border);text-align:center;color:var(--text-2)">3</div>
+            <div style="padding:5px 8px;border-top:1px solid var(--border);text-align:center;color:var(--text-2)">19</div>
+            <div style="padding:5px 8px;border-top:1px solid var(--border);text-align:center;color:#ef4444;font-weight:700">↑16</div>
+
+            <div style="padding:5px 8px;border-top:1px solid var(--border);color:var(--text-1)">Missing alt text</div>
+            <div style="padding:5px 8px;border-top:1px solid var(--border);color:var(--text-2);font-size:9px">Images</div>
+            <div style="padding:5px 8px;border-top:1px solid var(--border);text-align:center;color:var(--text-2)">88</div>
+            <div style="padding:5px 8px;border-top:1px solid var(--border);text-align:center;color:var(--text-2)">96</div>
+            <div style="padding:5px 8px;border-top:1px solid var(--border);text-align:center;color:#ef4444;font-weight:700">↑8</div>
+          </div>
+        </div>
+      </div>
+      <div class="pros-cons" style="margin-top:8px">
+        <div class="pros"><h4>Pros</h4><ul><li>Biggest changes visible by default</li><li>Section + severity filters for drill-down</li><li>Most flexible</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Slightly more UI controls to learn</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+</div>

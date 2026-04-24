@@ -1,0 +1,170 @@
+<h2>Compare View — Page Layout</h2>
+<p class="subtitle">How should the job pickers and diff table be arranged?</p>
+
+<div class="options">
+
+  <!-- Option A -->
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Compact top bar</h3>
+      <p>Two job dropdowns in a single row at the top. Summary metric cards appear below once both are selected. Diff table fills the rest of the page.</p>
+      <div class="mockup" style="margin-top:12px;font-size:11px">
+        <div class="mockup-header">Compare Crawls</div>
+        <div class="mockup-body" style="padding:10px;display:flex;flex-direction:column;gap:8px">
+          <!-- picker row -->
+          <div style="display:flex;gap:8px;align-items:center">
+            <div style="flex:1;background:var(--surface-2);border:1px solid var(--border);border-radius:6px;padding:6px 10px;color:var(--text-2)">Job A — Cars24 · Apr 15, 2026 · 1,243 URLs</div>
+            <span style="color:var(--text-2);font-size:13px">vs</span>
+            <div style="flex:1;background:var(--surface-2);border:1px solid var(--border);border-radius:6px;padding:6px 10px;color:var(--text-2)">Job B — Cars24 · Mar 30, 2026 · 1,201 URLs</div>
+          </div>
+          <!-- summary cards -->
+          <div style="display:flex;gap:8px">
+            <div style="flex:1;background:var(--surface-2);border:1px solid var(--border);border-radius:6px;padding:8px;text-align:center">
+              <div style="font-size:18px;font-weight:700;color:var(--text-1)">74 → 81</div>
+              <div style="color:var(--text-2);font-size:10px">Health Score ↑7</div>
+            </div>
+            <div style="flex:1;background:var(--surface-2);border:1px solid var(--border);border-radius:6px;padding:8px;text-align:center">
+              <div style="font-size:18px;font-weight:700;color:#ef4444">342 → 289</div>
+              <div style="color:var(--text-2);font-size:10px">Critical Issues ↓53</div>
+            </div>
+            <div style="flex:1;background:var(--surface-2);border:1px solid var(--border);border-radius:6px;padding:8px;text-align:center">
+              <div style="font-size:18px;font-weight:700;color:#f97316">187 → 204</div>
+              <div style="color:var(--text-2);font-size:10px">Warnings ↑17</div>
+            </div>
+          </div>
+          <!-- diff table preview -->
+          <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:6px;overflow:hidden">
+            <div style="display:grid;grid-template-columns:1fr 100px 100px 80px;gap:0;font-size:10px">
+              <div style="padding:5px 8px;background:var(--surface-3);color:var(--text-2);font-weight:600">Issue Type</div>
+              <div style="padding:5px 8px;background:var(--surface-3);color:var(--text-2);font-weight:600;text-align:center">Before</div>
+              <div style="padding:5px 8px;background:var(--surface-3);color:var(--text-2);font-weight:600;text-align:center">After</div>
+              <div style="padding:5px 8px;background:var(--surface-3);color:var(--text-2);font-weight:600;text-align:center">Δ</div>
+              <div style="padding:5px 8px;border-top:1px solid var(--border);color:var(--text-1)">Missing title tag</div>
+              <div style="padding:5px 8px;border-top:1px solid var(--border);text-align:center;color:var(--text-2)">45</div>
+              <div style="padding:5px 8px;border-top:1px solid var(--border);text-align:center;color:var(--text-2)">23</div>
+              <div style="padding:5px 8px;border-top:1px solid var(--border);text-align:center;color:#22c55e;font-weight:600">↓22</div>
+              <div style="padding:5px 8px;border-top:1px solid var(--border);color:var(--text-1)">Duplicate meta desc</div>
+              <div style="padding:5px 8px;border-top:1px solid var(--border);text-align:center;color:var(--text-2)">12</div>
+              <div style="padding:5px 8px;border-top:1px solid var(--border);text-align:center;color:var(--text-2)">19</div>
+              <div style="padding:5px 8px;border-top:1px solid var(--border);text-align:center;color:#ef4444;font-weight:600">↑7</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="pros-cons" style="margin-top:8px">
+        <div class="pros"><h4>Pros</h4><ul><li>Maximum space for diff table</li><li>Clean, minimal UI</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Less context about each job</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Option B -->
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Two job cards side by side</h3>
+      <p>Each job gets its own card showing the selector + key stats (health score, URL count, crawl date). Diff table below spans full width.</p>
+      <div class="mockup" style="margin-top:12px;font-size:11px">
+        <div class="mockup-header">Compare Crawls</div>
+        <div class="mockup-body" style="padding:10px;display:flex;flex-direction:column;gap:8px">
+          <!-- two job cards -->
+          <div style="display:flex;gap:8px">
+            <div style="flex:1;background:var(--surface-2);border:1px solid var(--border);border-radius:6px;padding:8px">
+              <div style="font-size:10px;color:var(--text-2);font-weight:600;text-transform:uppercase;margin-bottom:4px">Baseline (A)</div>
+              <div style="background:var(--surface-3);border:1px solid var(--border);border-radius:4px;padding:5px 8px;color:var(--text-2);font-size:10px;margin-bottom:6px">Cars24 · Mar 30, 2026</div>
+              <div style="display:flex;gap:8px">
+                <div style="text-align:center"><div style="font-size:16px;font-weight:700;color:var(--text-1)">74</div><div style="color:var(--text-2);font-size:9px">Score</div></div>
+                <div style="text-align:center"><div style="font-size:16px;font-weight:700;color:#ef4444">342</div><div style="color:var(--text-2);font-size:9px">Critical</div></div>
+                <div style="text-align:center"><div style="font-size:16px;font-weight:700;color:var(--text-1)">1,201</div><div style="color:var(--text-2);font-size:9px">URLs</div></div>
+              </div>
+            </div>
+            <div style="flex:1;background:var(--surface-2);border:1px solid var(--border);border-radius:6px;padding:8px">
+              <div style="font-size:10px;color:var(--text-2);font-weight:600;text-transform:uppercase;margin-bottom:4px">Comparison (B)</div>
+              <div style="background:var(--surface-3);border:1px solid var(--border);border-radius:4px;padding:5px 8px;color:var(--text-2);font-size:10px;margin-bottom:6px">Cars24 · Apr 15, 2026</div>
+              <div style="display:flex;gap:8px">
+                <div style="text-align:center"><div style="font-size:16px;font-weight:700;color:var(--text-1)">81</div><div style="color:var(--text-2);font-size:9px">Score</div></div>
+                <div style="text-align:center"><div style="font-size:16px;font-weight:700;color:#ef4444">289</div><div style="color:var(--text-2);font-size:9px">Critical</div></div>
+                <div style="text-align:center"><div style="font-size:16px;font-weight:700;color:var(--text-1)">1,243</div><div style="color:var(--text-2);font-size:9px">URLs</div></div>
+              </div>
+            </div>
+          </div>
+          <!-- diff table -->
+          <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:6px;overflow:hidden">
+            <div style="display:grid;grid-template-columns:1fr 80px 80px 80px;font-size:10px">
+              <div style="padding:5px 8px;background:var(--surface-3);color:var(--text-2);font-weight:600">Issue Type</div>
+              <div style="padding:5px 8px;background:var(--surface-3);color:var(--text-2);font-weight:600;text-align:center">A</div>
+              <div style="padding:5px 8px;background:var(--surface-3);color:var(--text-2);font-weight:600;text-align:center">B</div>
+              <div style="padding:5px 8px;background:var(--surface-3);color:var(--text-2);font-weight:600;text-align:center">Δ</div>
+              <div style="padding:5px 8px;border-top:1px solid var(--border);color:var(--text-1)">Missing title tag</div>
+              <div style="padding:5px 8px;border-top:1px solid var(--border);text-align:center;color:var(--text-2)">45</div>
+              <div style="padding:5px 8px;border-top:1px solid var(--border);text-align:center;color:var(--text-2)">23</div>
+              <div style="padding:5px 8px;border-top:1px solid var(--border);text-align:center;color:#22c55e;font-weight:600">↓22</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="pros-cons" style="margin-top:8px">
+        <div class="pros"><h4>Pros</h4><ul><li>Clear context for each job</li><li>Easy to see which is baseline vs current</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Slightly more vertical space used</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Option C -->
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Picker → delta summary → diff table</h3>
+      <p>Job selectors in a compact card. Below: a single row of delta cards (↑↓ only). Then the diff table. Emphasises what changed, not what was.</p>
+      <div class="mockup" style="margin-top:12px;font-size:11px">
+        <div class="mockup-header">Compare Crawls</div>
+        <div class="mockup-body" style="padding:10px;display:flex;flex-direction:column;gap:8px">
+          <!-- picker card -->
+          <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:6px;padding:8px;display:flex;gap:8px;align-items:center">
+            <div style="flex:1;background:var(--surface-3);border:1px solid var(--border);border-radius:4px;padding:5px 8px;color:var(--text-2)">Cars24 · Mar 30, 2026 (baseline)</div>
+            <span style="color:var(--text-2)">vs</span>
+            <div style="flex:1;background:var(--surface-3);border:1px solid var(--border);border-radius:4px;padding:5px 8px;color:var(--text-2)">Cars24 · Apr 15, 2026</div>
+          </div>
+          <!-- delta-only summary -->
+          <div style="display:flex;gap:8px">
+            <div style="flex:1;background:#16a34a18;border:1px solid #16a34a44;border-radius:6px;padding:8px;text-align:center">
+              <div style="font-size:20px;font-weight:700;color:#16a34a">+7</div>
+              <div style="color:var(--text-2);font-size:10px">Health Score</div>
+            </div>
+            <div style="flex:1;background:#16a34a18;border:1px solid #16a34a44;border-radius:6px;padding:8px;text-align:center">
+              <div style="font-size:20px;font-weight:700;color:#16a34a">−53</div>
+              <div style="color:var(--text-2);font-size:10px">Critical Issues</div>
+            </div>
+            <div style="flex:1;background:#ef444418;border:1px solid #ef444444;border-radius:6px;padding:8px;text-align:center">
+              <div style="font-size:20px;font-weight:700;color:#ef4444">+17</div>
+              <div style="color:var(--text-2);font-size:10px">Warnings</div>
+            </div>
+            <div style="flex:1;background:var(--surface-2);border:1px solid var(--border);border-radius:6px;padding:8px;text-align:center">
+              <div style="font-size:20px;font-weight:700;color:var(--text-1)">+42</div>
+              <div style="color:var(--text-2);font-size:10px">URLs Crawled</div>
+            </div>
+          </div>
+          <!-- diff table -->
+          <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:6px;overflow:hidden">
+            <div style="display:grid;grid-template-columns:1fr 80px 80px 80px;font-size:10px">
+              <div style="padding:5px 8px;background:var(--surface-3);color:var(--text-2);font-weight:600">Issue Type</div>
+              <div style="padding:5px 8px;background:var(--surface-3);color:var(--text-2);font-weight:600;text-align:center">Before</div>
+              <div style="padding:5px 8px;background:var(--surface-3);color:var(--text-2);font-weight:600;text-align:center">After</div>
+              <div style="padding:5px 8px;background:var(--surface-3);color:var(--text-2);font-weight:600;text-align:center">Δ</div>
+              <div style="padding:5px 8px;border-top:1px solid var(--border);color:var(--text-1)">Missing title tag</div>
+              <div style="padding:5px 8px;border-top:1px solid var(--border);text-align:center;color:var(--text-2)">45</div>
+              <div style="padding:5px 8px;border-top:1px solid var(--border);text-align:center;color:var(--text-2)">23</div>
+              <div style="padding:5px 8px;border-top:1px solid var(--border);text-align:center;color:#22c55e;font-weight:600">↓22</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="pros-cons" style="margin-top:8px">
+        <div class="pros"><h4>Pros</h4><ul><li>Delta-first thinking — focuses on change</li><li>Color-coded summary is instantly readable</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Raw counts not visible in summary</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+</div>
