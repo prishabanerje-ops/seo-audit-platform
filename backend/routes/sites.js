@@ -2,7 +2,8 @@ import { Router } from 'express';
 import { z }      from 'zod';
 import { v4 as uuidv4 } from 'uuid';
 import db          from '../db/sqlite.js';
-import { validate } from '../middleware/validate.js';
+import { validate }    from '../middleware/validate.js';
+import { requireRole } from '../middleware/auth.js';
 
 const router = Router();
 
@@ -59,7 +60,7 @@ router.get('/', (req, res) => {
 });
 
 // ─── POST /api/sites ──────────────────────────────────────────────────────────
-router.post('/', validate(siteSchema), (req, res) => {
+router.post('/', requireRole('admin', 'superadmin'), validate(siteSchema), (req, res) => {
   const { company_id: userCompanyId, role } = req.user;
   // Superadmin may supply company_id in body; regular users use their own
   const company_id = role === 'superadmin' ? (req.body.company_id || null) : userCompanyId;
@@ -88,7 +89,7 @@ router.get('/:id', (req, res) => {
 });
 
 // ─── PATCH /api/sites/:id ─────────────────────────────────────────────────────
-router.patch('/:id', validate(siteSchema.partial()), (req, res) => {
+router.patch('/:id', requireRole('admin', 'superadmin'), validate(siteSchema.partial()), (req, res) => {
   const { company_id, role } = req.user;
   const site = db.prepare('SELECT id, company_id FROM sites WHERE id = ?').get(req.params.id);
   if (!site) return res.status(404).json({ error: 'Site not found' });
@@ -110,7 +111,7 @@ router.patch('/:id', validate(siteSchema.partial()), (req, res) => {
 });
 
 // ─── DELETE /api/sites/:id ────────────────────────────────────────────────────
-router.delete('/:id', (req, res) => {
+router.delete('/:id', requireRole('admin', 'superadmin'), (req, res) => {
   const { company_id, role } = req.user;
   const site = db.prepare('SELECT id, company_id FROM sites WHERE id = ?').get(req.params.id);
   if (!site) return res.status(404).json({ error: 'Site not found' });
