@@ -234,6 +234,7 @@ Migration runner: `backend/db/sqlite.js`. Tracks applied migrations in `_migrati
 | `013_site_crawl_config.js` | Adds `crawl_config TEXT` column to `sites` table — stores per-site default crawl configuration as a JSON string |
 | `015_ai_suggestions_per_url.js` | Adds `result_id INTEGER` (FK → `audit_results.id`, UNIQUE INDEX where NOT NULL) and `feedback INTEGER` (thumbs up +1 / thumbs down -1 / null) columns to `ai_suggestions` |
 | `016_sheets_spreadsheet_id.js` | Adds `sheets_spreadsheet_id` to `company_settings` |
+| `019_password_version.js` | Adds `users.password_version INTEGER NOT NULL DEFAULT 0` for JWT revocation-on-password-change. Migrations 017–018 exist on disk but are intentionally unapplied — see Phase 11 audit for reconciliation. |
 | `017_skills_library.js` | Adds `content_skills` table. Platform-wide AI instruction layer (Phase 10a). |
 | `018_content_pipeline.js` | Adds `content_pipeline_runs`, `content_pipeline_steps`, `content_pages`, `content_pipeline_logs` tables. Adds `publish_webhook_url` column to `sites`. (Phase 10b). |
 
@@ -288,6 +289,8 @@ Visible only to superadmin. Accessible via Phase 2 Audit Log page under the Admi
 | `avatar_url` | TEXT | nullable |
 | `status` | TEXT | `active` / `inactive` |
 | `last_active_at` | TEXT | Updated non-blocking on every authed request |
+| `must_reset_password` | INTEGER | `0` / `1`. Added migration 008. `1` forces the user to hit `/change-password` before any login; `login` returns `403 password_reset_required` until cleared. |
+| `password_version` | INTEGER | Monotonically increasing counter, default `0`. Added migration 019. Embedded in JWTs as the `pv` claim; `change-password` bumps it; `authMiddleware` rejects tokens whose `pv` drifts below the column value. Pre-migration tokens have no `pv` claim and are treated as `pv = 0` (the column default), so existing sessions survive deploy. |
 | `created_at` | TIMESTAMP | |
 
 **Superadmin constraint:** `CREATE UNIQUE INDEX idx_single_superadmin ON users(role) WHERE role = 'superadmin'` — DB-level enforcement that exactly one superadmin can exist.
@@ -768,6 +771,16 @@ any target whose resolved IP falls in a private, loopback, link-local, ULA,
 multicast, or documentation range (both IPv4 and IPv6, including
 IPv4-mapped-IPv6 forms). Called from `crawl-runner.startCrawl` and
 `sitemap-fetcher.fetchText` before any outbound request.
+
+### `backend/startup-audit.js`
+`auditSeededPasswords(db)` — self-check invoked from `server.js` after
+migrations and `seedAuditChecks`. Reads every `admin` / `superadmin` row and
+`bcrypt.compareSync`s the stored hash against the known migration
+defaults (`ChangeMe123!`, `SuperAdmin123!`). If a match is found, prints a
+loud multi-line warning to stderr with rotation instructions. Never throws
+— the server keeps booting so operators are not locked out. Migration 006
+files are immutable (CLAUDE.md rule #9), so this runtime warning is the
+supported mitigation for SEC-H5.
 
 ### `backend/middleware/validate.js`
 Zod schema validation for `req.body`. On failure: `400` with `{ error: 'Validation failed', details: fieldErrors }`. On success: replaces `req.body` with parsed + coerced data.
