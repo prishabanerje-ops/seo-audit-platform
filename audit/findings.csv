@@ -1,0 +1,95 @@
+id,phase,severity,category,file,line,title,description,recommended_fix
+SEC-C1,1,critical,crypto-at-rest,backend/routes/gsc.js,66-84,GSC OAuth tokens stored unencrypted,access_token/refresh_token inserted plaintext into company_oauth_tokens; ads.service.js encrypts its equivalents,Wrap with ads.crypto encryptToken on INSERT; decryptToken on READ; backfill migration
+SEC-C1,1,critical,crypto-at-rest,backend/routes/ga4.js,66-84,GA4 OAuth tokens stored unencrypted,Same as SEC-C1 for GA4 provider,Same fix
+SEC-C2,1,critical,crypto-at-rest,backend/services/linear.service.js,42-46,Linear API key stored plaintext,SELECT value FROM company_settings returns raw key,Encrypt credential-class company_settings values; add secret-store abstraction
+SEC-C2,1,critical,crypto-at-rest,backend/services/slack.service.js,11-20,Slack webhook URL stored plaintext,Webhook URL returned raw from company_settings,Same fix
+SEC-C2,1,critical,crypto-at-rest,backend/routes/psi.js,39,PSI API key stored plaintext in settings,settings table value returned raw,Same fix
+SEC-C2,1,critical,crypto-at-rest,backend/routes/ai.js,69,Anthropic API key stored plaintext in settings,settings table value returned raw,Same fix
+SEC-C3,1,critical,oauth,backend/routes/gsc.js,32-55,GSC OAuth state is client-side JSON not server-bound,State is plain JSON echoed by Google; callback trusts parsed company_id without DB verification,Use ad_oauth_state pattern (server-side state with user_id+company_id+expiry; DELETE on consume)
+SEC-C3,1,critical,oauth,backend/routes/ga4.js,32-55,GA4 OAuth state is client-side JSON not server-bound,Same as SEC-C3 for GA4,Same fix
+SEC-C4,1,critical,ssrf,backend/routes/sites.js,15-29,SSRF via user-supplied site.url,z.string().url() does not block private IPs or loopback; crawler fetches arbitrary URLs,Add private-range + loopback blocklist; scheme allowlist http/https only; DNS resolve + pin IP
+SEC-C4,1,critical,ssrf,backend/services/crawl-runner.js,67-198,Crawler honors user URL without host restriction,Playwright launched against attacker-specified host,Wrap crawl() with URL validation helper
+SEC-C5,1,critical,ssrf,backend/services/sitemap-fetcher.js,22-40,SSRF via user-supplied sitemap URL,Up to 5 levels of recursive fetch of attacker-chosen URLs,Same host/IP allowlist inside fetchText
+SEC-C5,1,critical,input,backend/routes/crawls.js,66-67,sitemap_url not validated as URL,z.string() without .url() scheme check,Tighten Zod schema to z.string().url() + scheme allowlist
+SEC-C6,11,critical,authz,backend/routes/ai.js,34,AI suggest endpoint has no role guard,POST /api/ai/suggest is callable by any authenticated user including readonly; paid-call abuse vector,Add requireRole('admin'~'seo'~'superadmin') alongside aiLimiter
+SEC-C7,11,critical,authz,backend/routes/sites.js,62-122,Sites POST/PATCH/DELETE lack role guard,Any company-scoped user can create/modify/delete sites,Add requireRole('admin'~'superadmin') to mutation routes
+SEC-H1,1,high,auth,backend/middleware/auth.js,33-35,PUBLIC_PATHS uses startsWith prefix match,Any future path sharing a public prefix bypasses auth,Use exact match for non-param paths
+SEC-H2,1,high,config,backend/validate-env.js,7,JWT_SECRET has no length validation,Prod allows short/guessable secret,Require JWT_SECRET length >= 64 in validateEnv
+SEC-H3,1,high,authz,backend/routes/auth.js,386-420,Admin can promote users to admin via PATCH,Invite blocks admin->admin but PATCH role enum allows it,Add check: actorRole==admin && req.body.role==admin -> 403
+SEC-H4,1,high,session,backend/routes/auth.js,486-515,No session revocation on password change,Existing JWTs remain valid for 7 days after password change,Add users.password_version column; embed pv in JWT
+SEC-H5,1,high,credentials,backend/db/migrations/006_multi_tenancy.js,123,Default seed passwords hardcoded,SEED_ADMIN_PASSWORD defaults to ChangeMe123! SEED_SUPERADMIN_PASSWORD SuperAdmin123!,Refuse to seed without explicit env vars; generate random password
+SEC-H6,1,high,rate-limit,backend/routes/errors.js,18,errorLimiter defined but never applied,POST /api/errors only gated by global 300/min apiLimiter,Apply errorLimiter middleware
+SEC-H7,1,high,config,backend/validate-env.js,7-13,Insufficient REQUIRED_IN_PRODUCTION list,Credentials optional even if feature enabled,Require credentials when feature flag on
+SEC-H8,11,high,authz,backend/server.js,92-102,Socket.io rooms are not authenticated,Anonymous socket can join:job or join:company and receive cross-tenant events,Add io.use auth handler; verify company_id and job ownership on join
+SEC-M1,1,medium,cookie,backend/routes/auth.js,21-29,Cookie secure flag conditional on x-forwarded-proto,If proxy misconfigured cookie sent without Secure,Force secure=true in production
+SEC-M2,1,medium,info-leak,backend/routes/ads.js,49,OAuth error redirect leaks internal error message,err.message placed in URL query,Map to stable error codes
+SEC-M3,1,medium,session,backend/routes/auth.js,35,JWT expiry 7 days without rotation,Long-lived token,Shorten to 1-2 days + refresh rotation
+SEC-M4,1,medium,authz,backend/routes/auth.js,527-584,Impersonation has no re-auth step,Superadmin cookie sufficient,Require password or OTP
+SEC-M5,1,medium,dos,backend/server.js,77-78,express.json limit 10mb is too generous,300 req/min x 10MB = 3GB/min per IP,Tighten to 1mb globally
+SEC-M6,1,medium,deps,backend/package.json,28,multer unused,Not imported anywhere,Remove dep
+SEC-M7,1,medium,csp,backend/server.js,64,CSP blocks Google avatars,default-src self blocks *.googleusercontent.com,Add explicit imgSrc
+SEC-M8,1,medium,oauth,backend/routes/gsc.js,22-26,company_id not validated on resolve,Superadmin can pass nonexistent company_id,Validate in companies table
+SEC-M9,1,medium,testing,backend/__tests__/,0,Tests use production DB,17 test files import db from sqlite.js,Use :memory: or test-db file via env override
+ARCH-H1,2,high,architecture,backend/routes/,0,No DAL/repository layer routes do direct SQL,Every route file mixes business logic and persistence,Extract backend/repos per table; routes call repos
+ARCH-H2,2,high,architecture,backend/server.js,92-102,Socket.io not authenticated cross-tenant leak,(duplicate of SEC-H8 — see security),Add socket auth middleware
+ARCH-H3,2,high,architecture,backend/routes/ai.js,33-159,Route files contain heavy business logic,AI SDK + prompt + DB + SSE inline,Extract to services/ai.service.js
+ARCH-H4,2,medium,api,backend/routes/,0,Inconsistent error envelope,4+ shapes of error response across routes,Define ApiError class + res.apiError helper
+ARCH-M1,2,medium,architecture,backend/services/ads.service.js,0,ads.service.js mixes 4 concerns,OAuth state + connections + snapshots + metrics,Split into 4 files
+ARCH-M2,2,low,architecture,backend/services/ads.service.js,133-140,Dynamic imports in hot path,Breaks tree-shaking,Convert to static imports
+ARCH-M3,2,medium,data-integrity,backend/routes/tasks.js,264-272,No transaction on multi-step DB writes,sync-linear: UPDATE + INSERT not atomic,Use db.transaction()
+ARCH-M4,2,medium,architecture,backend/db/sqlite.js,88-90,Migrations auto-run only in dev,Production requires manual run — docs say auto,Document or run always
+ARCH-M8,2,medium,frontend,frontend/src/,0,No frontend data hook layer,Every page re-implements fetch/loading/error,Introduce custom hooks or React Query
+DRY-H1,3,high,duplication,backend/routes/,0,Company-scoping check copy-pasted 16x,Site lookup + 403 check appears in 16 places across 6 files,Extract requireSiteAccess middleware
+DRY-H2,3,high,duplication,backend/routes/reports.js,0,Latest completed crawl query duplicated 6x,6 occurrences of ORDER BY started_at DESC LIMIT 1,Extract getLatestCompletedJob helper
+DRY-H3,3,medium,duplication,backend/routes/tasks.js,0,Task enrichment JOIN duplicated 5x,Same LEFT JOIN users + sites block in 5 routes,Extract getEnrichedTaskById helper
+DRY-H4,3,low,duplication,backend/routes/gsc.js,22-26,resolveCompanyId duplicated in gsc.js and ga4.js,Identical,Extract shared helper
+DRY-M1,3,low,duplication,backend/routes/gsc.js,13-20,makeOAuth2Client duplicated in gsc.js and ga4.js,Only redirect_uri differs,Parameterize factory
+DRY-M2,3,low,duplication,backend/routes/,0,Pagination parsing repeated in 6+ routes,Math.min(Math.max(parseInt...)) pattern,parsePagination utility
+DRY-M3,3,low,duplication,backend/routes/,0,OAuth error redirect pattern repeated,Same pattern in ads.js gsc.js ga4.js,redirectWithError helper
+DRY-M4,3,medium,duplication,backend/routes/crawls.js,69-101,Crawl defaults duplicated backend and frontend,Zod defaults + DEFAULT_CONFIG,Derive one from other or shared endpoint
+SIZE-1,4,high,file-size,frontend/src/pages/IssueDetail.jsx,1-893,893 lines 3.6x over 250 limit,Fetches + SSE + feedback + related issues all in one file,Split into 6 files + 2 hooks
+SIZE-2,4,high,file-size,frontend/src/pages/AdsDashboard.jsx,1-798,798 lines 3.2x over limit,TopBar + KPIs + Table + socket polling,Split into 5 files + 2 hooks
+SIZE-3,4,high,file-size,frontend/src/pages/ScheduledCrawls.jsx,1-704,704 lines 2.8x over limit,List + form + cron builder + history,Split into 4 files + hook
+SIZE-4,4,high,file-size,frontend/src/components/CrawlConfigPanel.jsx,1-687,687 lines 2.7x over limit,6-tab form + defaults + validation,Split into 8 files
+SIZE-5,4,medium,file-size,backend/routes/auth.js,1-629,629 lines over 400 backend limit,Login logout invite users password impersonate all in one,Split into 5 sub-routers
+SIZE-6,4,medium,file-size,backend/routes/reports.js,1-519,519 lines over limit,8 endpoints in one file,Split into 4 sub-routers + helpers
+SIZE-7,4,medium,file-size,backend/services/audit-parser.service.js,1-516,516 lines over limit,One big dataset switch,Parser registry per section
+SIZE-8-33,4,medium,file-size,frontend/src/pages/*.jsx,0,28 more frontend files over 250 limit,See phase4 report for full list,Each needs 2-4 split
+CONFIG-1,5,critical,config,frontend/src/pages/AdsDashboard.jsx,561,Hardcoded localhost:3001 in socket.io client,Prod build will fail,Use import.meta.env.VITE_SOCKET_URL
+CONFIG-2,5,high,config,frontend/src/,0,No import.meta.env usage anywhere in frontend,No env system at all,Add VITE_API_BASE and VITE_SOCKET_URL env reads
+CONFIG-3,5,high,config,backend/routes/,0,10+ localhost URL fallbacks across 7 backend files,ads gsc ga4 auth server,Centralize in backend/config/index.js
+CONFIG-4,5,medium,config,backend/routes/ai.js,113-114,AI model and max_tokens hardcoded,claude-sonnet-4-6 + 1024,Env vars + settings-table override
+CONFIG-5,5,medium,config,backend/middleware/rateLimiter.js,3-40,Rate limits hardcoded,5 limiters with fixed windowMs and max,Config module + env override
+CONFIG-6,5,medium,config,backend/config/,0,backend/config directory is empty,No centralized config module exists,Create backend/config/index.js — skeleton in phase5 report
+PERF-H1,7,high,performance,backend/routes/schedules.js,0,N+1 in schedule validation,DB query per site in validation loop,Batch IN-list query
+PERF-M1,7,medium,performance,backend/routes/reports.js,262-273,Unbounded audit_checks SELECT *,No LIMIT on audit_checks queries in /summary,Add LIMIT or server-side aggregation
+PERF-M2,7,medium,performance,frontend/src/pages/CrawlStatus.jsx,0,setInterval polling,Re-fetches /crawls every 5s regardless of activity,Switch to Socket.io subscription
+PERF-M3,7,medium,performance,frontend/src/pages/CompareView.jsx,0,setInterval polling,Same pattern as CrawlStatus,Same fix
+PERF-M4,7,medium,db,backend/,0,Missing indexes on FK lookups,Users.email is unique (good); invites.email no index; audit_results.issue_type frequently queried without index,Add indexes per workload
+ERR-H1,6,high,error-handling,backend/routes/,0,40 routes without try/catch,Unhandled exceptions hit express default handler,Add global async error wrapper or per-route try/catch
+ERR-H2,6,high,info-leak,backend/routes/,0,Error messages leaked to client in several routes,err.message in response body beyond OAuth flows,Map to stable codes
+ERR-M1,6,medium,validation,backend/routes/,0,UUID path params not validated,/:id routes accept any string,Zod validation on req.params
+ERR-M2,6,medium,error-handling,backend/services/,0,Promise rejections swallowed in services,console.error catches without surfacing,Propagate or log structured
+DEAD-1,10,medium,deps,backend/package.json,28,multer dependency unused,Not imported by any backend file,Remove dep
+DEAD-2,10,medium,deps,backend/package.json,30,nodemailer dependency unused,Not imported anywhere; has HIGH CVE,Remove dep
+DEAD-3,10,low,tests,backend/__tests__/,0,Orphaned test utilities,Unused exports in test helper files,Prune
+DEP-H1,9,high,deps,backend/package.json,30,nodemailer 6.10.1 has HIGH CVE,GHSA-rcmh-qjqh-p98v addressparser DoS,Remove dep (unused) or upgrade to 7.0.7+
+DEP-M1,9,medium,deps,backend/,0,8 moderate CVEs via vitest/vite/esbuild/gaxios,Transitive via dev deps,npm audit fix + vitest 4.x major upgrade
+DEP-M2,9,medium,deps,frontend/,0,1 moderate CVE via follow-redirects,Via axios,npm audit fix
+DEP-M3,9,medium,deps,playwright-crawler/,0,13 moderate CVEs in @crawlee/* subpackages,Same advisory across all,npm audit fix
+DEP-L1,9,low,deps,/,0,Two test runners across monorepo,vitest (backend) + jest (crawler),Consolidate on vitest
+TEST-H1,8,high,coverage,frontend/src/,0,Zero frontend tests,No test infra at all in frontend,Add vitest + testing-library; test Auth Sites contexts first
+TEST-H2,8,high,coverage,backend/,0,Core services untested,crawl-runner schedule-service slack linear sitemap-fetcher audit-parser sheets ads.{google~meta~linkedin},Unit + integration coverage for at least crawl-runner audit-parser linear
+TEST-M1,8,medium,coverage,backend/__tests__/compare.test.js,0,Tests write to production DB,3 test files insert sites/crawl_jobs to seo-automation.db,Per-test isolation (see SEC-M9)
+TEST-M2,8,medium,coverage,backend/,0,Happy-path tests missing for login AI streaming schedules notifications,Only schema validation covered,Add end-to-end tests
+TEST-M3,8,medium,coverage,backend/,0,Socket.io and multi-tenancy write isolation untested,Critical paths no coverage,Add tests
+PRD-M1,11,high,prd-mismatch,backend/services/crawl-runner.js,11,PRD describes Screaming Frog but code is Playwright,Entire SF CLI chapter in PRD is stale,Update PRD or mark SF section as legacy
+PRD-M2,11,high,prd-mismatch,backend/routes/ai.js,114,max_tokens mismatch PRD says 1500 code uses 1024,Active contradiction,Pick one — CLAUDE.md also says 1024
+PRD-M3,11,high,prd-mismatch,backend/db/,0,Migrations 005 and 018 in repo but not applied,Features silently disabled in live DB,Apply migrations and reconcile
+PRD-M4,11,medium,prd-mismatch,backend/routes/tasks.js,0,No DELETE on tasks PRD claims it exists,Route not implemented,Implement or remove from PRD
+PRD-M5,11,medium,prd-mismatch,backend/routes/gsc.js,0,No /daily GSC endpoint UI 28-day trend depends on it,Route missing,Implement endpoint
+PRD-M6,11,medium,prd-mismatch,frontend/src/,0,Dark theme default claimed but no toggle present,No data-theme attribute wired,Implement or update PRD
+PRD-M7,11,medium,prd-mismatch,.github/workflows/,0,Empty — PRD claims CI workflows exist,No pipeline defined,Add CI or update PRD
+PRD-M8,11,medium,prd-mismatch,backend/services/,0,Promised services missing email.service.js sf-config.service.js health.service.js,Files do not exist,Implement or update PRD
+PRD-M9,11,medium,prd-mismatch,backend/routes/auth.js,25,sameSite=lax not Strict as PRD claims,Code uses lax,Keep lax (industry norm) update PRD
+PRD-M10,11,info,prd-mismatch,backend/db/seed/audit-checks.js,0,321 vs 291 checks — 30-check gap,Live DB has 291 seed file may have different,Reconcile count
