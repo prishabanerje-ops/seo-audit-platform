@@ -8,6 +8,7 @@ import Anthropic      from '@anthropic-ai/sdk';
 import db             from '../db/sqlite.js';
 import { aiLimiter }  from '../middleware/rateLimiter.js';
 import { requireRole } from '../middleware/auth.js';
+import { getGlobalSetting } from '../services/secret-store.js';
 
 const router = Router();
 
@@ -68,12 +69,9 @@ router.post('/suggest', requireRole(...AI_ROLES), aiLimiter, async (req, res) =>
     FROM audit_checks WHERE name = ?
   `).get(result.issue_type);
 
-  // 4. Resolve Anthropic API key
-  let apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) {
-    const setting = db.prepare(`SELECT value FROM settings WHERE key = 'anthropic_api_key'`).get();
-    apiKey = setting?.value || null;
-  }
+  // 4. Resolve Anthropic API key (env overrides settings table; DB value is
+  // auto-decrypted by the secret-store if it was written through setters).
+  const apiKey = process.env.ANTHROPIC_API_KEY || getGlobalSetting('anthropic_api_key');
   if (!apiKey) {
     return res.status(503).json({
       error: 'AI recommendations require an Anthropic API key. Configure it in Settings.',

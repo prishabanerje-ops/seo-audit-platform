@@ -2,7 +2,7 @@
  * @module services/linear
  * Linear integration — create issues via the Linear GraphQL API.
  */
-import db from '../db/sqlite.js';
+import { getCompanySetting } from './secret-store.js';
 
 /**
  * Internal GraphQL helper — POSTs a query/mutation to the Linear API.
@@ -38,12 +38,9 @@ async function linearGraphQL(apiKey, query, variables = {}) {
  * @returns {Promise<{ issueId: string, url: string, title: string }>}
  */
 export async function createLinearIssue({ title, description, companyId }) {
-  // 1. Resolve API key from company_settings
-  const row = db.prepare(
-    `SELECT value FROM company_settings WHERE company_id = ? AND key = 'linear_api_key'`
-  ).get(companyId);
-  if (!row?.value) throw new Error('Linear API key not configured for this company');
-  const apiKey = row.value;
+  // 1. Resolve API key from company_settings (auto-decrypted)
+  const apiKey = getCompanySetting(companyId, 'linear_api_key');
+  if (!apiKey) throw new Error('Linear API key not configured for this company');
 
   // 2. Fetch the first team
   const teamsData = await linearGraphQL(apiKey, `{ teams { nodes { id name } } }`);

@@ -1,20 +1,17 @@
-import db from '../db/sqlite.js';
+import { getCompanySetting } from './secret-store.js';
 
 /**
  * Resolve the Slack webhook URL for a given company.
- * Checks company_settings first; falls back to process.env.SLACK_WEBHOOK_URL.
+ * Checks company_settings first (auto-decrypted); falls back to
+ * process.env.SLACK_WEBHOOK_URL when no per-company value is set.
  *
  * @param {string|null} companyId
  * @returns {string|null}
  */
 function getWebhookUrl(companyId) {
   if (companyId) {
-    const row = db
-      .prepare(
-        `SELECT value FROM company_settings WHERE company_id = ? AND key = 'slack_webhook_url'`
-      )
-      .get(companyId);
-    if (row?.value) return row.value;
+    const value = getCompanySetting(companyId, 'slack_webhook_url');
+    if (value) return value;
   }
   return process.env.SLACK_WEBHOOK_URL || null;
 }

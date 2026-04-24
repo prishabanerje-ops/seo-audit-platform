@@ -9,6 +9,11 @@ import db           from '../db/sqlite.js';
 import { validate } from '../middleware/validate.js';
 import { requireRole } from '../middleware/auth.js';
 import { logAction } from '../services/audit-log.service.js';
+import {
+  getGlobalSetting, setGlobalSetting,
+  getCompanySetting, setCompanySetting,
+  SECRET_KEYS,
+} from '../services/secret-store.js';
 
 const router = Router();
 
@@ -34,17 +39,34 @@ router.get('/', requireRole('admin', 'superadmin'), (req, res) => {
 
   let companySettings = {};
   if (targetCompanyId) {
-    const rows = db.prepare(
-      'SELECT key, value FROM company_settings WHERE company_id = ?'
-    ).all(targetCompanyId);
-    companySettings = Object.fromEntries(rows.map(r => [r.key, r.value ?? '']));
+    for (const key of ALLOWED_COMPANY_KEYS) {
+      // Secret keys never leave the backend in cleartext — return a sentinel
+      // that the UI can render as "••• saved" without exposing the value.
+      if (SECRET_KEYS.has(key)) {
+        const present = db.prepare(
+          'SELECT 1 FROM company_settings WHERE company_id = ? AND key = ? AND value IS NOT NULL AND value != ""'
+        ).get(targetCompanyId, key);
+        companySettings[key] = present ? '__set__' : '';
+      } else {
+        companySettings[key] = getCompanySetting(targetCompanyId, key) ?? '';
+      }
+    }
   }
 
   const result = { settings: companySettings };
 
   if (role === 'superadmin') {
-    const rows = db.prepare('SELECT key, value FROM settings').all();
-    result.global = Object.fromEntries(rows.map(r => [r.key, r.value ?? '']));
+    result.global = {};
+    for (const key of ALLOWED_GLOBAL_KEYS) {
+      if (SECRET_KEYS.has(key)) {
+        const present = db.prepare(
+          "SELECT 1 FROM settings WHERE key = ? AND value IS NOT NULL AND value != ''"
+        ).get(key);
+        result.global[key] = present ? '__set__' : '';
+      } else {
+        result.global[key] = getGlobalSetting(key) ?? '';
+      }
+    }
   }
 
   res.json(result);
@@ -69,31 +91,27 @@ router.put('/', requireRole('admin', 'superadmin'), validate(settingsSchema), (r
     if (!co) return res.status(404).json({ error: 'Company not found.' });
   }
 
-  const now = new Date().toISOString();
+  // Skip the "__set__" sentinel — the UI sends it when the user hasn't touched
+  // a secret field, so we leave the existing stored value intact.
+  const isSentinel = (v) => v === '__set__';
 
   if (targetCompanyId && Object.keys(settings).length > 0) {
-    const upsert = db.prepare(`
-      INSERT INTO company_settings (company_id, key, value, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?)
-      ON CONFLICT(company_id, key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at
-    `);
     const saveMany = db.transaction((entries) => {
       for (const [key, value] of entries) {
-        if (ALLOWED_COMPANY_KEYS.includes(key)) {
-          upsert.run(targetCompanyId, key, value === '' ? null : value, now, now);
-        }
+        if (!ALLOWED_COMPANY_KEYS.includes(key)) continue;
+        if (isSentinel(value)) continue;
+        setCompanySetting(targetCompanyId, key, value);
       }
     });
     saveMany(Object.entries(settings));
   }
 
   if (role === 'superadmin' && Object.keys(global).length > 0) {
-    const upsertGlobal = db.prepare(
-      'INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value'
-    );
     const saveGlobal = db.transaction((entries) => {
       for (const [key, value] of entries) {
-        if (ALLOWED_GLOBAL_KEYS.includes(key)) upsertGlobal.run(key, value === '' ? null : value);
+        if (!ALLOWED_GLOBAL_KEYS.includes(key)) continue;
+        if (isSentinel(value)) continue;
+        setGlobalSetting(key, value);
       }
     });
     saveGlobal(Object.entries(global));

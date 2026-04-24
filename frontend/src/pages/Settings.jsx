@@ -55,11 +55,17 @@ function SectionHeading({ title, description }) {
   );
 }
 
+// Sentinel the backend returns for secrets that are stored but must not be
+// echoed back in cleartext. Keeping it straight through the form and sending
+// it back on PUT means the backend skips the field and preserves the value.
+const SECRET_SET_SENTINEL = '__set__';
+
 function SmtpSection({ companyId }) {
   const [form,   setForm]   = useState({ smtp_host: '', smtp_port: '587', smtp_user: '', smtp_pass: '', smtp_from: '' });
   const [saving, setSaving] = useState(false);
   const [msg,    setMsg]    = useState('');
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+  const passIsStored = form.smtp_pass === SECRET_SET_SENTINEL;
 
   useEffect(() => {
     const qs = companyId ? `?company_id=${companyId}` : '';
@@ -97,7 +103,14 @@ function SmtpSection({ companyId }) {
           <Field label="Port"><Input value={form.smtp_port} onChange={v => set('smtp_port', v)} placeholder="587" /></Field>
         </div>
         <Field label="Username"><Input value={form.smtp_user} onChange={v => set('smtp_user', v)} placeholder="user@example.com" /></Field>
-        <Field label="Password"><Input type="password" value={form.smtp_pass} onChange={v => set('smtp_pass', v)} placeholder="••••••••" /></Field>
+        <Field label="Password">
+          <Input
+            type="password"
+            value={passIsStored ? '' : form.smtp_pass}
+            onChange={v => set('smtp_pass', v)}
+            placeholder={passIsStored ? '•••••••• (saved — type to replace)' : '••••••••'}
+          />
+        </Field>
         <Field label="From Address"><Input value={form.smtp_from} onChange={v => set('smtp_from', v)} placeholder="SEO Platform <noreply@example.com>" /></Field>
         <div className="flex items-center gap-3"><SaveBtn saving={saving} onClick={save} /><StatusMsg msg={msg} /></div>
       </div>
@@ -109,6 +122,7 @@ function GlobalSection() {
   const [key,    setKey]    = useState('');
   const [saving, setSaving] = useState(false);
   const [msg,    setMsg]    = useState('');
+  const keyIsStored = key === SECRET_SET_SENTINEL;
 
   useEffect(() => {
     api.get('/settings').then(r => setKey(r.data.global?.anthropic_api_key || '')).catch(() => {});
@@ -131,7 +145,12 @@ function GlobalSection() {
       <SectionHeading title="Global" description="Instance-wide settings applied to all companies." />
       <div className="space-y-4">
         <Field label="Anthropic API Key">
-          <Input type="password" value={key} onChange={setKey} placeholder="sk-ant-..." />
+          <Input
+            type="password"
+            value={keyIsStored ? '' : key}
+            onChange={setKey}
+            placeholder={keyIsStored ? '•••••••• (saved — type to replace)' : 'sk-ant-...'}
+          />
         </Field>
         <div className="flex items-center gap-3"><SaveBtn saving={saving} onClick={save} /><StatusMsg msg={msg} /></div>
       </div>

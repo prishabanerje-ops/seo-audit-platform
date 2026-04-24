@@ -3,8 +3,8 @@
  * PageSpeed Insights (PSI) API v5 — analyze a URL for Core Web Vitals & performance score.
  */
 import { Router }     from 'express';
-import db             from '../db/sqlite.js';
 import { psiLimiter } from '../middleware/rateLimiter.js';
+import { getGlobalSetting } from '../services/secret-store.js';
 
 const router = Router();
 
@@ -34,11 +34,7 @@ router.get('/analyze', psiLimiter, async (req, res) => {
     }
 
     // 3. Resolve PSI API key
-    let apiKey = process.env.PSI_API_KEY;
-    if (!apiKey) {
-      const setting = db.prepare(`SELECT value FROM settings WHERE key = 'psi_api_key'`).get();
-      apiKey = setting?.value || null;
-    }
+    const apiKey = process.env.PSI_API_KEY || getGlobalSetting('psi_api_key');
     if (!apiKey) {
       return res.status(503).json({
         error: 'PSI API key not configured. Add PSI_API_KEY to .env or Settings.',
