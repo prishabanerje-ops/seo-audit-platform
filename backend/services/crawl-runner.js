@@ -12,6 +12,7 @@ import { crawl }          from '../../playwright-crawler/src/index.js';
 import { toSfFormat }     from '../../playwright-crawler/src/index.js';
 import { parseAndStoreFromDatasets } from './audit-parser.service.js';
 import { fetchUrlsFromSitemaps }     from './sitemap-fetcher.js';
+import { assertSafeOutboundUrl }     from '../lib/url-safety.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -150,6 +151,12 @@ export async function startCrawl(job, io) {
     }
 
     console.log(`[crawl-runner] Job ${job.id}: starting ${crawlMode} crawl of ${startUrl}`);
+
+    // SSRF guard: reject private/loopback/link-local targets before any
+    // network activity. Applies to the seed URL; the crawler itself limits
+    // follow-external, so downstream hosts are either the same domain or
+    // a user-approved pattern.
+    await assertSafeOutboundUrl(startUrl);
 
     const pages = await crawl({
       startUrl,

@@ -61,10 +61,11 @@ const startCrawlSchema = z.object({
   mode:    z.enum(['spider', 'list', 'sitemap', 'sitemap-list']).default('spider'),
   config:  z.object({
     // ── List mode ─────────────────────────────────────────────────────────
-    list_urls:            z.array(z.string()).optional().default([]),
-    // ── Sitemap mode ──────────────────────────────────────────────────────
-    sitemap_url:          z.string().optional().default(''),
-    sitemap_urls:         z.array(z.string()).optional().default([]),
+    // Per-URL validation happens in crawl-runner via assertSafeOutboundUrl.
+    list_urls:            z.array(z.string().url()).optional().default([]),
+    // ── Sitemap mode — URLs must parse; scheme/host is re-validated server-side
+    sitemap_url:          z.union([z.string().url(), z.literal('')]).optional().default(''),
+    sitemap_urls:         z.array(z.string().url()).optional().default([]),
     // ── Limits ────────────────────────────────────────────────────────────
     max_depth:            z.number().int().min(1).max(25).optional().default(5),
     max_urls:             z.number().int().min(0).optional().default(0),

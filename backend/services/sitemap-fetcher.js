@@ -9,7 +9,13 @@
  *   - Gzip-compressed sitemaps (via Node fetch auto-decompression)
  *
  * No external dependencies — uses Node 18+ built-in fetch.
+ *
+ * Every outbound fetch is gated by lib/url-safety.assertSafeOutboundUrl,
+ * which refuses private-range, loopback, and link-local targets (SSRF
+ * mitigation — SEC-C5).
  */
+
+import { assertSafeOutboundUrl } from '../lib/url-safety.js';
 
 const MAX_URLS_PER_SITEMAP = 50_000; // standard sitemap limit
 const FETCH_TIMEOUT_MS     = 15_000;
@@ -17,9 +23,11 @@ const MAX_DEPTH            = 5;      // prevent infinite index recursion
 
 /**
  * Fetch a URL and return the response body as text.
- * Throws on network error or non-2xx status.
+ * Throws on network error, non-2xx status, or private-address targets.
  */
 async function fetchText(url) {
+  await assertSafeOutboundUrl(url);
+
   const controller = new AbortController();
   const timer      = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
 
