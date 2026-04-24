@@ -2,8 +2,9 @@ import jwt from 'jsonwebtoken';
 import db from '../db/sqlite.js';
 
 /**
- * Paths that bypass JWT verification.
- * Everything else requires a valid auth_token cookie.
+ * Paths that bypass JWT verification — exact match on (method, path).
+ * The ads callback is enumerated per platform so that we never admit
+ * an unintended sub-path via prefix matching.
  */
 const PUBLIC_PATHS = [
   { method: 'POST', path: '/api/auth/login' },
@@ -16,10 +17,16 @@ const PUBLIC_PATHS = [
   { method: 'POST', path: '/api/auth/change-password' },
   { method: 'GET',  path: '/api/health' },
   { method: 'POST', path: '/api/errors' },
-  { method: 'GET',  path: '/api/ads/callback/' },
+  { method: 'GET',  path: '/api/ads/callback/google' },
+  { method: 'GET',  path: '/api/ads/callback/meta' },
+  { method: 'GET',  path: '/api/ads/callback/linkedin' },
   { method: 'GET',  path: '/api/gsc/callback' },
   { method: 'GET',  path: '/api/ga4/callback' },
 ];
+
+const PUBLIC_PATH_INDEX = new Set(
+  PUBLIC_PATHS.map(p => `${p.method} ${p.path}`)
+);
 
 /**
  * Global auth middleware — applied to every request.
@@ -30,9 +37,7 @@ export function authMiddleware(req, res, next) {
   // the frontend handles auth redirects client-side.
   if (!req.path.startsWith('/api')) return next();
 
-  const isPublic = PUBLIC_PATHS.some(
-    p => p.method === req.method && req.path.startsWith(p.path)
-  );
+  const isPublic = PUBLIC_PATH_INDEX.has(`${req.method} ${req.path}`);
   if (isPublic) return next();
 
   const token = req.cookies?.auth_token;

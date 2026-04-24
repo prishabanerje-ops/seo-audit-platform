@@ -23,9 +23,12 @@ describe('GET /api/ads/callback/google — public route', () => {
   });
 });
 
-describe('GET /api/ads/callback/invalid — invalid platform', () => {
-  it('returns 400', async () => {
+describe('GET /api/ads/callback/invalid — unknown platform', () => {
+  // PUBLIC_PATHS enumerates the three supported platforms exactly; any other
+  // callback sub-path falls through to authMiddleware and returns 401, which
+  // prevents unauthenticated reconnaissance of route internals.
+  it('returns 401 (not in PUBLIC_PATHS)', async () => {
     const res = await request(app).get('/api/ads/callback/invalid');
-    expect(res.status).toBe(400);
+    expect(res.status).toBe(401);
   });
 });
