@@ -6,6 +6,8 @@ import { Router }      from 'express';
 import { google }      from 'googleapis';
 import db              from '../db/sqlite.js';
 import { requireRole } from '../middleware/auth.js';
+import { encryptToken, decryptToken } from '../services/ads.crypto.js';
+import { createState, consumeState } from '../services/oauth-state.service.js';
 
 const router = Router();
 const GA4_SCOPES = ['https://www.googleapis.com/auth/analytics.readonly'];
@@ -29,11 +31,16 @@ function resolveCompanyId(req) {
 router.get('/auth', requireRole('admin', 'superadmin'), (req, res) => {
   const cid = resolveCompanyId(req);
   if (!cid) return res.status(400).json({ error: 'company_id required.' });
+
+  const co = db.prepare('SELECT id FROM companies WHERE id = ?').get(cid);
+  if (!co) return res.status(404).json({ error: 'Company not found.' });
+
+  const stateToken = createState(req.user.sub, 'ga4', { companyId: cid });
   const url = makeOAuth2Client().generateAuthUrl({
     access_type: 'offline',
     prompt:      'consent',
     scope:       GA4_SCOPES,
-    state:       JSON.stringify({ company_id: cid, provider: 'ga4' }),
+    state:       stateToken,
   });
   res.json({ authUrl: url });
 });
@@ -46,11 +53,14 @@ router.get('/callback', async (req, res) => {
   if (oauthError) return res.redirect(`${frontendUrl}/integrations?ga4_error=${encodeURIComponent(oauthError)}`);
   if (!code || !state) return res.redirect(`${frontendUrl}/integrations?ga4_error=missing_params`);
 
-  let parsed;
-  try { parsed = JSON.parse(state); } catch {
+  let bound;
+  try {
+    bound = consumeState(state, 'ga4');
+  } catch {
     return res.redirect(`${frontendUrl}/integrations?ga4_error=invalid_state`);
   }
-  if (!parsed.company_id || parsed.provider !== 'ga4') {
+  const targetCompanyId = bound.context?.companyId;
+  if (!targetCompanyId) {
     return res.redirect(`${frontendUrl}/integrations?ga4_error=invalid_state`);
   }
 
@@ -62,6 +72,9 @@ router.get('/callback', async (req, res) => {
     const userInfo = await google.oauth2({ version: 'v2', auth: oauth2 }).userinfo.get();
     const connectedEmail = userInfo.data.email || null;
     const now = new Date().toISOString();
+
+    const encAccess  = encryptToken(tokens.access_token);
+    const encRefresh = tokens.refresh_token ? encryptToken(tokens.refresh_token) : null;
 
     db.prepare(`
       INSERT INTO company_oauth_tokens
@@ -75,9 +88,9 @@ router.get('/callback', async (req, res) => {
         connected_email = excluded.connected_email,
         updated_at      = excluded.updated_at
     `).run(
-      parsed.company_id,
-      tokens.access_token,
-      tokens.refresh_token || null,
+      targetCompanyId,
+      encAccess,
+      encRefresh,
       tokens.expiry_date ? new Date(tokens.expiry_date).toISOString() : null,
       tokens.scope || GA4_SCOPES.join(' '),
       connectedEmail, now, now,
@@ -121,15 +134,15 @@ router.get('/properties', requireRole('admin', 'superadmin'), async (req, res) =
   try {
     const oauth2 = makeOAuth2Client();
     oauth2.setCredentials({
-      access_token:  row.access_token,
-      refresh_token: row.refresh_token,
+      access_token:  decryptToken(row.access_token),
+      refresh_token: row.refresh_token ? decryptToken(row.refresh_token) : undefined,
       expiry_date:   row.token_expiry ? new Date(row.token_expiry).getTime() : undefined,
     });
     oauth2.on('tokens', (t) => {
       if (t.access_token) {
         db.prepare(
           "UPDATE company_oauth_tokens SET access_token = ?, token_expiry = ?, updated_at = ? WHERE company_id = ? AND provider = 'ga4'"
-        ).run(t.access_token, t.expiry_date ? new Date(t.expiry_date).toISOString() : null, new Date().toISOString(), cid);
+        ).run(encryptToken(t.access_token), t.expiry_date ? new Date(t.expiry_date).toISOString() : null, new Date().toISOString(), cid);
       }
     });
 
