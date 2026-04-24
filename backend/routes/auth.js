@@ -30,7 +30,16 @@ function getCookieOptions(req) {
 
 function signToken(user) {
   return jwt.sign(
-    { sub: user.id, email: user.email, name: user.name, role: user.role, company_id: user.company_id ?? null },
+    {
+      sub:         user.id,
+      email:       user.email,
+      name:        user.name,
+      role:        user.role,
+      company_id:  user.company_id ?? null,
+      // Embedded password version — authMiddleware rejects tokens whose pv
+      // drifts below the user's current users.password_version.
+      pv:          user.password_version ?? 0,
+    },
     process.env.JWT_SECRET,
     { expiresIn: '7d', algorithm: 'HS256' }
   );
@@ -126,10 +135,16 @@ router.get('/me', (req, res) => {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const user = db.prepare(
-      'SELECT id, email, name, role, company_id, avatar_url, status FROM users WHERE id = ?'
+      'SELECT id, email, name, role, company_id, avatar_url, status, password_version FROM users WHERE id = ?'
     ).get(decoded.sub);
 
     if (!user || user.status === 'inactive') return res.json({ user: null });
+
+    // Honour password-version revocation here too — /me is public and must
+    // agree with authMiddleware about whether the session is still valid.
+    if ((decoded.pv ?? 0) !== (user.password_version ?? 0)) {
+      return res.json({ user: null });
+    }
 
     res.json({
       user: { sub: user.id, email: user.email, name: user.name, role: user.role, company_id: user.company_id ?? null, avatar_url: user.avatar_url },
@@ -277,7 +292,9 @@ router.post('/invite/accept', authLimiter, validate(acceptInviteSchema), async (
 
   db.prepare('UPDATE invites SET accepted = 1 WHERE id = ?').run(invite.id);
 
-  const user = db.prepare('SELECT id, email, name, role, company_id FROM users WHERE id = ?').get(id);
+  const user = db.prepare(
+    'SELECT id, email, name, role, company_id, password_version FROM users WHERE id = ?'
+  ).get(id);
   const jwtToken = signToken(user);
 
   res.cookie('auth_token', jwtToken, getCookieOptions(req));
@@ -508,7 +525,11 @@ router.post('/change-password', authLimiter, validate(changePasswordSchema), asy
   }
 
   const hash = await bcrypt.hash(newPassword, 12);
-  db.prepare('UPDATE users SET password_hash = ?, must_reset_password = 0 WHERE id = ?').run(hash, user.id);
+  // Bumping password_version invalidates every JWT previously issued to
+  // this user (authMiddleware rejects tokens whose pv no longer matches).
+  db.prepare(
+    'UPDATE users SET password_hash = ?, must_reset_password = 0, password_version = password_version + 1 WHERE id = ?'
+  ).run(hash, user.id);
 
   logAction({ sub: user.id, email: user.email, role: user.role, company_id: user.company_id }, {
     action:     'user.password_changed',
@@ -544,7 +565,9 @@ router.post('/impersonate', authLimiter, requireSuperAdmin, validate(impersonate
     return res.status(403).json({ error: 'Cannot impersonate while already in an impersonation session.' });
   }
 
-  const target = db.prepare('SELECT id, email, name, role, company_id, status FROM users WHERE id = ?').get(user_id);
+  const target = db.prepare(
+    'SELECT id, email, name, role, company_id, status, password_version FROM users WHERE id = ?'
+  ).get(user_id);
 
   if (!target) {
     return res.status(404).json({ error: 'User not found.' });
@@ -564,6 +587,7 @@ router.post('/impersonate', authLimiter, requireSuperAdmin, validate(impersonate
     name:           target.name,
     role:           target.role,
     company_id:     target.company_id ?? null,
+    pv:             target.password_version ?? 0,
     impersonated_by: req.user.sub,
   };
 
@@ -601,7 +625,9 @@ router.post('/impersonate/end', (req, res) => {
     return res.status(400).json({ error: 'Not currently impersonating anyone.' });
   }
 
-  const superadmin = db.prepare('SELECT id, email, name, role, company_id, status FROM users WHERE id = ?').get(req.user.impersonated_by);
+  const superadmin = db.prepare(
+    'SELECT id, email, name, role, company_id, status, password_version FROM users WHERE id = ?'
+  ).get(req.user.impersonated_by);
 
   if (!superadmin || superadmin.role !== 'superadmin' || superadmin.status === 'inactive') {
     res.clearCookie('auth_token');

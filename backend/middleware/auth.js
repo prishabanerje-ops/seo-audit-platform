@@ -45,7 +45,25 @@ export function authMiddleware(req, res, next) {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded; // { sub, email, name, role, company_id }
+
+    // Password-version revocation: reject tokens whose pv claim is behind
+    // the user's current password_version (bumped on every change-password).
+    // Pre-migration tokens have no pv claim — treat as 0, which matches the
+    // column default so existing sessions keep working until rotation.
+    // If the user row is missing (deleted, or a test fixture that skipped
+    // the DB) we can't enforce pv; fall through to JWT-only trust.
+    const userRow = db.prepare(
+      'SELECT password_version FROM users WHERE id = ?'
+    ).get(decoded.sub);
+    if (userRow) {
+      const tokenPv = decoded.pv ?? 0;
+      const userPv  = userRow.password_version ?? 0;
+      if (tokenPv !== userPv) {
+        return res.status(401).json({ error: 'Session invalidated. Please log in again.' });
+      }
+    }
+
+    req.user = decoded; // { sub, email, name, role, company_id, pv }
 
     // Non-blocking last_active update
     setImmediate(() => {

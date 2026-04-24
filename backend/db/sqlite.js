@@ -18,6 +18,7 @@ import { up as migration013 } from './migrations/013_site_crawl_config.js';
 import { up as migration014 } from './migrations/014_audit_checks_tools.js';
 import { up as migration015 } from './migrations/015_ai_suggestions_per_url.js';
 import { up as migration016 } from './migrations/016_sheets_spreadsheet_id.js';
+import { up as migration019 } from './migrations/019_password_version.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DB_PATH = join(__dirname, '..', 'seo-automation.db');
@@ -51,6 +52,9 @@ const MIGRATIONS = [
   { id: 14, fn: migration014, name: '014_audit_checks_tools' },
   { id: 15, fn: migration015, name: '015_ai_suggestions_per_url' },
   { id: 16, fn: migration016, name: '016_sheets_spreadsheet_id' },
+  // 017 and 018 are on disk but intentionally unapplied here — see PRD-v2-FINAL
+  // and Phase 11 audit; enabling them is a separate PRD conformance decision.
+  { id: 19, fn: migration019, name: '019_password_version' },
 ];
 
 /**
