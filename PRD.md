@@ -729,6 +729,8 @@ On success: sets `req.user = { sub, email, name, role, company_id }`. `company_i
 - `/api/sites` POST/PATCH/DELETE → `admin`, `superadmin` (mutation guard)
 - `/api/ai/suggest` POST and `/api/ai/suggest/:id/feedback` POST → `admin`, `seo`, `superadmin` (readonly users cannot trigger paid AI calls)
 
+**Admin → admin promotion:** `POST /api/auth/invite` (line 161) and `PATCH /api/auth/users/:id` (line ~405) both refuse a request from an `admin` actor that would yield another `admin` role, preventing admin proliferation within a company without superadmin involvement.
+
 ### `backend/middleware/rateLimiter.js`
 | Limiter | Window | Max | Used on |
 |---|---|---|---|
@@ -736,6 +738,36 @@ On success: sets `req.user = { sub, email, name, role, company_id }`. `company_i
 | `apiLimiter` | 1 min | 300 requests | All `/api/*` |
 | `aiLimiter` | 1 min | 10 requests | AI recommendation endpoints (Phase 3+) |
 | `errorLimiter` | 1 min | 30 requests | Error reporting endpoints |
+
+### `backend/services/secret-store.js`
+Central helper for credential-class settings. Callers read with
+`getGlobalSetting(key)` / `getCompanySetting(companyId, key)` and write
+with `setGlobalSetting(key, value)` / `setCompanySetting(companyId, key, value)`.
+`SECRET_KEYS` defines the set that is auto-encrypted at rest via
+`services/ads.crypto.encryptToken`: `anthropic_api_key`, `psi_api_key`,
+`linear_api_key`, `slack_webhook_url`, `smtp_pass`. Non-secret keys are
+stored verbatim. Reads are idempotent for legacy plaintext so the migration
+to encrypted storage is seamless. `GET /api/settings` never returns a
+cleartext secret — if a known-secret key is present, the response value is
+the sentinel `"__set__"`, which the Settings UI renders as a populated
+password field with a "(saved — type to replace)" placeholder. A `PUT` that
+re-submits `"__set__"` is a no-op for that field.
+
+### `backend/services/oauth-state.service.js`
+Provider-agnostic server-bound OAuth state. `createState(userId, provider, context)`
+returns a random 32-byte hex token stored in `ad_oauth_state` with a 10-minute
+expiry and `(userId, encodedProvider)` binding; the encoded provider allows
+extra context such as `{ companyId }` without a schema change.
+`consumeState(state, expectedProvider)` deletes the row (single-use) and
+returns `{ userId, provider, context }`. Used by GSC/GA4 `/auth` + `/callback`
+to replace the previous client-side JSON state token.
+
+### `backend/lib/url-safety.js`
+`assertSafeOutboundUrl(url)` — SSRF guard. Rejects non-http(s) schemes and
+any target whose resolved IP falls in a private, loopback, link-local, ULA,
+multicast, or documentation range (both IPv4 and IPv6, including
+IPv4-mapped-IPv6 forms). Called from `crawl-runner.startCrawl` and
+`sitemap-fetcher.fetchText` before any outbound request.
 
 ### `backend/middleware/validate.js`
 Zod schema validation for `req.body`. On failure: `400` with `{ error: 'Validation failed', details: fieldErrors }`. On success: replaces `req.body` with parsed + coerced data.
@@ -751,6 +783,8 @@ Manages crawl jobs. Routes to the built-in Playwright crawler when `USE_PLAYWRIG
 - `cancelCrawl(jobId)` — cancels a running crawl, marks job cancelled
 - `pauseCrawl(jobId)` — pauses a running crawl
 - `resumeCrawl(jobId)` — resumes a paused crawl
+
+**SSRF guard:** `startCrawl` calls `lib/url-safety.assertSafeOutboundUrl(startUrl)` before any network activity. The helper refuses non-http(s) schemes and any target that resolves to an RFC 1918, loopback, link-local, or IPv6 unique-local / link-local / documentation address, including IPv4-mapped v6 forms. `services/sitemap-fetcher.js` applies the same guard inside `fetchText`, so recursive sitemap indexes cannot pivot into internal addresses either.
 
 **Feature flag:** `USE_PLAYWRIGHT_CRAWLER` constant read from `process.env` at startup. When `true`, `startCrawl()` delegates to `_runPlaywrightCrawl()` and returns immediately.
 
@@ -916,21 +950,21 @@ All routes require `superadmin` role.
 
 | Method | Path | Auth | Request | Response |
 |---|---|---|---|---|
-| GET | `/api/gsc/auth` | Admin or Superadmin | `?company_id=` (superadmin) | `{ authUrl }` — Google OAuth initiation URL |
-| GET | `/api/gsc/callback` | Public (OAuth callback) | `?code=&state=` | Redirects to `/integrations?gsc_connected=1` or `/integrations?gsc_error=...`. Stores tokens in `company_oauth_tokens`. |
+| GET | `/api/gsc/auth` | Admin or Superadmin | `?company_id=` (superadmin) | `{ authUrl }` — verifies the target company exists, creates a server-bound OAuth state via `oauth-state.service` (10-min expiry, single-use, bound to user + companyId), returns the Google OAuth initiation URL |
+| GET | `/api/gsc/callback` | Public (OAuth callback) | `?code=&state=` | Redirects to `/integrations?gsc_connected=1` or `/integrations?gsc_error=...`. Consumes the state (single-use), stores tokens in `company_oauth_tokens` **encrypted at rest** via `services/ads.crypto`. |
 | GET | `/api/gsc/status` | Admin or Superadmin | `?company_id=` | `{ connected, connected_email, connected_at }` |
 | DELETE | `/api/gsc/disconnect` | Admin or Superadmin | `?company_id=` | `{ ok: true }`. Removes token row. |
-| GET | `/api/gsc/properties` | Admin or Superadmin | `?company_id=` | `{ properties: [{ url, permission_level }] }`. Auto-refreshes token if expired. |
+| GET | `/api/gsc/properties` | Admin or Superadmin | `?company_id=` | `{ properties: [{ url, permission_level }] }`. Decrypts the stored tokens; auto-refreshes on expiry and re-encrypts the new access token. |
 
 ### GA4 OAuth (per company)
 
 | Method | Path | Auth | Request | Response |
 |---|---|---|---|---|
-| GET | `/api/ga4/auth` | Admin or Superadmin | `?company_id=` (superadmin) | `{ authUrl }` — Google OAuth initiation URL |
-| GET | `/api/ga4/callback` | Public (OAuth callback) | `?code=&state=` | Redirects to `/integrations?ga4_connected=1` or `/integrations?ga4_error=...`. Stores tokens in `company_oauth_tokens`. |
+| GET | `/api/ga4/auth` | Admin or Superadmin | `?company_id=` (superadmin) | `{ authUrl }` — verifies the target company exists, creates a server-bound OAuth state via `oauth-state.service`, returns the Google OAuth initiation URL |
+| GET | `/api/ga4/callback` | Public (OAuth callback) | `?code=&state=` | Redirects to `/integrations?ga4_connected=1` or `/integrations?ga4_error=...`. Consumes the state (single-use), stores tokens in `company_oauth_tokens` **encrypted at rest** via `services/ads.crypto`. |
 | GET | `/api/ga4/status` | Admin or Superadmin | `?company_id=` | `{ connected, connected_email, connected_at }` |
 | DELETE | `/api/ga4/disconnect` | Admin or Superadmin | `?company_id=` | `{ ok: true }`. Removes token row. |
-| GET | `/api/ga4/properties` | Admin or Superadmin | `?company_id=` | `{ properties: [{ name, display_name, property_id }] }`. Auto-refreshes token if expired. |
+| GET | `/api/ga4/properties` | Admin or Superadmin | `?company_id=` | `{ properties: [{ name, display_name, property_id }] }`. Decrypts stored tokens; auto-refreshes on expiry and re-encrypts the new access token. |
 
 ### Sites
 
