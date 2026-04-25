@@ -19,6 +19,7 @@ export const CANONICAL_CATEGORIES = [
   'International SEO',
   'Rankings & Traffic',
   'Backlinks & Authority',
+  'E-E-A-T Signals',
   'AI Overviews & AIO Optimization',
   'GEO & LLM Crawlers',
   'Local SEO',
@@ -27,8 +28,6 @@ export const CANONICAL_CATEGORIES = [
 const ALIASES = {
   // CSV → canonical (R-M3 rename)
   'Local SEO & GEO': 'Local SEO',
-  // E-E-A-T Signals merges into Backlinks & Authority in the 23-category canonical set
-  'E-E-A-T Signals': 'Backlinks & Authority',
   // Seed DB categories → canonical (frontend slugs)
   'Mobile SEO': 'Mobile & Usability',
   'Schema / Structured Data': 'Schema & Structured Data',

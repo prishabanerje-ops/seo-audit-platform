@@ -2,10 +2,11 @@ import { describe, it, expect } from 'vitest';
 import { CANONICAL_CATEGORIES, mapCategory, recategorizeBotPolicy } from '../src/taxonomy.js';
 
 describe('CANONICAL_CATEGORIES', () => {
-  it('contains exactly 23 unique slugs including Local SEO (renamed)', () => {
-    expect(CANONICAL_CATEGORIES.length).toBe(23);
-    expect(new Set(CANONICAL_CATEGORIES).size).toBe(23);
+  it('contains exactly 24 unique slugs including Local SEO (renamed) and E-E-A-T Signals', () => {
+    expect(CANONICAL_CATEGORIES.length).toBe(24);
+    expect(new Set(CANONICAL_CATEGORIES).size).toBe(24);
     expect(CANONICAL_CATEGORIES).toContain('Local SEO');
+    expect(CANONICAL_CATEGORIES).toContain('E-E-A-T Signals');
     expect(CANONICAL_CATEGORIES).not.toContain('Local SEO & GEO');
   });
 });
