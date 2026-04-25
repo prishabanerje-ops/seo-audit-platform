@@ -12,11 +12,11 @@ Sample names:
 - Editorial Link vs Paid Link [critical]
 - ...and 2 more
 
-> Decision: ___
+> Decision: cut-all
 
 ## Group 2: R-F3 in AI Overviews & AIO Optimization (1 flags)
 
 Sample names:
 - Schema Markup for AI Readability [warning]
 
-> Decision: ___
+> Decision: cut-all
