@@ -25,7 +25,7 @@ The new 321-row CSV is a fresh external authoritative target. This spec reconcil
 - Produce one canonical, reconciled check list with stable IDs
 - Cover decisions for every CSV row: `keep` / `cut` / `merge` / `edit` / `flag`
 - Add seed-only checks (any seed entry not in CSV) so the canonical list is complete
-- Normalize taxonomy onto the 23 frontend slugs already used in [frontend/src/lib/auditCategories.js](../../../frontend/src/lib/auditCategories.js)
+- Normalize taxonomy onto the 24 frontend slugs already used in [frontend/src/lib/auditCategories.js](../../../frontend/src/lib/auditCategories.js)
 - Three-value `automation_type` (automated / hybrid / manual) matching seed
 - Provide audit trail (decision log) for every cut, merge, and rename
 
@@ -51,8 +51,8 @@ Five sources currently disagree about how many checks the platform has:
 |---|---|---|---|
 | External CSV | 321 | 24 | automated / manual |
 | Seed file | 291 | 19 (DB) | automated / hybrid / manual |
-| Frontend slugs | — | 23 | — |
-| PRD claim | 321 | 23 | — |
+| Frontend slugs | — | 24 | — |
+| PRD claim | 321 | 23 (incorrect — actual frontend has 24) | — |
 | Parser actually firing | ~40 | — | — |
 
 This spec produces one source of truth that downstream phases consume.
@@ -69,7 +69,7 @@ This spec produces one source of truth that downstream phases consume.
 | `csv_row` | input CSV | Original line number, empty if seed-only |
 | `seed_check_number` | seed file | 1–291, empty if csv-only |
 | `source` | derived | `csv-only` / `seed-only` / `both` |
-| `category` | curated | One of the 23 canonical slugs (frontend taxonomy) |
+| `category` | curated | One of the 24 canonical slugs (frontend taxonomy) |
 | `subsection` | curated | Optional 2nd-level group |
 | `name` | curated | Final check name |
 | `original_name` | input | Pre-rename name |
@@ -92,7 +92,7 @@ This spec produces one source of truth that downstream phases consume.
 ### 5.3 Locked sub-decisions
 
 1. **Stable IDs (`C001`...)** — not seed numbers. Seed numbers stay in `seed_check_number` for traceability.
-2. **23 frontend slugs as canonical taxonomy** — minimizes UX churn vs current frontend.
+2. **24 frontend slugs as canonical taxonomy** — minimizes UX churn vs current frontend. (Note: original brainstorm said "23"; verified actual count is 24 during Task 5 implementation. The PRD will need updating in a later phase to reflect the correct count.)
 3. **`hybrid` added to automation_type** — matches seed; CSV `manual` rows with crawler-detectable signal get reclassified.
 
 ---
@@ -116,14 +116,14 @@ Rules apply mechanically. Tie-breaker: **Cut > Merge > Edit > Reclassify > Keep*
 |---|---|
 | R-M1 | CSV row matches seed by semantic name (≥90% token overlap or human-equivalent) → merge into seed entry; carry forward seed's `implementation_rule` and `tool_current` |
 | R-M2 | Two CSV checks measure the same signal in different categories → merge into more specific category; keep better-worded name |
-| R-M3 | Two known overlap actions. (a) `GEO & LLM Crawlers` ↔ `AI Overviews & AIO Optimization`: **both categories remain** in the canonical 23. Individual checks that semantically duplicate across them are merged into the more specific category (the bot-policy / robots-directive checks belong in `GEO & LLM Crawlers`; visibility/citation/snippet-formatting checks belong in `AI Overviews & AIO Optimization`). (b) Rename `Local SEO & GEO` → `Local SEO` (the "GEO" there means *geographic*, not Generative Engine Optimization, creating a name clash). Net effect: 23 canonical categories preserved, one renamed, no category count change |
+| R-M3 | Two known overlap actions. (a) `GEO & LLM Crawlers` ↔ `AI Overviews & AIO Optimization`: **both categories remain** in the canonical 23. Individual checks that semantically duplicate across them are merged into the more specific category (the bot-policy / robots-directive checks belong in `GEO & LLM Crawlers`; visibility/citation/snippet-formatting checks belong in `AI Overviews & AIO Optimization`). (b) Rename `Local SEO & GEO` → `Local SEO` (the "GEO" there means *geographic*, not Generative Engine Optimization, creating a name clash). Net effect: 24 canonical categories preserved, one renamed, no category count change |
 
 ### 6.3 Edit/rename rules (R-E*)
 
 | ID | Rule |
 |---|---|
 | R-E1 | Vague names → actionable specific names |
-| R-E2 | Normalize `category` to one of the 23 canonical slugs |
+| R-E2 | Normalize `category` to one of the 24 canonical slugs |
 | R-E3 | Severity vocabulary (`critical/warning/info`) already aligned — no change |
 
 ### 6.4 Reclassify-automation rules (R-R*)
