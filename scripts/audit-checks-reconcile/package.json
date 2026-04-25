@@ -1,0 +1,16 @@
+{
+  "name": "audit-checks-reconcile",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "cli": "node src/cli.js"
+  },
+  "devDependencies": {
+    "csv-parse": "^5.5.6",
+    "csv-stringify": "^6.5.2",
+    "vitest": "^2.1.8"
+  }
+}
