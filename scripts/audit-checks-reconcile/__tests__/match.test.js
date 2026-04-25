@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { semanticMatch, tokenOverlap } from '../src/match.js';
+import { tokenOverlap } from '../src/match.js';
 
 describe('tokenOverlap', () => {
   it('returns 1.0 for identical tokens', () => {
@@ -21,18 +21,3 @@ describe('tokenOverlap', () => {
   });
 });
 
-describe('semanticMatch', () => {
-  it('returns the seed entry whose normalized name overlaps >= threshold', () => {
-    const seed = [
-      { check_number: 1, name: 'All internal links return 200 status' },
-      { check_number: 2, name: '404 pages return proper 404 status code' },
-    ];
-    const result = semanticMatch('Internal links return 200 status', seed, 0.7);
-    expect(result?.check_number).toBe(1);
-  });
-
-  it('returns null when nothing meets threshold', () => {
-    const seed = [{ check_number: 1, name: 'Hreflang configured correctly' }];
-    expect(semanticMatch('Title tag length under 60 chars', seed, 0.9)).toBe(null);
-  });
-});

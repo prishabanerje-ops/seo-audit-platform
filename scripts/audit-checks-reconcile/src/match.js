@@ -22,15 +22,3 @@ export function tokenOverlap(a, b) {
   return union === 0 ? 0 : inter / union;
 }
 
-export function semanticMatch(name, seedEntries, threshold = 0.9) {
-  let best = null;
-  let bestScore = 0;
-  for (const entry of seedEntries) {
-    const score = tokenOverlap(name, entry.name);
-    if (score > bestScore && score >= threshold) {
-      best = entry;
-      bestScore = score;
-    }
-  }
-  return best;
-}

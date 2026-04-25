@@ -81,3 +81,19 @@
 - Spec estimated 220–280 final rows; actual canonical has **610 rows** (515 active after cuts).
 - Cause: csv and seed have very different naming conventions; even with category-aware matching, only 32 merges occurred. 289 seed entries remain as standalone rows.
 - Phase 2 gap-mapping should reconcile these further by matching against parser output.
+
+---
+
+## Phase 2 Prerequisites (deferred from Phase 1 review)
+
+These tooling issues did not affect Phase 1 artifacts but should be addressed before the reconciliation tool is reused.
+
+1. **`applybulk` re-run safety** — `cli.js` patches the draft CSV in place. A second `applybulk` run reads the already-patched draft and silently no-ops on previously resolved flags. **Fix:** add a guard that warns when triage decisions reference rows that are no longer `decision=flag`, or regenerate the draft from the pipeline rather than patching in place.
+
+2. **CSV input validation** — `csv.js` uses `relax_quotes: true` and `relax_column_count: true` to handle real-world CSV quirks. The latter silently drops rows with missing columns, leaving `undefined` values that downstream code coerces to empty strings. **Fix:** add a post-parse validation step asserting that `sub_check_name`, `group`, `severity`, `automation_type` are non-empty strings; report any malformed row before the pipeline runs.
+
+3. **R-E2 traceability** — Spec defines R-E2 as a category-normalization edit rule. The implementation applies `mapCategory()` inline in `reconcile.js#csvRowToCanonical` / `seedRowToCanonical` rather than as a named rule object. Functionally correct, but the `rule_id` column never shows `R-E2` for normalized rows. **Fix:** either extract R-E2 into `rules/edit.js` as an `R_E2` object, or document the inline application in the canonical CSV's column comments.
+
+4. **`finalize` rationale overwrite on `comment:` decisions** — `cli.js` finalize loop overwrites `row.rationale` with `"individual triage (comment:...)"` when a user picks a `comment:` resolution, losing the original rule's rationale. Affected zero rows in Phase 1 (no individual flags reached finalize). **Fix:** prefix instead of replace — `row.rationale = "${original}; individual triage (...)"`.
+
+The dead `semanticMatch` export from `src/match.js` (raised in the same review) was removed in commit following this finalization.
