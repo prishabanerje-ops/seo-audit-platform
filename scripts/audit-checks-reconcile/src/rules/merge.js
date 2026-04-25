@@ -24,7 +24,7 @@ const R_M1 = {
       if (other.check_id === row.check_id) continue;
       if (other.source === 'csv-only') continue;
       const score = tokenOverlap(row.name, other.name);
-      if (score >= 0.8 && score > bestScore) {
+      if (score >= 0.9 && score > bestScore) {
         best = other;
         bestScore = score;
       }
