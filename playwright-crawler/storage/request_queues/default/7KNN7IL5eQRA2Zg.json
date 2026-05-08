@@ -1,0 +1,9 @@
+{
+	"id": "7KNN7IL5eQRA2Zg",
+	"json": "{\"id\":\"7KNN7IL5eQRA2Zg\",\"url\":\"https://www.cars24.com/sell-used-cars/\",\"uniqueKey\":\"https://www.cars24.com/sell-used-cars\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"depth\":1,\"redirectChain\":[],\"__crawlee\":{\"crawlDepth\":1}}}",
+	"method": "GET",
+	"orderNo": 1776072160799,
+	"retryCount": 0,
+	"uniqueKey": "https://www.cars24.com/sell-used-cars",
+	"url": "https://www.cars24.com/sell-used-cars/"
+}

@@ -1,0 +1,9 @@
+{
+	"id": "HF7U4H0Kn1PFvF2",
+	"json": "{\"id\":\"HF7U4H0Kn1PFvF2\",\"url\":\"https://www.cars24.com/buy-used-maruti-cars-gurgaon/\",\"loadedUrl\":\"https://www.cars24.com/buy-used-maruti-cars-gurgaon/\",\"uniqueKey\":\"https://www.cars24.com/buy-used-maruti-cars-gurgaon\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"depth\":1,\"redirectChain\":[],\"responseTime\":0,\"__crawlee\":{\"crawlDepth\":1,\"state\":4}},\"handledAt\":\"2026-04-13T09:22:44.509Z\"}",
+	"method": "GET",
+	"orderNo": null,
+	"retryCount": 0,
+	"uniqueKey": "https://www.cars24.com/buy-used-maruti-cars-gurgaon",
+	"url": "https://www.cars24.com/buy-used-maruti-cars-gurgaon/"
+}

@@ -1,0 +1,9 @@
+{
+	"id": "1NSVDuoGIvUD3u3",
+	"json": "{\"id\":\"1NSVDuoGIvUD3u3\",\"url\":\"https://www.cars24.com/testimonials/\",\"uniqueKey\":\"https://www.cars24.com/testimonials\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"depth\":1,\"redirectChain\":[],\"__crawlee\":{\"crawlDepth\":1}}}",
+	"method": "GET",
+	"orderNo": 1776072160799,
+	"retryCount": 0,
+	"uniqueKey": "https://www.cars24.com/testimonials",
+	"url": "https://www.cars24.com/testimonials/"
+}

@@ -1,0 +1,84 @@
+{
+  "botAccess": {
+    "Googlebot": {
+      "userAgent": "Googlebot",
+      "allowed": true,
+      "explicit": true
+    },
+    "Google-Extended": {
+      "userAgent": "Google-Extended",
+      "allowed": true,
+      "explicit": true
+    },
+    "Bingbot": {
+      "userAgent": "Bingbot",
+      "allowed": true,
+      "explicit": true
+    },
+    "GPTBot": {
+      "userAgent": "GPTBot",
+      "allowed": true,
+      "explicit": true
+    },
+    "ChatGPT-User": {
+      "userAgent": "ChatGPT-User",
+      "allowed": true,
+      "explicit": true
+    },
+    "OAI-SearchBot": {
+      "userAgent": "OAI-SearchBot",
+      "allowed": true,
+      "explicit": true
+    },
+    "ClaudeBot": {
+      "userAgent": "ClaudeBot",
+      "allowed": true,
+      "explicit": true
+    },
+    "anthropic-ai": {
+      "userAgent": "anthropic-ai",
+      "allowed": true,
+      "explicit": true
+    },
+    "PerplexityBot": {
+      "userAgent": "PerplexityBot",
+      "allowed": true,
+      "explicit": true
+    },
+    "Bytespider": {
+      "userAgent": "Bytespider",
+      "allowed": true,
+      "explicit": true
+    },
+    "CCBot": {
+      "userAgent": "CCBot",
+      "allowed": true,
+      "explicit": true
+    },
+    "Applebot": {
+      "userAgent": "Applebot",
+      "allowed": true,
+      "explicit": true
+    },
+    "FacebookBot": {
+      "userAgent": "FacebookBot",
+      "allowed": true,
+      "explicit": true
+    }
+  },
+  "sitemapsInRobots": [
+    "https://www.cars24.com/sitemap.xml"
+  ],
+  "hasSitemapInRobots": true,
+  "crawlDelay": null,
+  "_googlebotAllowed": true,
+  "_gptbotAllowed": true,
+  "_claudebotAllowed": true,
+  "_perplexityAllowed": true,
+  "_criticalPathBlocked": false,
+  "_jsCssBlocked": false,
+  "_missingRobots": false,
+  "_rawContent": "User-agent: *\nDisallow: /lead/variant/\nDisallow: /lead/year/\nDisallow: /*/feed/\nDisallow: /*?filter=\nDisallow: /blog-v2/*\nDisallow: /inspection-complete/*\nDisallow: /loans24/*\nDisallow: /cdn-cgi/\nDisallow: /account/*\nDisallow: */amp/*\nDisallow: /ads.js\nDisallow: /ola-electric\nDisallow: /vinfast\nDisallow: /pravaig\nDisallow: /ford\nDisallow: /rolls-royce\nDisallow: /bajaj\nDisallow: /mercedes-benz\nDisallow: /maruti-suzuki\nDisallow: /toyota\nDisallow: /kia\nDisallow: /pmv\nDisallow: /lotus\nDisallow: /lamborghini\nDisallow: /lexus\nDisallow: /land-rover\nDisallow: /maserati\nDisallow: /ferrari\nDisallow: /mini\nDisallow: /isuzu\nDisallow: /jaguar\nDisallow: /renault\nDisallow: /honda\nDisallow: /nissan\nDisallow: /bentley\nDisallow: /aston-martin\nDisallow: /byd\nDisallow: /volkswagen\nDisallow: /hyundai\nDisallow: /mahindra\nDisallow: /jeep\nDisallow: /audi\nDisallow: /skoda\nDisallow: /tata\nDisallow: /mg\nDisallow: /citroen\nDisallow: /force\nDisallow: /tesla\nDisallow: /strom-motors\nDisallow: /porsche\nDisallow: /mclaren\nDisallow: /xiaomi\nDisallow: /bmw\nDisallow: /volvo\nDisallow: /compare-cars\nDisallow: /checkout\nDisallow: //checkout\nDisallow: /new-cars/_next/*\nDisallow: /make-offer-handler/*\nDisallow: */_next/*\n\nSitemap: https://www.cars24.com/sitemap.xml",
+  "robotsUrl": "https://www.cars24.com/robots.txt",
+  "robotsStatusCode": 200
+}

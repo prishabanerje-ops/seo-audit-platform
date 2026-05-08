@@ -1,0 +1,9 @@
+{
+	"id": "9db3rDNALdDt2sy",
+	"json": "{\"id\":\"9db3rDNALdDt2sy\",\"url\":\"https://www.cars24.com/careers/\",\"uniqueKey\":\"https://www.cars24.com/careers\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"depth\":1,\"redirectChain\":[],\"__crawlee\":{\"crawlDepth\":1}}}",
+	"method": "GET",
+	"orderNo": 1776072160799,
+	"retryCount": 0,
+	"uniqueKey": "https://www.cars24.com/careers",
+	"url": "https://www.cars24.com/careers/"
+}

@@ -1,0 +1,546 @@
+{
+  "usableSessionsCount": 12,
+  "retiredSessionsCount": 0,
+  "sessions": [
+    {
+      "id": "session_C2WORqrkGz",
+      "cookieJar": {
+        "version": "tough-cookie@6.0.1",
+        "storeType": "MemoryCookieStore",
+        "rejectPublicSuffixes": true,
+        "enableLooseMode": false,
+        "allowSpecialUseDomain": true,
+        "prefixSecurity": "silent",
+        "cookies": [
+          {
+            "key": "statsigStableId",
+            "value": "dbd0c7cb-7b53-498d-918f-5dd593a097e1",
+            "expires": "2026-10-12T21:22:40.000Z",
+            "maxAge": 15768000,
+            "domain": "www.cars24.com",
+            "path": "/",
+            "hostOnly": false,
+            "creation": "2026-04-13T09:22:40.757Z",
+            "lastAccessed": "2026-04-13T09:22:40.757Z",
+            "sameSite": "lax"
+          },
+          {
+            "key": "__cf_bm",
+            "value": "86ThBuBki5xUDUQfl44QOgqM.XbQrMKYnbNn7KjFIxE-1776072160.1517122-1.0.1.1-I6m3UdQznqADdGTvQYS9crOXOH3MbbnZo8.pMVe91335QaTCrJLG7MJgKU9zY0OjNKQTNh0l2LcdreK21_FDwHsQbtQvElP6mXRsKZ1lOtOY_8V90yD1ELPA4exMSh6e",
+            "expires": "2026-04-13T09:52:40.000Z",
+            "domain": "cars24.com",
+            "path": "/",
+            "secure": true,
+            "httpOnly": true,
+            "hostOnly": false,
+            "creation": "2026-04-13T09:22:40.757Z",
+            "lastAccessed": "2026-04-13T09:22:40.757Z"
+          }
+        ]
+      },
+      "userData": {},
+      "maxErrorScore": 3,
+      "errorScoreDecrement": 0.5,
+      "expiresAt": "2026-04-13T10:12:39.798Z",
+      "createdAt": "2026-04-13T09:22:39.798Z",
+      "usageCount": 1,
+      "maxUsageCount": 50,
+      "errorScore": 0
+    },
+    {
+      "id": "session_jCVzLlzFqi",
+      "cookieJar": {
+        "version": "tough-cookie@6.0.1",
+        "storeType": "MemoryCookieStore",
+        "rejectPublicSuffixes": true,
+        "enableLooseMode": false,
+        "allowSpecialUseDomain": true,
+        "prefixSecurity": "silent",
+        "cookies": [
+          {
+            "key": "statsigStableId",
+            "value": "80f2ccb5-6e95-4dd9-8f63-732704531d96",
+            "expires": "2026-10-12T21:22:40.000Z",
+            "maxAge": 15768000,
+            "domain": "www.cars24.com",
+            "path": "/",
+            "hostOnly": false,
+            "creation": "2026-04-13T09:22:41.835Z",
+            "lastAccessed": "2026-04-13T09:22:41.835Z",
+            "sameSite": "lax"
+          },
+          {
+            "key": "__cf_bm",
+            "value": "EkSnG23iHuChQ1jjnMqzkSWvfGOjG2rOiamiCvvX8.Q-1776072160.882317-1.0.1.1-g27W79qrTgRAuZCyA5YQO7oY6GlGhyIKRABya9zbbCR_0Ayv5_vkowY_kZ0EPuHyoagVD9wIK7FSt1BQ5OOWCqk2tVrDilsI_mMmms2np8dEDpKpTpda5g4VjTleWZgo",
+            "expires": "2026-04-13T09:52:41.000Z",
+            "domain": "cars24.com",
+            "path": "/",
+            "secure": true,
+            "httpOnly": true,
+            "hostOnly": false,
+            "creation": "2026-04-13T09:22:41.835Z",
+            "lastAccessed": "2026-04-13T09:22:41.835Z"
+          }
+        ]
+      },
+      "userData": {},
+      "maxErrorScore": 3,
+      "errorScoreDecrement": 0.5,
+      "expiresAt": "2026-04-13T10:12:40.831Z",
+      "createdAt": "2026-04-13T09:22:40.831Z",
+      "usageCount": 1,
+      "maxUsageCount": 50,
+      "errorScore": 0
+    },
+    {
+      "id": "session_9WNSb8H2tv",
+      "cookieJar": {
+        "version": "tough-cookie@6.0.1",
+        "storeType": "MemoryCookieStore",
+        "rejectPublicSuffixes": true,
+        "enableLooseMode": false,
+        "allowSpecialUseDomain": true,
+        "prefixSecurity": "silent",
+        "cookies": [
+          {
+            "key": "statsigStableId",
+            "value": "945a9d65-22da-47f4-b8e9-8dde0dcca697",
+            "expires": "2026-10-12T21:22:41.000Z",
+            "maxAge": 15768000,
+            "domain": "www.cars24.com",
+            "path": "/",
+            "hostOnly": false,
+            "creation": "2026-04-13T09:22:41.757Z",
+            "lastAccessed": "2026-04-13T09:22:41.757Z",
+            "sameSite": "lax"
+          },
+          {
+            "key": "__cf_bm",
+            "value": "j0RQ.feSzeN712kSeTGw_mudn2tQOFsACdufKOQ.5KU-1776072160.8826463-1.0.1.1-3rSOVtYcsvTp.HxrR0VXZAeJr8aOhIUMQQpVWnFbWUzAGBTwf4AehkYgJkoS5FPPVH2z1U7vw15q1yKYOsTymFycApGXb2430_fV5t4Miodjm0883pDJZIlx8WCBDWs.",
+            "expires": "2026-04-13T09:52:41.000Z",
+            "domain": "cars24.com",
+            "path": "/",
+            "secure": true,
+            "httpOnly": true,
+            "hostOnly": false,
+            "creation": "2026-04-13T09:22:41.757Z",
+            "lastAccessed": "2026-04-13T09:22:41.757Z"
+          }
+        ]
+      },
+      "userData": {},
+      "maxErrorScore": 3,
+      "errorScoreDecrement": 0.5,
+      "expiresAt": "2026-04-13T10:12:40.832Z",
+      "createdAt": "2026-04-13T09:22:40.832Z",
+      "usageCount": 1,
+      "maxUsageCount": 50,
+      "errorScore": 0
+    },
+    {
+      "id": "session_1utNBbSc6l",
+      "cookieJar": {
+        "version": "tough-cookie@6.0.1",
+        "storeType": "MemoryCookieStore",
+        "rejectPublicSuffixes": true,
+        "enableLooseMode": false,
+        "allowSpecialUseDomain": true,
+        "prefixSecurity": "silent",
+        "cookies": [
+          {
+            "key": "statsigStableId",
+            "value": "28a5a513-d9af-446f-b7a9-14816a25c622",
+            "expires": "2026-10-12T21:22:40.000Z",
+            "maxAge": 15768000,
+            "domain": "www.cars24.com",
+            "path": "/",
+            "hostOnly": false,
+            "creation": "2026-04-13T09:22:42.005Z",
+            "lastAccessed": "2026-04-13T09:22:42.005Z",
+            "sameSite": "lax"
+          },
+          {
+            "key": "__cf_bm",
+            "value": "OB5OgjbuYB5iVvJl8xooAqvIZDApJNRDITbIewhZOKI-1776072160.883042-1.0.1.1-Nh1FwFzVOPhJfxW84G_xiCSMp07KyLmiG9RNFN.dmhIkBHHoeZGTEr6lymIQhw2DeSA09OTq7klMC92hS0D9suzbMqBnRd7A4Ngvktd.PZ9BRwU9UVKqCjRbR1NWzkgn",
+            "expires": "2026-04-13T09:52:41.000Z",
+            "domain": "cars24.com",
+            "path": "/",
+            "secure": true,
+            "httpOnly": true,
+            "hostOnly": false,
+            "creation": "2026-04-13T09:22:42.005Z",
+            "lastAccessed": "2026-04-13T09:22:42.005Z"
+          }
+        ]
+      },
+      "userData": {},
+      "maxErrorScore": 3,
+      "errorScoreDecrement": 0.5,
+      "expiresAt": "2026-04-13T10:12:40.833Z",
+      "createdAt": "2026-04-13T09:22:40.833Z",
+      "usageCount": 1,
+      "maxUsageCount": 50,
+      "errorScore": 0
+    },
+    {
+      "id": "session_mecdGpspn5",
+      "cookieJar": {
+        "version": "tough-cookie@6.0.1",
+        "storeType": "MemoryCookieStore",
+        "rejectPublicSuffixes": true,
+        "enableLooseMode": false,
+        "allowSpecialUseDomain": true,
+        "prefixSecurity": "silent",
+        "cookies": [
+          {
+            "key": "statsigStableId",
+            "value": "2c831397-1622-4ae2-a186-c1bf204fc0af",
+            "expires": "2026-10-12T21:22:41.000Z",
+            "maxAge": 15768000,
+            "domain": "www.cars24.com",
+            "path": "/",
+            "hostOnly": false,
+            "creation": "2026-04-13T09:22:42.595Z",
+            "lastAccessed": "2026-04-13T09:22:42.595Z",
+            "sameSite": "lax"
+          },
+          {
+            "key": "__cf_bm",
+            "value": "OxbMxuRXoSAH_XOnkUx5Cmr5QEysAk84mikP3PW11ZI-1776072161.8504274-1.0.1.1-jtsNUpdgsOUXsmbd2LZj.3oxxhqqHhO0EGwCZtSfW.RKR9j6LBDSGobokyAIGhL8ZurP_0MiQ9t7XQAQrlOlKaFWFaM6NdDxii3YQJ5vRVK4MCxHjuKjC9T8Y7ZxUxrN",
+            "expires": "2026-04-13T09:52:42.000Z",
+            "domain": "cars24.com",
+            "path": "/",
+            "secure": true,
+            "httpOnly": true,
+            "hostOnly": false,
+            "creation": "2026-04-13T09:22:42.595Z",
+            "lastAccessed": "2026-04-13T09:22:42.595Z"
+          }
+        ]
+      },
+      "userData": {},
+      "maxErrorScore": 3,
+      "errorScoreDecrement": 0.5,
+      "expiresAt": "2026-04-13T10:12:41.818Z",
+      "createdAt": "2026-04-13T09:22:41.818Z",
+      "usageCount": 1,
+      "maxUsageCount": 50,
+      "errorScore": 0
+    },
+    {
+      "id": "session_ZXKHv7229i",
+      "cookieJar": {
+        "version": "tough-cookie@6.0.1",
+        "storeType": "MemoryCookieStore",
+        "rejectPublicSuffixes": true,
+        "enableLooseMode": false,
+        "allowSpecialUseDomain": true,
+        "prefixSecurity": "silent",
+        "cookies": [
+          {
+            "key": "statsigStableId",
+            "value": "4e384f55-70ea-4202-936d-d68dfc55b92a",
+            "expires": "2026-10-12T21:22:41.000Z",
+            "maxAge": 15768000,
+            "domain": "www.cars24.com",
+            "path": "/",
+            "hostOnly": false,
+            "creation": "2026-04-13T09:22:42.682Z",
+            "lastAccessed": "2026-04-13T09:22:42.682Z",
+            "sameSite": "lax"
+          },
+          {
+            "key": "__cf_bm",
+            "value": "wQsHHoSX5A2IE5cwvwq3sb4O25LrqiBJ0E.5d2z.l7M-1776072161.868765-1.0.1.1-Wfj2tgjK74qNaaUD_oCVQd_JrA_ouFstccPKc_Q6wj5HDXlykRWn06kpkzw3YGcIxuDQeRQWqfGRCs4szI3lSKD7j9Wj5mB33ExtXSmC0P7AjOuGWrJjg.hIMKY4uIWd",
+            "expires": "2026-04-13T09:52:42.000Z",
+            "domain": "cars24.com",
+            "path": "/",
+            "secure": true,
+            "httpOnly": true,
+            "hostOnly": false,
+            "creation": "2026-04-13T09:22:42.682Z",
+            "lastAccessed": "2026-04-13T09:22:42.682Z"
+          }
+        ]
+      },
+      "userData": {},
+      "maxErrorScore": 3,
+      "errorScoreDecrement": 0.5,
+      "expiresAt": "2026-04-13T10:12:41.888Z",
+      "createdAt": "2026-04-13T09:22:41.888Z",
+      "usageCount": 1,
+      "maxUsageCount": 50,
+      "errorScore": 0
+    },
+    {
+      "id": "session_8JHrGYsUiC",
+      "cookieJar": {
+        "version": "tough-cookie@6.0.1",
+        "storeType": "MemoryCookieStore",
+        "rejectPublicSuffixes": true,
+        "enableLooseMode": false,
+        "allowSpecialUseDomain": true,
+        "prefixSecurity": "silent",
+        "cookies": [
+          {
+            "key": "statsigStableId",
+            "value": "5ee9589d-7fe5-43d9-9f92-fa74f15df09a",
+            "expires": "2026-10-12T21:22:42.000Z",
+            "maxAge": 15768000,
+            "domain": "www.cars24.com",
+            "path": "/",
+            "hostOnly": false,
+            "creation": "2026-04-13T09:22:43.043Z",
+            "lastAccessed": "2026-04-13T09:22:43.043Z",
+            "sameSite": "lax"
+          },
+          {
+            "key": "__cf_bm",
+            "value": "TTK_nC8wS6SIsakCUZ2THTV9L5NbNewFMZD1GRmMR4I-1776072162.142377-1.0.1.1-MHwF4dTwihgJ1Yc9tk2dprn59oWl2i7KoJEDinFr6kKAJEWMrpZApCB3ZSSLfSiqMxz_F8srQk7YD5QUFVHRDzL_tg4pCP6jrXkRlq2LDgNwR_tqagn3obu6vaebZpM2",
+            "expires": "2026-04-13T09:52:42.000Z",
+            "domain": "cars24.com",
+            "path": "/",
+            "secure": true,
+            "httpOnly": true,
+            "hostOnly": false,
+            "creation": "2026-04-13T09:22:43.043Z",
+            "lastAccessed": "2026-04-13T09:22:43.043Z"
+          }
+        ]
+      },
+      "userData": {},
+      "maxErrorScore": 3,
+      "errorScoreDecrement": 0.5,
+      "expiresAt": "2026-04-13T10:12:42.029Z",
+      "createdAt": "2026-04-13T09:22:42.029Z",
+      "usageCount": 1,
+      "maxUsageCount": 50,
+      "errorScore": 0
+    },
+    {
+      "id": "session_8ZN46ixlqU",
+      "cookieJar": {
+        "version": "tough-cookie@6.0.1",
+        "storeType": "MemoryCookieStore",
+        "rejectPublicSuffixes": true,
+        "enableLooseMode": false,
+        "allowSpecialUseDomain": true,
+        "prefixSecurity": "silent",
+        "cookies": [
+          {
+            "key": "statsigStableId",
+            "value": "8f3521b9-ab49-4395-9b4c-c44bdc16a95f",
+            "expires": "2026-10-12T21:22:42.000Z",
+            "maxAge": 15768000,
+            "domain": "www.cars24.com",
+            "path": "/",
+            "hostOnly": false,
+            "creation": "2026-04-13T09:22:43.708Z",
+            "lastAccessed": "2026-04-13T09:22:43.708Z",
+            "sameSite": "lax"
+          },
+          {
+            "key": "__cf_bm",
+            "value": "aW0k2D0UQ7PCNtSl35qXLrP9vWL_D0RwMIjDMPdUODg-1776072162.6448758-1.0.1.1-nwADF5hWFIAqm1GxEL0yjJwnhTUZeIaVvaSc94lsnCeVQveSICJGkH_EgvId0WyC0WJ6SFJL9EYc0zykWruuT3n2VKddGski9c.NjD0FczDiuJQma6HKSNnM613pNrle",
+            "expires": "2026-04-13T09:52:43.000Z",
+            "domain": "cars24.com",
+            "path": "/",
+            "secure": true,
+            "httpOnly": true,
+            "hostOnly": false,
+            "creation": "2026-04-13T09:22:43.708Z",
+            "lastAccessed": "2026-04-13T09:22:43.708Z"
+          }
+        ]
+      },
+      "userData": {},
+      "maxErrorScore": 3,
+      "errorScoreDecrement": 0.5,
+      "expiresAt": "2026-04-13T10:12:42.662Z",
+      "createdAt": "2026-04-13T09:22:42.662Z",
+      "usageCount": 1,
+      "maxUsageCount": 50,
+      "errorScore": 0
+    },
+    {
+      "id": "session_jh7hNFZw9N",
+      "cookieJar": {
+        "version": "tough-cookie@6.0.1",
+        "storeType": "MemoryCookieStore",
+        "rejectPublicSuffixes": true,
+        "enableLooseMode": false,
+        "allowSpecialUseDomain": true,
+        "prefixSecurity": "silent",
+        "cookies": [
+          {
+            "key": "statsigStableId",
+            "value": "effd15c3-9137-403c-ac04-d83a29b5ecff",
+            "expires": "2026-10-12T21:22:42.000Z",
+            "maxAge": 15768000,
+            "domain": "www.cars24.com",
+            "path": "/",
+            "hostOnly": false,
+            "creation": "2026-04-13T09:22:43.607Z",
+            "lastAccessed": "2026-04-13T09:22:43.607Z",
+            "sameSite": "lax"
+          },
+          {
+            "key": "__cf_bm",
+            "value": "K5ZgsMXnlzRzX0pE12JhNLZKNztHR3rGPypyCLp4E2A-1776072162.7722015-1.0.1.1-jyq4uQxtZVi5jadU.tAB4LJwp6NjokT_OFRbYbQ6ZGQgqNvZ2L96_Z8oiwkgiPDRVOoJCnEptw43Tn8kYXR4upaFwOr.EZSiIhLpvDjAPe2DpBBz4G5WG0jR6zyZlxJj",
+            "expires": "2026-04-13T09:52:43.000Z",
+            "domain": "cars24.com",
+            "path": "/",
+            "secure": true,
+            "httpOnly": true,
+            "hostOnly": false,
+            "creation": "2026-04-13T09:22:43.607Z",
+            "lastAccessed": "2026-04-13T09:22:43.607Z"
+          }
+        ]
+      },
+      "userData": {},
+      "maxErrorScore": 3,
+      "errorScoreDecrement": 0.5,
+      "expiresAt": "2026-04-13T10:12:42.730Z",
+      "createdAt": "2026-04-13T09:22:42.730Z",
+      "usageCount": 1,
+      "maxUsageCount": 50,
+      "errorScore": 0
+    },
+    {
+      "id": "session_gBW26eu0IU",
+      "cookieJar": {
+        "version": "tough-cookie@6.0.1",
+        "storeType": "MemoryCookieStore",
+        "rejectPublicSuffixes": true,
+        "enableLooseMode": false,
+        "allowSpecialUseDomain": true,
+        "prefixSecurity": "silent",
+        "cookies": [
+          {
+            "key": "statsigStableId",
+            "value": "6a98be45-dd89-433d-9f53-d2a33948d00d",
+            "expires": "2026-10-12T21:22:43.000Z",
+            "maxAge": 15768000,
+            "domain": "www.cars24.com",
+            "path": "/",
+            "hostOnly": false,
+            "creation": "2026-04-13T09:22:44.156Z",
+            "lastAccessed": "2026-04-13T09:22:44.156Z",
+            "sameSite": "lax"
+          },
+          {
+            "key": "__cf_bm",
+            "value": "WkDsQab5puNPv.WR.rN2AdBKQFm0kvSDNxWwC1q2zok-1776072163.0738173-1.0.1.1-3mtGMSWJzfUP6paKb5DiXHHzfLV5hKtLbubW9yBAcz.ppU4ES3L8y6qUnJIghYcSvjjCt_EQWi2FjsnuU3x.Ht5SnTaHd8KhaSeGw7j.JFkNHron0AIWV0JxE66fqvFQ",
+            "expires": "2026-04-13T09:52:43.000Z",
+            "domain": "cars24.com",
+            "path": "/",
+            "secure": true,
+            "httpOnly": true,
+            "hostOnly": false,
+            "creation": "2026-04-13T09:22:44.156Z",
+            "lastAccessed": "2026-04-13T09:22:44.156Z"
+          }
+        ]
+      },
+      "userData": {},
+      "maxErrorScore": 3,
+      "errorScoreDecrement": 0.5,
+      "expiresAt": "2026-04-13T10:12:43.093Z",
+      "createdAt": "2026-04-13T09:22:43.093Z",
+      "usageCount": 1,
+      "maxUsageCount": 50,
+      "errorScore": 0
+    },
+    {
+      "id": "session_JoKhiDVJTY",
+      "cookieJar": {
+        "version": "tough-cookie@6.0.1",
+        "storeType": "MemoryCookieStore",
+        "rejectPublicSuffixes": true,
+        "enableLooseMode": false,
+        "allowSpecialUseDomain": true,
+        "prefixSecurity": "silent",
+        "cookies": [
+          {
+            "key": "statsigStableId",
+            "value": "a472ffb3-8c93-41f5-b186-5d13951d5908",
+            "expires": "2026-10-12T21:22:43.000Z",
+            "maxAge": 15768000,
+            "domain": "www.cars24.com",
+            "path": "/",
+            "hostOnly": false,
+            "creation": "2026-04-13T09:22:44.220Z",
+            "lastAccessed": "2026-04-13T09:22:44.220Z",
+            "sameSite": "lax"
+          },
+          {
+            "key": "__cf_bm",
+            "value": "ohZnro7862YYG23ejmMJ9USJw.ee91kB3cI19CddMl8-1776072163.6499176-1.0.1.1-e.CpjNrp8PH8cduL48hG1a7cWP9dNCDB7E9iAQTDXR9YgXO5INPdU0bARxtl9eqagKyR1NvCOjlg5wXfU8YH3Xyg58gsMTTLjDG89sWaPu4NcBjNk32n91C.KAYzOkka",
+            "expires": "2026-04-13T09:52:43.000Z",
+            "domain": "cars24.com",
+            "path": "/",
+            "secure": true,
+            "httpOnly": true,
+            "hostOnly": false,
+            "creation": "2026-04-13T09:22:44.220Z",
+            "lastAccessed": "2026-04-13T09:22:44.220Z"
+          }
+        ]
+      },
+      "userData": {},
+      "maxErrorScore": 3,
+      "errorScoreDecrement": 0.5,
+      "expiresAt": "2026-04-13T10:12:43.668Z",
+      "createdAt": "2026-04-13T09:22:43.668Z",
+      "usageCount": 1,
+      "maxUsageCount": 50,
+      "errorScore": 0
+    },
+    {
+      "id": "session_hGZyeQnbTJ",
+      "cookieJar": {
+        "version": "tough-cookie@6.0.1",
+        "storeType": "MemoryCookieStore",
+        "rejectPublicSuffixes": true,
+        "enableLooseMode": false,
+        "allowSpecialUseDomain": true,
+        "prefixSecurity": "silent",
+        "cookies": [
+          {
+            "key": "statsigStableId",
+            "value": "4adb85d6-ecd5-4494-a66f-f7cd392a88fc",
+            "expires": "2026-10-12T21:22:43.000Z",
+            "maxAge": 15768000,
+            "domain": "www.cars24.com",
+            "path": "/",
+            "hostOnly": false,
+            "creation": "2026-04-13T09:22:44.467Z",
+            "lastAccessed": "2026-04-13T09:22:44.467Z",
+            "sameSite": "lax"
+          },
+          {
+            "key": "__cf_bm",
+            "value": "J_G4ZAqJf11vh2OiU4e6Tszaa_CgI8LcUWQOuy5viW8-1776072163.8085759-1.0.1.1-dEVPVdnZ_OC.pFG.utg2dTCi3WictU84PiiU8uW_suFqKH.HKMREXDtngTRKoweQDfw.MWHAx8m9FRRtMgTgCzwxPEgCY.tcYu.r26tWgfSEirPdiY5ilTRa4wmRWYGM",
+            "expires": "2026-04-13T09:52:44.000Z",
+            "domain": "cars24.com",
+            "path": "/",
+            "secure": true,
+            "httpOnly": true,
+            "hostOnly": false,
+            "creation": "2026-04-13T09:22:44.467Z",
+            "lastAccessed": "2026-04-13T09:22:44.467Z"
+          }
+        ]
+      },
+      "userData": {},
+      "maxErrorScore": 3,
+      "errorScoreDecrement": 0.5,
+      "expiresAt": "2026-04-13T10:12:43.755Z",
+      "createdAt": "2026-04-13T09:22:43.755Z",
+      "usageCount": 1,
+      "maxUsageCount": 50,
+      "errorScore": 0
+    }
+  ]
+}

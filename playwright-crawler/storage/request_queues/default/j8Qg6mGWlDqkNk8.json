@@ -1,0 +1,9 @@
+{
+	"id": "j8Qg6mGWlDqkNk8",
+	"json": "{\"id\":\"j8Qg6mGWlDqkNk8\",\"url\":\"https://www.cars24.com/new-cars/compare-cars/\",\"uniqueKey\":\"https://www.cars24.com/new-cars/compare-cars\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"depth\":1,\"redirectChain\":[],\"__crawlee\":{\"crawlDepth\":1}}}",
+	"method": "GET",
+	"orderNo": 1776072160799,
+	"retryCount": 0,
+	"uniqueKey": "https://www.cars24.com/new-cars/compare-cars",
+	"url": "https://www.cars24.com/new-cars/compare-cars/"
+}

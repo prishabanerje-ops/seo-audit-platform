@@ -1,0 +1,76 @@
+import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import api from '../api/index.js';
+
+const AuthContext = createContext(null);
+
+export function AuthProvider({ children }) {
+  const [user,      setUser]      = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const [viewingCompany, setViewingCompanyState] = useState(() => {
+    try {
+      const saved = localStorage.getItem('viewingCompany');
+      return saved ? JSON.parse(saved) : null;
+    } catch { return null; }
+  });
+
+  const setViewingCompany = (company) => {
+    if (company) {
+      localStorage.setItem('viewingCompany', JSON.stringify(company));
+    } else {
+      localStorage.removeItem('viewingCompany');
+    }
+    setViewingCompanyState(company);
+  };
+
+  useEffect(() => {
+    if (user && user.role !== 'superadmin') setViewingCompany(null);
+  }, [user]);
+
+  useEffect(() => {
+    api.get('/auth/me')
+      .then(res => setUser(res.data.user))
+      .catch(() => setUser(null))
+      .finally(() => setIsLoading(false));
+  }, []);
+
+  const logout = useCallback(async () => {
+    await api.post('/auth/logout').catch(() => {});
+    setViewingCompany(null);
+    setUser(null);
+  }, []);
+
+  const isImpersonating = Boolean(user?.impersonated_by);
+
+  const endImpersonation = useCallback(async () => {
+    const res = await api.post('/auth/impersonate/end');
+    setViewingCompany(null);
+    setUser(res.data.user);
+    return res.data.user;
+  }, []);
+
+  const companyId        = user?.company_id ?? null;
+  const viewingCompanyId = viewingCompany?.id ?? null;
+
+  return (
+    <AuthContext.Provider value={{
+      user, setUser,
+      companyId,
+      isLoading,
+      logout,
+      viewingCompany,
+      viewingCompanyId,
+      setViewingCompany,
+      isImpersonating,
+      endImpersonation,
+    }}>
+      {children}
+    </AuthContext.Provider>
+  );
+}
+
+export function useAuth() {
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error('useAuth must be used within AuthProvider');
+  return ctx;
+}

@@ -1,0 +1,9 @@
+{
+	"id": "4CmeYrKTRZHRvt3",
+	"json": "{\"id\":\"4CmeYrKTRZHRvt3\",\"url\":\"https://www.cars24.com/buy-used-tata-tiago-cars-gurgaon/\",\"loadedUrl\":\"https://www.cars24.com/buy-used-tata-tiago-cars-gurgaon/\",\"uniqueKey\":\"https://www.cars24.com/buy-used-tata-tiago-cars-gurgaon\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"depth\":1,\"redirectChain\":[],\"responseTime\":0,\"__crawlee\":{\"crawlDepth\":1,\"state\":4}},\"handledAt\":\"2026-04-13T09:22:44.259Z\"}",
+	"method": "GET",
+	"orderNo": null,
+	"retryCount": 0,
+	"uniqueKey": "https://www.cars24.com/buy-used-tata-tiago-cars-gurgaon",
+	"url": "https://www.cars24.com/buy-used-tata-tiago-cars-gurgaon/"
+}

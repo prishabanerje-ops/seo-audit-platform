@@ -1,0 +1,205 @@
+import { createBrowserRouter, Outlet } from 'react-router';
+
+import { ProtectedRoute, RequireRole } from './components/ProtectedRoute.jsx';
+import { RequireCompany } from './components/RequireCompany.jsx';
+import { AppShell } from './components/AppShell.jsx';
+import { HomePage }     from './pages/HomePage.jsx';
+import { Login }        from './pages/Login.jsx';
+import { Setup }        from './pages/Setup.jsx';
+import { InviteAccept } from './pages/InviteAccept.jsx';
+import { NotFound }     from './pages/NotFound.jsx';
+import { AccessExpired }   from './pages/AccessExpired.jsx';
+import { ChangePassword }  from './pages/ChangePassword.jsx';
+
+import { Sites }         from './pages/Sites.jsx';
+import { NewSiteWizard } from './pages/NewSiteWizard.jsx';
+import { CrawlStart }    from './pages/CrawlStart.jsx';
+import { CrawlStatus }   from './pages/CrawlStatus.jsx';
+import { LiveRun }       from './pages/LiveRun.jsx';
+import { AuditHealth }   from './pages/AuditHealth.jsx';
+import { AdsDashboard }  from './pages/AdsDashboard.jsx';
+import { Companies }     from './pages/Companies.jsx';
+import { AuditLog }      from './pages/AuditLog.jsx';
+import { Settings }      from './pages/Settings.jsx';
+import { Users }         from './pages/Users.jsx';
+
+import { Exports }      from './pages/Exports.jsx';
+import { CompareView }  from './pages/CompareView.jsx';
+import { Integrations } from './pages/Integrations.jsx';
+import {
+  SystemHealth,
+  ErrorLog,
+  AuditCustomExtraction, AuditLogFile,
+} from './pages/stubs.jsx';
+
+import { Notifications } from './pages/Notifications.jsx';
+
+import { ScheduledCrawls } from './pages/ScheduledCrawls.jsx';
+
+import { CoreWebVitals } from './pages/CoreWebVitals.jsx';
+import { GscOverlay }    from './pages/GscOverlay.jsx';
+import { Ga4Overlay }    from './pages/Ga4Overlay.jsx';
+
+import { AdminView }     from './pages/AdminView.jsx';
+import { SeoView }       from './pages/SeoView.jsx';
+import { DeveloperView } from './pages/DeveloperView.jsx';
+import { Tasks }         from './pages/Tasks.jsx';
+import { TaskDetail }    from './pages/TaskDetail.jsx';
+
+import { AuditCategory }   from './pages/AuditCategory.jsx';
+import { AuditCategories } from './pages/AuditCategories.jsx';
+import { IssueDetail }     from './pages/IssueDetail.jsx';
+import { ManualChecks }   from './pages/ManualChecks.jsx';
+
+/* Authenticated shell wrapper */
+function AuthedShell() {
+  return (
+    <ProtectedRoute>
+      <AppShell>
+        <Outlet />
+      </AppShell>
+    </ProtectedRoute>
+  );
+}
+
+
+/* Admin-only wrapper */
+function AdminOnly() {
+  return (
+    <RequireRole role="admin">
+      <Outlet />
+    </RequireRole>
+  );
+}
+
+/* Superadmin-only wrapper */
+function SuperAdminOnly() {
+  return (
+    <RequireRole role="superadmin">
+      <Outlet />
+    </RequireRole>
+  );
+}
+
+export const router = createBrowserRouter([
+  /* ── Public ───────────────────────────────────────────────────────────── */
+  { path: '/',                element: <HomePage /> },
+  { path: '/login',           element: <Login /> },
+  { path: '/setup',           element: <Setup /> },
+  { path: '/invite/accept',   element: <InviteAccept /> },
+  { path: '/access-expired',  element: <AccessExpired /> },
+  { path: '/change-password', element: <ChangePassword /> },
+
+  /* ── Authenticated ─────────────────────────────────────────────────────── */
+  {
+    element: <AuthedShell />,
+    children: [
+      /* Dashboards */
+      { path: '/admin',       element: <AdminView /> },
+      { path: '/developer',   element: <DeveloperView /> },
+      { path: '/seo',         element: <SeoView /> },
+
+      /* Notifications */
+      { path: '/notifications',    element: <Notifications /> },
+
+      /* Company-scoped routes */
+      {
+        element: <RequireCompany />,
+        children: [
+          /* Sites */
+          { path: '/sites',          element: <Sites /> },
+          { path: '/sites/new',      element: <NewSiteWizard /> },
+
+          /* Crawls */
+          { path: '/crawl',          element: <CrawlStart /> },
+          { path: '/crawl/status',   element: <CrawlStatus /> },
+          { path: '/crawl/:jobId/live', element: <LiveRun /> },
+
+          /* Audit */
+          { path: '/audit',                element: <AuditHealth /> },
+          { path: '/audit/categories',     element: <AuditCategories /> },
+          { path: '/audit/issue/:resultId', element: <IssueDetail /> },
+          { path: '/audit/cwv',            element: <CoreWebVitals /> },
+          { path: '/audit/compare',        element: <CompareView /> },
+          { path: '/audit/gsc',            element: <GscOverlay /> },
+          { path: '/audit/ga4',            element: <Ga4Overlay /> },
+          { path: '/audit/manual-checks/:siteId', element: <ManualChecks /> },
+
+          /* Audit categories */
+          /* Audit category routes — canonical slugs */
+          { path: '/audit/response-codes',      element: <AuditCategory /> },
+          { path: '/audit/canonicalisation',    element: <AuditCategory /> },
+          { path: '/audit/robots',              element: <AuditCategory /> },
+          { path: '/audit/sitemaps',            element: <AuditCategory /> },
+          { path: '/audit/crawlability',        element: <AuditCategory /> },
+          { path: '/audit/url-structure',       element: <AuditCategory /> },
+          { path: '/audit/javascript',          element: <AuditCategory /> },
+          { path: '/audit/mobile',              element: <AuditCategory /> },
+          { path: '/audit/security',            element: <AuditCategory /> },
+          { path: '/audit/core-web-vitals',     element: <AuditCategory /> },
+          { path: '/audit/title-tags',          element: <AuditCategory /> },
+          { path: '/audit/meta-desc',           element: <AuditCategory /> },
+          { path: '/audit/headings',            element: <AuditCategory /> },
+          { path: '/audit/content',             element: <AuditCategory /> },
+          { path: '/audit/images',              element: <AuditCategory /> },
+          { path: '/audit/schema',              element: <AuditCategory /> },
+          { path: '/audit/internal-linking',    element: <AuditCategory /> },
+          { path: '/audit/international',       element: <AuditCategory /> },
+          { path: '/audit/rankings',            element: <AuditCategory /> },
+          { path: '/audit/eeat',                element: <AuditCategory /> },
+          { path: '/audit/aio',                 element: <AuditCategory /> },
+          { path: '/audit/geo-llm',             element: <AuditCategory /> },
+          { path: '/audit/local-seo',           element: <AuditCategory /> },
+          /* Legacy slug aliases — kept for backwards compatibility */
+          { path: '/audit/indexability',        element: <AuditCategory /> },
+          { path: '/audit/canonicals',          element: <AuditCategory /> },
+          { path: '/audit/hreflang',            element: <AuditCategory /> },
+          { path: '/audit/links',               element: <AuditCategory /> },
+          { path: '/audit/redirects',           element: <AuditCategory /> },
+          { path: '/audit/page-speed',          element: <AuditCategory /> },
+          { path: '/audit/structured-data',     element: <AuditCategory /> },
+          { path: '/audit/crawl-depth',         element: <AuditCategory /> },
+          { path: '/audit/sitemap',             element: <AuditCategory /> },
+          { path: '/audit/custom',              element: <AuditCategory /> },
+          { path: '/audit/custom-extraction',   element: <AuditCustomExtraction /> },
+          { path: '/audit/log-file',            element: <AuditLogFile /> },
+
+          /* Paid Ads */
+          { path: '/ads', element: <AdsDashboard /> },
+
+          /* Tasks */
+          { path: '/tasks',            element: <Tasks /> },
+          { path: '/tasks/:id',        element: <TaskDetail /> },
+
+          /* Platform */
+          { path: '/schedules',        element: <ScheduledCrawls /> },
+          { path: '/exports',          element: <Exports /> },
+
+          /* System — admin-only group */
+          {
+            element: <AdminOnly />,
+            children: [
+              { path: '/integrations', element: <Integrations /> },
+              { path: '/system',       element: <SystemHealth /> },
+              { path: '/users',        element: <Users /> },
+              { path: '/settings',     element: <Settings /> },
+              { path: '/errors',       element: <ErrorLog /> },
+            ],
+          },
+        ],
+      },
+
+      /* Superadmin-only group */
+      {
+        element: <SuperAdminOnly />,
+        children: [
+          { path: '/companies',  element: <Companies /> },
+          { path: '/audit-log',  element: <AuditLog /> },
+        ],
+      },
+    ],
+  },
+
+  /* Catch-all */
+  { path: '*', element: <NotFound /> },
+]);

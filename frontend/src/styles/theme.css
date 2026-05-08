@@ -1,0 +1,210 @@
+/* ─── Light Theme (default :root) ───────────────────────────────────────────── */
+:root {
+  --bg-base:     #f8f9fc;
+  --bg-surface:  #ffffff;
+  --bg-raised:   #f1f3f9;
+  --bg-overlay:  rgba(0, 0, 0, 0.40);
+
+  --border-default: #e2e6f0;
+  --border-subtle:  #edf0f7;
+  --border-strong:  #c8cfe0;
+
+  --text-primary:   #0f1117;
+  --text-secondary: #475569;
+  --text-muted:     #94a3b8;
+  --text-disabled:  #cbd5e1;
+  --text-inverse:   #ffffff;
+
+  --brand:       #6366f1;
+  --brand-hover: #4f46e5;
+  --brand-muted: rgba(99, 102, 241, 0.10);
+  --brand-text:  #4338ca;
+  --brand-subtle: rgba(99, 102, 241, 0.08);
+
+  /* Severity — Critical */
+  --severity-critical:        #dc2626;
+  --severity-critical-bg:     #fef2f2;
+  --severity-critical-text:   #991b1b;
+  --severity-critical-border: #fecaca;
+
+  /* Severity — Warning */
+  --severity-warning:        #d97706;
+  --severity-warning-bg:     #fffbeb;
+  --severity-warning-text:   #92400e;
+  --severity-warning-border: #fde68a;
+
+  /* Severity — Info */
+  --severity-info:        #2563eb;
+  --severity-info-bg:     #eff6ff;
+  --severity-info-text:   #1e40af;
+  --severity-info-border: #bfdbfe;
+
+  /* Severity — Pass / OK */
+  --severity-pass:        #059669;
+  --severity-pass-bg:     #ecfdf5;
+  --severity-pass-text:   #065f46;
+  --severity-pass-border: #a7f3d0;
+
+  /* Severity — None */
+  --severity-none:      #94a3b8;
+  --severity-none-bg:   #f8fafc;
+  --severity-none-text: #64748b;
+
+  /* Spacing scale */
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  20px;
+  --space-6:  24px;
+  --space-8:  32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* Border radius */
+  --radius-sm:   4px;
+  --radius-md:   6px;
+  --radius-lg:   8px;
+  --radius-xl:   12px;
+  --radius-full: 9999px;
+}
+
+/* ─── Dark Theme ─────────────────────────────────────────────────────────────── */
+.dark {
+  --bg-base:     #0f1117;
+  --bg-surface:  #1a1d27;
+  --bg-raised:   #222635;
+  --bg-overlay:  rgba(15, 17, 23, 0.80);
+
+  --border-default: #2d3148;
+  --border-subtle:  #1e2235;
+  --border-strong:  #404669;
+
+  --text-primary:   #e2e8f0;
+  --text-secondary: #94a3b8;
+  --text-muted:     #64748b;
+  --text-disabled:  #334155;
+  --text-inverse:   #0f1117;
+
+  --brand:       #6366f1;
+  --brand-hover: #818cf8;
+  --brand-muted: rgba(99, 102, 241, 0.10);
+  --brand-text:  #a5b4fc;
+  --brand-subtle: rgba(99, 102, 241, 0.10);
+
+  /* Severity — same vibrant colours on dark */
+  --severity-critical:        #ef4444;
+  --severity-critical-bg:     rgba(239, 68, 68, 0.10);
+  --severity-critical-text:   #fca5a5;
+  --severity-critical-border: rgba(239, 68, 68, 0.20);
+
+  --severity-warning:        #f59e0b;
+  --severity-warning-bg:     rgba(245, 158, 11, 0.10);
+  --severity-warning-text:   #fcd34d;
+  --severity-warning-border: rgba(245, 158, 11, 0.20);
+
+  --severity-info:        #3b82f6;
+  --severity-info-bg:     rgba(59, 130, 246, 0.10);
+  --severity-info-text:   #93c5fd;
+  --severity-info-border: rgba(59, 130, 246, 0.20);
+
+  --severity-pass:        #10b981;
+  --severity-pass-bg:     rgba(16, 185, 129, 0.10);
+  --severity-pass-text:   #6ee7b7;
+  --severity-pass-border: rgba(16, 185, 129, 0.20);
+
+  --severity-none:      #64748b;
+  --severity-none-bg:   rgba(100, 116, 139, 0.10);
+  --severity-none-text: #94a3b8;
+}
+
+/* ─── Tailwind v4 @theme block — exposes CSS vars as Tailwind utilities ──────── */
+@theme inline {
+  --color-bg-base:     var(--bg-base);
+  --color-bg-surface:  var(--bg-surface);
+  --color-bg-raised:   var(--bg-raised);
+  --color-bg-overlay:  var(--bg-overlay);
+
+  --color-border-default: var(--border-default);
+  --color-border-subtle:  var(--border-subtle);
+  --color-border-strong:  var(--border-strong);
+
+  --color-text-primary:   var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted:     var(--text-muted);
+  --color-text-disabled:  var(--text-disabled);
+
+  --color-brand:        var(--brand);
+  --color-brand-hover:  var(--brand-hover);
+  --color-brand-muted:  var(--brand-muted);
+  --color-brand-text:   var(--brand-text);
+  --color-brand-subtle: var(--brand-subtle);
+
+  --color-severity-critical:        var(--severity-critical);
+  --color-severity-critical-bg:     var(--severity-critical-bg);
+  --color-severity-critical-text:   var(--severity-critical-text);
+  --color-severity-warning:         var(--severity-warning);
+  --color-severity-warning-bg:      var(--severity-warning-bg);
+  --color-severity-warning-text:    var(--severity-warning-text);
+  --color-severity-info:            var(--severity-info);
+  --color-severity-info-bg:         var(--severity-info-bg);
+  --color-severity-info-text:       var(--severity-info-text);
+  --color-severity-pass:            var(--severity-pass);
+  --color-severity-pass-bg:         var(--severity-pass-bg);
+  --color-severity-pass-text:       var(--severity-pass-text);
+  --color-severity-none:            var(--severity-none);
+  --color-severity-none-bg:         var(--severity-none-bg);
+  --color-severity-none-text:       var(--severity-none-text);
+
+  --radius-sm:   var(--radius-sm);
+  --radius-md:   var(--radius-md);
+  --radius-lg:   var(--radius-lg);
+  --radius-xl:   var(--radius-xl);
+  --radius-full: var(--radius-full);
+
+  --font-ui:   -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+}
+
+/* ─── Base layer ─────────────────────────────────────────────────────────────── */
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    font-size: 14px;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--bg-base);
+    color: var(--text-primary);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar       { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg-base); }
+  ::-webkit-scrollbar-thumb {
+    background: var(--bg-raised);
+    border-radius: 3px;
+    border: 1px solid var(--bg-base);
+  }
+  ::-webkit-scrollbar-thumb:hover { background: var(--border-default); }
+
+  /* Focus ring */
+  :focus-visible {
+    outline: 2px solid var(--brand);
+    outline-offset: 2px;
+  }
+}
+
+/* ─── Keyframe animations ────────────────────────────────────────────────────── */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
